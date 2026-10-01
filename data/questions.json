@@ -1,64 +1,1249 @@
 [
   {
-    "id": "test-001",
+    "id": "personal-001",
     "source": "Personal",
-    "type": "single_choice",
-    "question": "Which AWS service provides object storage?",
-    "options": { "A": "Amazon EC2", "B": "Amazon S3", "C": "Amazon RDS", "D": "Amazon VPC" },
-    "correct_answer": ["B"],
-    "explanation": "Amazon S3 is an object storage service.",
-    "tags": ["S3", "Storage"]
+    "tag": "Conceitos de nuvem",
+    "question": "O que é computação em nuvem?",
+    "options": [
+      "Faça backup de arquivos armazenados em dispositivos móveis e desktop para evitar a perda de dados",
+      "Implantação de aplicativos conectados à infraestrutura local",
+      "Execução de código sem a necessidade de gerenciar ou provisionar servidores",
+      "Fornecimento sob demanda de recursos e aplicações de TI pela internet com o modelo de pagamento conforme o uso"
+    ],
+    "correct_answer": "Fornecimento sob demanda de recursos e aplicações de TI pela internet com o modelo de pagamento conforme o uso.",
+    "explanation": "As outras respostas estão incorretas porque: É possível fazer backup de arquivos na nuvem, mas essa resposta não descreve a computação em nuvem como um todo. A implantação de aplicações conectadas à infraestrutura on-premises é um exemplo de caso de uso para implantação de nuvem híbrida. O AWS Lambda é um serviço da AWS que permite executar códigos sem a necessidade de gerenciar servidores."
   },
   {
-    "id": "test-002",
+    "id": "personal-002",
     "source": "Personal",
-    "type": "single_choice",
-    "question": "Which AWS service is used to manage users and permissions?",
-    "options": { "A": "AWS IAM", "B": "Amazon CloudFront", "C": "AWS Budgets", "D": "Amazon SNS" },
-    "correct_answer": ["A"],
-    "explanation": "AWS Identity and Access Management (IAM) controls who can access which AWS resources.",
-    "tags": ["IAM", "Security"]
+    "tag": "Conceitos de nuvem",
+    "question": "Qual é outro nome para implantação on-premises?",
+    "options": [
+      "Implantação de nuvem privada",
+      "Aplicativo baseado na nuvem",
+      "Implantação híbrida",
+      "Nuvem AWS"
+    ],
+    "correct_answer": "Implantação de nuvem privada.",
+    "explanation": "As outras respostas estão incorretas porque: Aplicações baseadas na nuvem são totalmente implantadas na nuvem e não têm partes executadas on-premises. Uma implantação híbrida conecta a infraestrutura e as aplicações entre os recursos baseados na nuvem e os recursos que não estão na nuvem, como aqueles on-premises. A nuvem AWS oferece três modelos de implantação de nuvem: nuvem, híbrida e on-premises."
   },
   {
-    "id": "test-003",
+    "id": "personal-003",
     "source": "Personal",
-    "type": "multiple_choice",
-    "question": "Which TWO of the following are AWS compute services? (Choose two.)",
-    "options": { "A": "Amazon EC2", "B": "Amazon S3", "C": "AWS Lambda", "D": "Amazon Route 53", "E": "AWS Artifact" },
-    "correct_answer": ["A", "C"],
-    "explanation": "Amazon EC2 and AWS Lambda are compute services.",
-    "tags": ["EC2", "Lambda", "Compute"]
+    "tag": "Cobrança e preços",
+    "question": "Como o scaling da computação em nuvem ajuda a economizar custos?",
+    "options": [
+      "Você não precisa investir em recursos de tecnologia antes de usá-los.",
+      "O uso agregado da nuvem por um grande número de clientes resulta em pagamento conforme o uso de preços mais baixos.",
+      "O acesso a serviços sob demanda ajuda a evitar capacidade excessiva ou limitada.",
+      "Você pode implantar aplicações rapidamente para os clientes e proporcionar baixa latência."
+    ],
+    "correct_answer": "O uso agregado da nuvem por um grande número de clientes resulta em valores menores do pagamento conforme o uso.",
+    "explanation": "Essa resposta descreve como os clientes podem se beneficiar de enormes economias de escala com a computação em nuvem. Não ter que investir em recursos está relacionado a Trocar despesas iniciais por despesas variáveis. O acesso sob demanda está relacionado a Parar de adivinhar a capacidade."
   },
   {
-    "id": "test-004",
+    "id": "personal-004",
     "source": "Personal",
-    "type": "single_choice",
-    "question": "Which AWS tool lets you view and forecast your AWS costs and usage?",
-    "options": { "A": "AWS Config", "B": "AWS Cost Explorer", "C": "AWS Shield", "D": "AWS Direct Connect" },
-    "correct_answer": ["B"],
-    "tags": ["Billing"]
+    "tag": "Tecnologia",
+    "question": "Qual tipo de instância do Amazon EC2 é adequado para aplicações de data warehousing?",
+    "options": [
+      "Otimizada para memória",
+      "Otimizada para armazenamento",
+      "Uso geral",
+      "Otimizada para computação"
+    ],
+    "correct_answer": "Otimizada para armazenamento.",
+    "explanation": ""
   },
   {
-    "id": "test-005",
+    "id": "personal-005",
     "source": "Personal",
-    "type": "multiple_choice",
-    "question": "Which THREE are benefits of cloud computing? (Choose three.)",
-    "options": {
-      "A": "Trade fixed expense for variable expense",
-      "B": "Benefit from massive economies of scale",
-      "C": "Increase speed and agility",
-      "D": "Buy hardware before it is needed"
-    },
-    "correct_answer": ["A", "B", "C"],
-    "explanation": "Guessing capacity and buying hardware up front is what the cloud helps you avoid.",
-    "tags": ["Cloud Concepts"]
+    "tag": "Tecnologia",
+    "question": "Qual tipo de instância do Amazon EC2 equilibra os recursos de computação, memória e rede?",
+    "options": [
+      "Otimizada para memória",
+      "Otimizada para armazenamento",
+      "Uso geral",
+      "Otimizada para computação"
+    ],
+    "correct_answer": "Uso geral.",
+    "explanation": ""
   },
   {
-    "id": "test-006",
+    "id": "personal-006",
     "source": "Personal",
-    "type": "single_choice",
-    "question": "Questão inválida de propósito (correct_answer inexistente) — deve aparecer no aviso de validação.",
-    "options": { "A": "Um", "B": "Dois" },
-    "correct_answer": ["Z"]
+    "tag": "Tecnologia",
+    "question": "Qual tipo de instância do Amazon EC2 é ideal para bancos de dados de alto desempenho?",
+    "options": [
+      "Otimizada para memória",
+      "Otimizada para armazenamento",
+      "Uso geral",
+      "Otimizada para computação"
+    ],
+    "correct_answer": "Otimizada para computação.",
+    "explanation": ""
+  },
+  {
+    "id": "personal-007",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual tipo de instância do Amazon EC2 oferece processadores de alto desempenho?",
+    "options": [
+      "Otimizada para memória",
+      "Otimizada para armazenamento",
+      "Uso geral",
+      "Otimizada para computação"
+    ],
+    "correct_answer": "Otimizada para computação.",
+    "explanation": ""
+  },
+  {
+    "id": "personal-008",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Qual opção de preço do Amazon EC2 oferece um desconto quando você especifica um número de instâncias do EC2 para executar um sistema operacional, família e tamanho de instância e tenancy específicos em uma Região?",
+    "options": [
+      "Instâncias reservadas conversíveis",
+      "Savings Plans da instância do EC2",
+      "Instâncias spot",
+      "Standard Reserved Instances"
+    ],
+    "correct_answer": "Standard Reserved Instances.",
+    "explanation": "As Standard Reserved Instances exigem que você especifique: tamanho e família de instância, descrição da plataforma, tenancy, Região. Sua quantidade específica de instâncias do EC2 é coberta por um período de vigência de um ou três anos."
+  },
+  {
+    "id": "personal-009",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Qual opção de preço do Amazon EC2 oferece um desconto quando você assume um compromisso de gasto por hora com uma família de instância e uma Região por um período de vigência de um ou três anos?",
+    "options": [
+      "Sob demanda",
+      "Savings Plans da instância do EC2",
+      "Instâncias spot",
+      "Instâncias reservadas"
+    ],
+    "correct_answer": "Savings Plans da instância do EC2.",
+    "explanation": "Os Savings Plans reduzem o custo das instâncias do EC2 em troca do compromisso de um gasto por hora com uma família e uma Região, por um ou três anos."
+  },
+  {
+    "id": "personal-010",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço da AWS é a melhor opção para publicar mensagens para assinantes?",
+    "options": [
+      "Amazon Simple Queue Service (Amazon SQS)",
+      "Amazon EC2 Auto Scaling",
+      "Amazon Simple Notification Service (Amazon SNS)",
+      "Elastic Load Balancing"
+    ],
+    "correct_answer": "Amazon Simple Notification Service (Amazon SNS).",
+    "explanation": "O Amazon SNS é um serviço de publicação/assinatura. Usando tópicos do Amazon SNS, um editor publica mensagens para assinantes. O SQS é um serviço de enfileiramento."
+  },
+  {
+    "id": "personal-011",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual das afirmações a seguir melhor descreve as Zonas de Disponibilidade?",
+    "options": [
+      "Uma área geográfica que contém recursos da AWS",
+      "Um único data center ou grupo de data centers em uma Região",
+      "Um data center usado por um serviço AWS para executar operações específicas do serviço",
+      "Um serviço que você pode usar para executar a infraestrutura da AWS em seu próprio data center on-premises em uma abordagem híbrida"
+    ],
+    "correct_answer": "Um único data center ou grupo de data centers em uma Região.",
+    "explanation": "Uma Região é uma área geográfica que contém recursos AWS. Um local de borda é um data center usado para executar operações específicas de serviço."
+  },
+  {
+    "id": "personal-012",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual declaração é VERDADEIRA para a infraestrutura global da AWS?",
+    "options": [
+      "Uma Região consiste em uma única Zona de Disponibilidade.",
+      "Uma Zona de Disponibilidade consiste em duas ou mais Regiões.",
+      "Uma Região consiste em três ou mais Zonas de Disponibilidade.",
+      "Uma Zona de Disponibilidade consiste em uma única Região."
+    ],
+    "correct_answer": "Uma Região consiste em três ou mais Zonas de Disponibilidade.",
+    "explanation": "Por exemplo, a Região América do Sul (São Paulo) é sa-east-1. Ela tem três Zonas de Disponibilidade: sa-east-1a, sa-east-1b e sa-east-1c."
+  },
+  {
+    "id": "personal-013",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Quais fatores devem ser considerados ao selecionar uma Região? (Selecione DUAS opções.)",
+    "options": [
+      "Conformidade com governança de dados e requisitos legais",
+      "Proximidade com os clientes",
+      "Acesso a suporte técnico 24 horas por dia",
+      "Capacidade de atribuir permissões personalizadas a diferentes usuários",
+      "Acesso à AWS Command Line Interface (AWS CLI)"
+    ],
+    "correct_answer": "Conformidade com governança de dados e requisitos legais e Proximidade com os clientes.",
+    "explanation": "Dois outros fatores a serem considerados ao selecionar uma Região são definição de preços e serviços disponíveis em uma Região. O nível de suporte, permissões personalizadas e acesso ao CLI são possíveis em todas as Regiões AWS."
+  },
+  {
+    "id": "personal-014",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual declaração descreve melhor o Amazon CloudFront?",
+    "options": [
+      "Um serviço que permite executar a infraestrutura em uma abordagem de nuvem híbrida",
+      "Um mecanismo de computação sem servidor para contêineres",
+      "Um serviço que permite enviar e receber mensagens entre componentes de software por uma fila",
+      "Um serviço global de entrega de conteúdo"
+    ],
+    "correct_answer": "Um serviço global de entrega de conteúdo.",
+    "explanation": "O Amazon CloudFront é um serviço de entrega de conteúdo. Ele usa uma rede de locais de borda para armazenar conteúdo em cache e entregar conteúdo para clientes em todo o mundo. Quando o conteúdo é armazenado em cache, ele é mantido localmente como uma cópia."
+  },
+  {
+    "id": "personal-015",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual site o Amazon CloudFront usa para armazenar cópias de conteúdo em cache para entregá-los mais rapidamente aos usuários em qualquer local?",
+    "options": [
+      "Região",
+      "Zona de Disponibilidade",
+      "Local de borda",
+      "Origem"
+    ],
+    "correct_answer": "Local de borda.",
+    "explanation": "Uma origem é o servidor do qual o CloudFront obtém os arquivos."
+  },
+  {
+    "id": "personal-016",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual ação você pode executar com o AWS Outposts?",
+    "options": [
+      "Automatizar ações para serviços e aplicações da AWS por meio de scripts.",
+      "Acessar assistentes e fluxos de trabalho automatizados para executar tarefas nos serviços da AWS.",
+      "Desenvolver aplicações da AWS em linguagens de programação compatíveis.",
+      "Estender a infraestrutura e os serviços da AWS para diferentes locais, incluindo um data center on-premises."
+    ],
+    "correct_answer": "Estender a infraestrutura e os serviços da AWS para diferentes locais, incluindo um data center on-premises.",
+    "explanation": "A CLI automatiza por scripts. O Console traz assistentes. Os SDKs permitem desenvolver em linguagens compatíveis."
+  },
+  {
+    "id": "personal-017",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual declaração descreve melhor a lista de controle de acesso de rede-padrão de uma conta AWS?",
+    "options": [
+      "Ela é stateless e nega todo o tráfego de entrada e saída.",
+      "Ela é stateful e permite todo o tráfego de entrada e saída.",
+      "Ela é stateless e permite todo o tráfego de entrada e saída.",
+      "Ela é stateful e nega todo o tráfego de entrada e saída."
+    ],
+    "correct_answer": "Ela é stateless e permite todo o tráfego de entrada e saída.",
+    "explanation": "As ACLs de rede fazem a filtragem de pacotes stateless. Elas não se lembram de nada e verificam os pacotes que atravessam a fronteira da sub-rede nos dois sentidos."
+  },
+  {
+    "id": "personal-018",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual declaração melhor descreve a resolução de DNS?",
+    "options": [
+      "Iniciar recursos em uma rede virtual definida por você",
+      "Armazenar cópias locais de conteúdo em locais de borda em todo o mundo",
+      "Conectar uma VPC à Internet",
+      "Converter um nome de domínio em um endereço IP"
+    ],
+    "correct_answer": "Converter um nome de domínio em um endereço IP.",
+    "explanation": "Por exemplo, para acessar um site, você digita o nome de domínio e essa solicitação é enviada para um servidor DNS para achar o IP."
+  },
+  {
+    "id": "personal-019",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Sua empresa tem um aplicativo que usa instâncias do Amazon EC2 para executar o site voltado para o cliente e instâncias de banco de dados do Amazon RDS para armazenar informações pessoais dos clientes. Como o desenvolvedor deve configurar a VPC de acordo com as práticas recomendadas?",
+    "options": [
+      "Colocar as instâncias do Amazon EC2 em uma sub-rede privada e as instâncias de bancos de dados do Amazon RDS em uma sub-rede pública.",
+      "Colocar as instâncias do Amazon EC2 em uma sub-rede pública e as instâncias de bancos de dados do Amazon RDS em uma sub-rede privada.",
+      "Colocar as instâncias do Amazon EC2 e as instâncias de bancos de dados do Amazon RDS em uma sub-rede pública.",
+      "Colocar as instâncias do Amazon EC2 e as instâncias de bancos de dados do Amazon RDS em uma sub-rede privada."
+    ],
+    "correct_answer": "Colocar as instâncias do Amazon EC2 em uma sub-rede pública e as instâncias de bancos de dados do Amazon RDS em uma sub-rede privada.",
+    "explanation": "As sub-redes públicas têm recursos que precisam ser acessíveis pelo público, como o site. As sub-redes privadas têm recursos que devem ser acessíveis apenas pela sua rede privada, como o banco de dados."
+  },
+  {
+    "id": "personal-020",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual componente pode ser usado para estabelecer uma conexão privada dedicada entre o data center da sua empresa e a AWS?",
+    "options": [
+      "Sub-rede privada",
+      "DNS",
+      "AWS Direct Connect",
+      "Gateway privado virtual"
+    ],
+    "correct_answer": "AWS Direct Connect.",
+    "explanation": "O Gateway privado virtual permite criar uma conexão VPN. Embora seja privada, ela trafega pela internet pública. O Direct Connect é uma conexão privada dedicada."
+  },
+  {
+    "id": "personal-021",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual declaração descreve melhor os grupos de segurança?",
+    "options": [
+      "Eles são stateful e negam todo o tráfego de entrada por padrão.",
+      "Eles são stateful e permitem todo o tráfego de entrada por padrão.",
+      "Eles são stateless e negam todo o tráfego de entrada por padrão.",
+      "Eles são stateless e permitem todo o tráfego de entrada por padrão."
+    ],
+    "correct_answer": "Grupos de segurança são stateful e negam todo o tráfego de entrada por padrão.",
+    "explanation": "Grupos de segurança são stateful. Isso significa que eles usam padrões e fluxos de tráfego anteriores ao avaliar novas solicitações para uma instância."
+  },
+  {
+    "id": "personal-022",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual componente é usado para conectar uma VPC à internet?",
+    "options": [
+      "Sub-rede pública",
+      "Local de borda",
+      "Grupo de segurança",
+      "Gateway de internet"
+    ],
+    "correct_answer": "Gateway de internet.",
+    "explanation": "Um gateway de internet é a porta de saída da VPC para a internet pública."
+  },
+  {
+    "id": "personal-023",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço é usado para gerenciar os registros de DNS para nomes de domínio?",
+    "options": [
+      "Amazon Virtual Private Cloud",
+      "AWS Direct Connect",
+      "Amazon CloudFront",
+      "Amazon Route 53"
+    ],
+    "correct_answer": "Amazon Route 53.",
+    "explanation": "O Amazon Route 53 é um serviço da web de DNS."
+  },
+  {
+    "id": "personal-024",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Quais das seguintes opções são características do serviço Amazon EBS? (Selecione DUAS opções.)",
+    "options": [
+      "Ideal para dados que precisam ser retidos",
+      "Ideal para dados temporários que não são mantidos a longo prazo",
+      "Unidades separadas do computador host de uma instância do EC2",
+      "Conectado fisicamente ao computador host da instância do EC2",
+      "Os dados são apagados quando uma instância do EC2 é encerrada"
+    ],
+    "correct_answer": "Melhor para dados que requerem retenção e Unidades separadas do computador host de uma instância do EC2.",
+    "explanation": "O EBS é armazenamento em bloco persistente que sobrevive à finalização da instância e opera sobre a rede (separado do host físico)."
+  },
+  {
+    "id": "personal-025",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Você quer armazenar dados que são acessados com pouca frequência, mas devem estar imediatamente disponíveis quando necessário. Qual storage class do Amazon S3 você deve usar?",
+    "options": [
+      "S3 Intelligent-Tiering",
+      "S3 Glacier Deep Archive",
+      "S3 Standard-IA",
+      "S3 Glacier Flexible Retrieval"
+    ],
+    "correct_answer": "S3 Standard-IA.",
+    "explanation": "A storage class S3 Standard-IA é ideal para dados acessados com pouca frequência, mas que precisam ter alta disponibilidade quando necessário."
+  },
+  {
+    "id": "personal-026",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Quais são os cenários em que você deve usar o Amazon Relational Database Service (Amazon RDS)? (Selecione DUAS opções.)",
+    "options": [
+      "Ao executar um banco de dados sem servidor",
+      "Ao usar SQL para organizar dados",
+      "Ao armazenar dados em um banco de dados de chave-valor",
+      "Ao dimensionar para 10 trilhões de solicitações por dia",
+      "Ao armazenar dados em um banco de dados do Amazon Aurora"
+    ],
+    "correct_answer": "Ao usar SQL para organizar dados e Ao armazenar dados em um banco de dados do Amazon Aurora.",
+    "explanation": "As outras três respostas são cenários nos quais você deve usar o Amazon DynamoDB."
+  },
+  {
+    "id": "personal-027",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Quais storage classes do Amazon S3 são otimizadas para dados de arquivamento? (Selecione DUAS opções.)",
+    "options": [
+      "Amazon S3 Standard",
+      "Amazon S3 Glacier Flexible Retrieval",
+      "Amazon S3 Intelligent-Tiering",
+      "Amazon S3 Standard-IA",
+      "Amazon S3 Glacier Deep Archive"
+    ],
+    "correct_answer": "Amazon S3 Glacier Flexible Retrieval e Amazon S3 Glacier Deep Archive.",
+    "explanation": "Objetos armazenados na storage class Amazon S3 Glacier Flexible Retrieval podem ser recuperados de poucos minutos a algumas horas. Em comparação, os objetos armazenados no Deep Archive podem ser recuperados em 12 horas."
+  },
+  {
+    "id": "personal-028",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual(ais) afirmação (ões) é(são) VERDADEIRA(S) sobre os volumes do Amazon EBS e sistemas de arquivos do Amazon Elastic File System?",
+    "options": [
+      "Os volumes do EBS armazenam dados em uma única Zona de Disponibilidade. Os sistemas de arquivos do Amazon EFS armazenam dados em várias Zonas de Disponibilidade.",
+      "Os volumes do EBS armazenam dados em várias Zonas de Disponibilidade. Os sistemas de arquivos do Amazon EFS armazenam dados em uma única Zona de Disponibilidade.",
+      "Os volumes do EBS e os sistemas de arquivos do Amazon EFS armazenam dados em uma única Zona de Disponibilidade.",
+      "Os volumes do EBS e os sistemas de arquivos do Amazon Elastic File System armazenam dados em várias Zonas de Disponibilidade."
+    ],
+    "correct_answer": "Os volumes do EBS armazenam dados em uma única Zona de Disponibilidade. Os sistemas de arquivos do Amazon Elastic File System armazenam dados em várias Zonas de Disponibilidade.",
+    "explanation": "Um volume do EBS precisa estar localizado na mesma Zona de Disponibilidade que a instância do Amazon EC2 à qual ele está associado. O EFS é multizona."
+  },
+  {
+    "id": "personal-029",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Você quer armazenar dados em um serviço de armazenamento de objetos. Qual serviço da AWS é o melhor para esse tipo de armazenamento?",
+    "options": [
+      "Amazon Managed Blockchain",
+      "Amazon Elastic File System (Amazon EFS)",
+      "Amazon Elastic Block Store (Amazon EBS)",
+      "Amazon Simple Storage Service (Amazon S3)"
+    ],
+    "correct_answer": "Amazon Simple Storage Service (Amazon S3).",
+    "explanation": "O EBS é bloco, o EFS é sistema de arquivos."
+  },
+  {
+    "id": "personal-030",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual afirmação melhor descreve o Amazon DynamoDB?",
+    "options": [
+      "Um serviço que permite executar bancos de dados relacionais na nuvem AWS",
+      "Um serviço de banco de dados de chave-valor sem servidor",
+      "Um serviço que você pode usar para migrar bancos de dados relacionais e não relacionais e outros tipos de armazenamentos de dados",
+      "Banco de dados relacional de nível empresarial"
+    ],
+    "correct_answer": "Um serviço de banco de dados de chave-valor sem servidor.",
+    "explanation": "O DynamoDB não requer gerenciar servidores (serverless) e usa estrutura NoSQL."
+  },
+  {
+    "id": "personal-031",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço é usado para consultar e analisar dados em um data warehouse?",
+    "options": [
+      "Amazon Redshift",
+      "Amazon Neptune",
+      "Amazon DocumentDB",
+      "Amazon ElastiCache"
+    ],
+    "correct_answer": "Amazon Redshift.",
+    "explanation": "O Amazon Neptune é banco de grafos. O DocumentDB é para documentos. ElastiCache é cache."
+  },
+  {
+    "id": "personal-032",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Quais tarefas são responsabilidades dos clientes? (Selecione DUAS opções.)",
+    "options": [
+      "Manutenção da infraestrutura de rede",
+      "Aplicação de patches em software em instâncias do Amazon EC2",
+      "Implementação de controles de segurança física no data center",
+      "Definição de permissões para objetos do Amazon S3",
+      "Manutenção de servidores que executam instâncias do Amazon EC2"
+    ],
+    "correct_answer": "Aplicação de patches em software em instâncias do Amazon EC2 e Definição de permissões para objetos do Amazon S3.",
+    "explanation": "Manutenção física e de virtualização/rede são responsabilidades da AWS no modelo de responsabilidade compartilhada."
+  },
+  {
+    "id": "personal-033",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Você está configurando políticas de controle de serviço (SCPs) no AWS Organizations. A quais identidades e recursos as SCPs podem ser aplicadas? (Selecione DUAS opções.)",
+    "options": [
+      "Usuários do IAM",
+      "Grupos do IAM",
+      "Uma conta de membro individua",
+      "Funções do IAM",
+      "Uma unidade organizacional (UO)"
+    ],
+    "correct_answer": "Uma conta de membro individual e Uma unidade organizacional (UO).",
+    "explanation": "As SCPs operam ao nível de contas e UOs da Organização. Você não pode aplicar SCPs diretamente a usuários e grupos individuais do IAM."
+  },
+  {
+    "id": "personal-034",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Quais tarefas você pode concluir no AWS Artifact? (Selecione DUAS opções.)",
+    "options": [
+      "Acessar relatórios de conformidade da AWS sob demanda.",
+      "Consolidar e gerenciar múltiplas contas AWS em um local central.",
+      "Criar usuários para permitir que pessoas e aplicativos interajam com serviços e recursos AWS.",
+      "Definir permissões para contas configurando as políticas de controle de serviço (SCPs).",
+      "Analisar, aceitar e gerenciar seus contratos com a AWS."
+    ],
+    "correct_answer": "Acessar relatórios de conformidade da AWS sob demanda e Analisar, aceitar e gerenciar seus contratos com a AWS.",
+    "explanation": "Consolidação e controle de contas e SCPs é via AWS Organizations. IAM é para permissões de usuários."
+  },
+  {
+    "id": "personal-035",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual afirmativa descreve melhor uma política do IAM?",
+    "options": [
+      "Um processo de autenticação que adiciona uma camada de proteção para sua conta AWS",
+      "Um documento que concede ou nega permissões para serviços e recursos AWS",
+      "Uma identidade que você pode assumir para obter acesso temporário a permissões",
+      "A identidade que é estabelecida quando você cria pela primeira vez uma conta AWS"
+    ],
+    "correct_answer": "Um documento que concede ou nega permissões para serviços e recursos AWS.",
+    "explanation": "A autenticação multifator (MFA) adiciona camada de proteção. Uma identidade temporária é um Perfil (Role). A identidade primeira é o Root User."
+  },
+  {
+    "id": "personal-036",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Um funcionário precisa de acesso temporário para criar vários buckets do Amazon S3. Qual opção seria a melhor escolha para essa tarefa?",
+    "options": [
+      "Usuário-raiz da conta AWS",
+      "Grupo do IAM",
+      "Função do IAM (Perfil/Role)",
+      "Política de controle de serviço (SCP)"
+    ],
+    "correct_answer": "Função do IAM (Perfil/Role).",
+    "explanation": "Um perfil do IAM é uma identidade que você pode assumir para obter acesso temporário a permissões."
+  },
+  {
+    "id": "personal-037",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual afirmativa melhor descreve o princípio de menor privilégio?",
+    "options": [
+      "Adicionar um usuário do IAM em pelo menos um grupo do IAM",
+      "Verificar as permissões de um pacote em relação a uma lista de controle de acesso",
+      "Conceder apenas as permissões necessárias para executar tarefas específicas",
+      "Executar um ataque de negação de serviço originado de pelo menos um dispositivo"
+    ],
+    "correct_answer": "Conceder somente as permissões necessárias para executar tarefas específicas do trabalho.",
+    "explanation": "Você impede que usuários ou perfis tenham mais permissões do que o estritamente necessário para suas funções."
+  },
+  {
+    "id": "personal-038",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual serviço ajuda a proteger suas aplicações contra ataques distribuídos de negação de serviço (DDoS)?",
+    "options": [
+      "Amazon GuardDuty",
+      "Amazon Inspector",
+      "AWS Artifact",
+      "AWS Shield"
+    ],
+    "correct_answer": "AWS Shield.",
+    "explanation": "O AWS Shield usa diversas técnicas de análise para detectar ataques DDoS potenciais em tempo real."
+  },
+  {
+    "id": "personal-039",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual tarefa o AWS Key Management Service (AWS KMS) pode executar?",
+    "options": [
+      "Configurar uma autenticação multifator (MFA).",
+      "Atualizar a senha do usuário-raiz da conta AWS.",
+      "Criar chaves de criptografia.",
+      "Atribuir permissões a usuários e grupos."
+    ],
+    "correct_answer": "Criar chaves de criptografia.",
+    "explanation": "MFA, senhas de root e permissões de usuários são gerenciadas ou através do IAM ou no console root."
+  },
+  {
+    "id": "personal-040",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Quais tarefas você pode executar usando o AWS CloudTrail? (Selecione DUAS opções.)",
+    "options": [
+      "Monitorar sua infraestrutura e seus recursos AWS em tempo real",
+      "Rastrear atividades do usuário e solicitações de API em toda a infraestrutura da AWS",
+      "Exibir métricas e gráficos para monitorar o desempenho dos recursos",
+      "Filtrar logs para auxiliar na análise operacional e na solução de problemas",
+      "Configurar ações automáticas e alertas em resposta a métricas"
+    ],
+    "correct_answer": "Rastrear atividades do usuário e solicitações de API em toda a infraestrutura da AWS e Filtrar logs para auxiliar na análise operacional e na solução de problemas.",
+    "explanation": "Monitoramento de métricas em tempo real, painéis e configuração de alarmes automáticos em resposta a métricas são funções do Amazon CloudWatch."
+  },
+  {
+    "id": "personal-041",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Quais ações você pode executar usando o Amazon CloudWatch? (Selecione DUAS opções.)",
+    "options": [
+      "Monitorar a utilização e o desempenho de seus recursos",
+      "Receber orientações em tempo real para melhorar seu ambiente AWS",
+      "Comparar sua infraestrutura com as práticas recomendadas da AWS em cinco categorias",
+      "Acessar métricas em um único painel",
+      "Detectar automaticamente atividades da conta incomuns"
+    ],
+    "correct_answer": "Monitorar a utilização e o desempenho de recursos e Acessar métricas em um único painel.",
+    "explanation": "A comparação das práticas recomendadas em cinco pilares é o AWS Trusted Advisor. A detecção automática de chamadas de conta anormais é feita por CloudTrail ou GuardDuty."
+  },
+  {
+    "id": "personal-042",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual serviço permite que você reveja a segurança de seus buckets do Amazon S3 verificando permissões de acesso aberto?",
+    "options": [
+      "Amazon CloudWatch",
+      "AWS CloudTrail",
+      "AWS Trusted Advisor",
+      "Amazon GuardDuty"
+    ],
+    "correct_answer": "AWS Trusted Advisor.",
+    "explanation": "Ele inspeciona o ambiente e faz recomendações, incluindo verificações de segurança para buckets S3 que podem estar expostos indevidamente."
+  },
+  {
+    "id": "personal-043",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Quais categorias estão inclusas no painel do AWS Trusted Advisor? (Selecione DUAS opções.)",
+    "options": [
+      "Confiabilidade",
+      "Desempenho",
+      "Dimensionamento",
+      "Elasticidade",
+      "Tolerância a falhas"
+    ],
+    "correct_answer": "Desempenho e Tolerância a falhas.",
+    "explanation": "O Trusted Advisor faz recomendações em cinco categorias: otimização de custos, desempenho, segurança, tolerância a falhas e limites de serviço."
+  },
+  {
+    "id": "personal-044",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "O nível gratuito da AWS inclui ofertas que ficam disponíveis para novos clientes AWS por um determinado período após a data de cadastro da AWS. Qual é a duração deste período?",
+    "options": [
+      "3 meses",
+      "6 meses",
+      "9 meses",
+      "12 meses"
+    ],
+    "correct_answer": "12 meses.",
+    "explanation": "Por 12 meses depois de se cadastrar pela primeira vez, você tem acesso às ofertas de Nível Gratuito."
+  },
+  {
+    "id": "personal-045",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Qual plano do Support inclui todas as verificações do AWS Trusted Advisor pelo menor custo?",
+    "options": [
+      "Basic",
+      "Developer",
+      "Business",
+      "Empresarial de Grande Porte"
+    ],
+    "correct_answer": "Business (Empresarial).",
+    "explanation": "Planos Enterprise e Business possuem o conjunto completo de verificações do Trusted Advisor. O Business tem um custo mais baixo do que o Enterprise."
+  },
+  {
+    "id": "personal-046",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Qual ação você pode executar com a cobrança consolidada?",
+    "options": [
+      "Analisar o custo em que seu uso previsto da AWS incorrerá até o final do mês.",
+      "Criar uma estimativa de custo para seus casos de uso na AWS.",
+      "Combinar o uso entre contas para obter descontos de preços por volume.",
+      "Visualizar e gerenciar os custos e o uso da AWS ao longo do tempo."
+    ],
+    "correct_answer": "Combine o uso entre contas para receber descontos de definição de preço por volume.",
+    "explanation": "Ao combinar volumes de uso entre as contas, você pode ultrapassar camadas de desconto de serviço baseadas em volume."
+  },
+  {
+    "id": "personal-047",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Qual ferramenta de definição de preço é usada para visualizar, entender e gerenciar o custo e o uso da AWS ao longo do tempo?",
+    "options": [
+      "Calculadora de Preços da AWS",
+      "AWS Budgets",
+      "AWS Cost Explorer",
+      "Nível gratuito da AWS"
+    ],
+    "correct_answer": "AWS Cost Explorer.",
+    "explanation": "Calculadora é para estimar *antes* do uso. Budgets é para ser alertado ou definir orçamentos teto."
+  },
+  {
+    "id": "personal-048",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Qual ferramenta de preços permite receber alertas quando o uso do serviço excede um limite que você definiu?",
+    "options": [
+      "Painel de cobrança no console de gerenciamento da AWS",
+      "AWS Budgets",
+      "Nível gratuito da AWS",
+      "AWS Cost Explorer"
+    ],
+    "correct_answer": "AWS Budgets.",
+    "explanation": "Você define alertas personalizados que notificam quando os custos ou as métricas de uso ultrapassam (ou estão próximos de ultrapassar) seu orçamento."
+  },
+  {
+    "id": "personal-049",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Sua empresa deseja ter suporte de um technical account manager (TAM) da AWS. Qual plano de suporte você deve escolher?",
+    "options": [
+      "Desenvolvedor",
+      "Empresarial de Grande Porte (Enterprise)",
+      "Basic",
+      "Empresarial (Business)"
+    ],
+    "correct_answer": "Empresarial de Grande Porte (Enterprise).",
+    "explanation": "O Technical Account Manager está disponível unicamente para planos Enterprise."
+  },
+  {
+    "id": "personal-050",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço ou recurso é usado para encontrar software de terceiros que pode ser executado na AWS?",
+    "options": [
+      "AWS Marketplace",
+      "Nível gratuito da AWS",
+      "AWS Support",
+      "Painel de cobrança no console de gerenciamento da AWS"
+    ],
+    "correct_answer": "AWS Marketplace.",
+    "explanation": "Trata-se de um catálogo digital de parceiros e fornecedores independentes de software (ISV)."
+  },
+  {
+    "id": "personal-051",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual perspectiva do AWS Cloud Adoption Framework ajuda você a elaborar, implementar e otimizar sua infraestrutura da AWS com base em suas metas e perspectivas de negócio?",
+    "options": [
+      "Perspectiva de negócio",
+      "Perspectiva de plataforma",
+      "Perspectiva de operações",
+      "Perspectiva de pessoas"
+    ],
+    "correct_answer": "Perspectiva de plataforma.",
+    "explanation": "Ela inclui os princípios para implementar novas soluções e migrar cargas de trabalho para nuvem elaborando arquiteturas."
+  },
+  {
+    "id": "personal-052",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual estratégia de migração envolve a mudança para um produto diferente?",
+    "options": [
+      "Refatorar",
+      "Retirar",
+      "Redefinir plataforma",
+      "Recomprar"
+    ],
+    "correct_answer": "Recomprar.",
+    "explanation": "Envolve substituir uma aplicação abandonando sua estrutura e assumindo um produto SaaS de mercado (por exemplo, comprar uma nova plataforma já hospedada)."
+  },
+  {
+    "id": "personal-053",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual é a capacidade de armazenamento do Snowball Edge Storage Optimized?",
+    "options": [
+      "40 TB",
+      "60 TB",
+      "80 TB",
+      "100 TB"
+    ],
+    "correct_answer": "80 TB.",
+    "explanation": "Ele fornece 80 TB utilizáveis para transferência ou processamento."
+  },
+  {
+    "id": "personal-054",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço ajuda você a criar, treinar e implantar rapidamente modelos de machine learning?",
+    "options": [
+      "Amazon Textract",
+      "Amazon Lex",
+      "AWS DeepRacer",
+      "Amazon SageMaker"
+    ],
+    "correct_answer": "Amazon SageMaker.",
+    "explanation": "Permite criar, treinar e fazer deploy rapidamente com ferramentas de workflow."
+  },
+  {
+    "id": "personal-055",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual perspectiva do AWS Cloud Adoption Framework ajuda você a estruturar a seleção e a implementação de permissões?",
+    "options": [
+      "Perspectiva de governança",
+      "Perspectiva de segurança",
+      "Perspectiva de operações",
+      "Perspectiva de negócio"
+    ],
+    "correct_answer": "Perspectiva de segurança.",
+    "explanation": "A perspectiva de segurança (IAM) também ajuda a mapear quem pode fazer o quê de maneira programática."
+  },
+  {
+    "id": "personal-056",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Quais estratégias fazem parte das seis estratégias de migração de aplicativo? (Selecione DUAS opções.)",
+    "options": [
+      "Revisitar",
+      "Reter",
+      "Lembrar",
+      "Redesenvolver",
+      "Redefinir hospedagem"
+    ],
+    "correct_answer": "Reter e Redefinir hospedagem.",
+    "explanation": "As 6 de migração (6 R's) são: Rehost (Redefinir Hospedagem), Replatform (Redefinir Plataforma), Repurchase (Recomprar), Refactor/Rearchitect (Refatorar), Retire (Inativar), Retain (Reter)."
+  },
+  {
+    "id": "personal-057",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual é a capacidade de armazenamento do AWS Snowmobile?",
+    "options": [
+      "40 PB",
+      "60 PB",
+      "80 PB",
+      "100 PB"
+    ],
+    "correct_answer": "100 PB.",
+    "explanation": "Ele é um contêiner físico gigante capaz de transportar até 100 Petabytes de dados em um caminhão semirreboque."
+  },
+  {
+    "id": "personal-058",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual declaração descreve melhor o Amazon Lex?",
+    "options": [
+      "Um serviço para criação interfaces de conversação usando voz e texto",
+      "Um serviço de machine learning que extrai automaticamente texto e dados de documentos digitalizados",
+      "Um serviço de banco de dados de documentos compatível com cargas de trabalho do MongoDB",
+      "Um serviço que identifica atividades on-line potencialmente fraudulentas"
+    ],
+    "correct_answer": "Um serviço para criação interfaces de conversação usando voz e texto.",
+    "explanation": "É a base para chatbots de voz (como o que movimenta a Alexa)."
+  },
+  {
+    "id": "personal-059",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual pilar do AWS Well-Architected Framework se concentra na capacidade de uma carga de trabalho executar de maneira consistente e correta as funções pretendidas?",
+    "options": [
+      "Excelência operacional",
+      "Eficiência de desempenho",
+      "Segurança",
+      "Confiabilidade"
+    ],
+    "correct_answer": "Confiabilidade.",
+    "explanation": "Foca em evitar falhas de sistema e capacidade de recuperação quando surgem."
+  },
+  {
+    "id": "personal-060",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Que processo é uma vantagem da grande economia em escala?",
+    "options": [
+      "Implantação de uma aplicação em várias Regiões ao redor do mundo",
+      "Fazer o pagamento conforme o uso de preços mais baixos em consequência do uso agregado de serviços dos clientes da AWS",
+      "Pagar pelo tempo de computação à medida que você o usa, em vez de investir antecipadamente em data centers",
+      "Aumentar ou diminuir a capacidade da infraestrutura para atender à demanda"
+    ],
+    "correct_answer": "Fazer o pagamento conforme o uso de preços mais baixos em consequência do uso agregado de serviços dos clientes da AWS.",
+    "explanation": "O agregado de milhares de clientes diminui os custos de manutenção em infraestrutura para a AWS, que repassa esses custos aos clientes."
+  },
+  {
+    "id": "personal-061",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual pilar do AWS Well-Architected Framework inclui a capacidade de executar cargas de trabalho de maneira eficaz e obter informações sobre as operações?",
+    "options": [
+      "Otimização de custos",
+      "Excelência operacional",
+      "Eficiência de desempenho",
+      "Confiabilidade"
+    ],
+    "correct_answer": "Excelência operacional.",
+    "explanation": "Foca-se em entregar valor comercial continuamente ajustando seus processos internos."
+  },
+  {
+    "id": "personal-062",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Quais são os benefícios da computação em nuvem? (Selecione DUAS opções.)",
+    "options": [
+      "Aumente a velocidade e a agilidade.",
+      "Beneficiar-se de economias de escala.",
+      "Trocar despesa variável por despesa antecipada.",
+      "Manter a capacidade da infraestrutura",
+      "Parar de gastar dinheiro com execução e manutenção de data centers."
+    ],
+    "correct_answer": "Aumentar a velocidade e agilidade e Parar de gastar dinheiro com execução e manutenção de data centers.",
+    "explanation": "O conceito troca despesa fixa de aquisição local (Capex) por despesa variável (Opex)."
+  },
+  {
+    "id": "personal-063",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Um engenheiro de nuvem está executando uma instância do Amazon EC2 e deseja armazenar dados em um recurso anexado. Os dados são temporários e não serão mantidos por longo prazo. Qual recurso você deve usar?",
+    "options": [
+      "Sub-rede",
+      "Volume do Amazon Elastic Block Store (Amazon EBS)",
+      "Bucket do Amazon S3",
+      "Armazenamento de instância (Instance Store)"
+    ],
+    "correct_answer": "Armazenamento de instância (Instance Store).",
+    "explanation": "São discos efêmeros nativos à máquina; os dados apagam após uma reinicialização profunda."
+  },
+  {
+    "id": "personal-064",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual ferramenta realiza ações de automação para serviços e aplicações da AWS por meio de scripts?",
+    "options": [
+      "Amazon QLDB",
+      "Amazon Redshift",
+      "AWS Snowball",
+      "AWS Command Line Interface"
+    ],
+    "correct_answer": "AWS Command Line Interface.",
+    "explanation": "Permite executar ações no nível dos recursos nativos usando seu terminal."
+  },
+  {
+    "id": "personal-065",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual componente ou serviço estabelece uma conexão privada dedicada entre o data center on-premises e a nuvem privada virtual (VPC)?",
+    "options": [
+      "Gateway privado virtual",
+      "AWS Direct Connect",
+      "Gateway de internet",
+      "Amazon CloudFront"
+    ],
+    "correct_answer": "AWS Direct Connect.",
+    "explanation": "É um link fisicamente direto estabelecendo acesso seguro e robusto, cortando a internet pública."
+  },
+  {
+    "id": "personal-066",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Um arquiteto de nuvem quer que o Amazon S3 monitore padrões de acesso do objeto. Qual storage class ele deve usar?",
+    "options": [
+      "Amazon S3 Standard-IA",
+      "Amazon S3 Intelligent-Tiering",
+      "Amazon S3 Glacier Flexible Retrieval",
+      "Amazon S3 One Zone - IA"
+    ],
+    "correct_answer": "Amazon S3 Intelligent-Tiering.",
+    "explanation": "A classe Intelligent-Tiering automatiza as transições de ciclo de vida com base em dados sendo acessados menos frequentemente."
+  },
+  {
+    "id": "personal-067",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual perspectiva do AWS Cloud Adoption Framework se concentra na recuperação de cargas de trabalho de TI para atender aos requisitos dos stakeholders da empresa?",
+    "options": [
+      "Perspectiva de operações",
+      "Perspectiva de pessoas",
+      "Perspectiva de negócio",
+      "Perspectiva de governança"
+    ],
+    "correct_answer": "Perspectiva de operações.",
+    "explanation": "Foca-se em manter processos técnicos e operacionais alinhados."
+  },
+  {
+    "id": "personal-068",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual ação pode ser executada no Amazon CloudFront?",
+    "options": [
+      "Provisão de uma seção isolada da nuvem AWS para iniciar recursos em uma rede virtual definida por alguém.",
+      "Executar a infraestrutura em uma abordagem de nuvem híbrida.",
+      "Provisão de recursos usando linguagens de programação ou um arquivo de texto.",
+      "Entregar conteúdo aos clientes por uma rede global de locais de borda."
+    ],
+    "correct_answer": "Entregar conteúdo aos clientes por uma rede global de locais de borda.",
+    "explanation": "É o serviço de CDN (Rede de Entrega de Conteúdos) da AWS."
+  },
+  {
+    "id": "personal-069",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual componente da nuvem privada virtual (VPC) controla o tráfego de entrada e saída para instâncias do Amazon EC2?",
+    "options": [
+      "Gateway de internet",
+      "Lista de controle de acesso de rede",
+      "Sub-rede",
+      "Grupo de segurança"
+    ],
+    "correct_answer": "Grupo de segurança.",
+    "explanation": "Eles operam a nível de Instância."
+  },
+  {
+    "id": "personal-070",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual categoria do AWS Trusted Advisor inclui verificações para alta utilização de instâncias do EC2?",
+    "options": [
+      "Tolerância a falhas",
+      "Segurança",
+      "Desempenho",
+      "Otimização de custos"
+    ],
+    "correct_answer": "Desempenho.",
+    "explanation": "Ajuda a otimizar processos em uso extensivo."
+  },
+  {
+    "id": "personal-071",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Qual opção de preço do Amazon EC2 reduz o custo quando uma empresa oferece um desconto quando você assume um compromisso de gasto por hora com uma família de instância e uma Região por um período de vigência de 1 ou 3 anos?",
+    "options": [
+      "Instâncias reservadas",
+      "Hosts dedicados",
+      "Instâncias spot",
+      "Savings Plans da instância do EC2"
+    ],
+    "correct_answer": "Savings Plans da instância do EC2.",
+    "explanation": "Proporciona muita flexibilidade, contanto que haja compromisso fixo de uso em $ por hora."
+  },
+  {
+    "id": "personal-072",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço apresenta revisão de detalhes de atividades de usuário e chamadas de API que ocorreram no ambiente AWS?",
+    "options": [
+      "Amazon CloudWatch",
+      "AWS Trusted Advisor",
+      "Amazon Inspector",
+      "AWS CloudTrail"
+    ],
+    "correct_answer": "AWS CloudTrail.",
+    "explanation": "Foca completamente em governança, conformidade, e log de quem fez o que e de onde."
+  },
+  {
+    "id": "personal-073",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Um engenheiro de nuvem deseja armazenar dados em um volume anexado a uma instância do Amazon EC2. Qual serviço deve ser utilizado?",
+    "options": [
+      "Amazon Simple Storage Service (Amazon S3)",
+      "Amazon ElastiCache",
+      "AWS Lambda",
+      "Amazon Elastic Block Store (Amazon EBS)"
+    ],
+    "correct_answer": "Amazon Elastic Block Store (Amazon EBS).",
+    "explanation": "Fornece armazenamento nativo a nível de bloco (discos)."
+  },
+  {
+    "id": "personal-074",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Quais planos de suporte incluem acesso a todas as verificações do AWS Trusted Advisor? (Selecione DUAS opções.)",
+    "options": [
+      "Nível gratuito da AWS",
+      "Empresarial (Business)",
+      "Empresarial de Grande Porte (Enterprise)",
+      "Desenvolvedor",
+      "Basic"
+    ],
+    "correct_answer": "Empresarial de Grande Porte (Enterprise) e Empresarial (Business).",
+    "explanation": "Planos menores recebem as validações fundamentais, Enterprise e Business destrancam tudo."
+  },
+  {
+    "id": "personal-075",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual declaração descreve melhor o Amazon GuardDuty?",
+    "options": [
+      "Um serviço que verifica as aplicações quanto a vulnerabilidades de segurança e desvios das práticas recomendadas de segurança",
+      "Um serviço que realiza detecção inteligente de ameaças na infraestrutura e nos recursos da AWS",
+      "Um serviço que monitora as solicitações de rede para aplicações web",
+      "Um serviço que protege as aplicações contra ataques distribuídos de negação de serviço (DDoS)"
+    ],
+    "correct_answer": "Um serviço que realiza detecção inteligente de ameaças na infraestrutura e nos recursos da AWS.",
+    "explanation": "Verifica os logs do VPC e do CloudTrail de maneira proativa visando caça de ameaças com aprendizado de máquina."
+  },
+  {
+    "id": "personal-076",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual declaração descreve melhor o AWS Marketplace?",
+    "options": [
+      "Um catálogo digital que inclui milhares de ofertas de software de fornecedores independentes de software",
+      "Uma ferramenta on-line que inspeciona o ambiente AWS e faz recomendações em tempo real de acordo com as práticas recomendadas da AWS",
+      "Um recurso que oferece orientação, revisões de arquitetura e comunicação contínua com sua empresa durante o planejamento",
+      "Um recurso que pode responder a perguntas sobre práticas recomendadas e ajudar na solução de problemas"
+    ],
+    "correct_answer": "Um catálogo digital que inclui milhares de ofertas de fornecedores independentes de software.",
+    "explanation": "Permite encontrar, instalar e muitas vezes pagar pelo uso de produtos de terceiros (como firewalls customizados)."
+  },
+  {
+    "id": "personal-077",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço permite implantar e dimensionar rapidamente aplicações na AWS?",
+    "options": [
+      "AWS Outposts",
+      "AWS Snowball",
+      "AWS Elastic Beanstalk",
+      "Amazon CloudFront"
+    ],
+    "correct_answer": "AWS Elastic Beanstalk.",
+    "explanation": "Ele abstrai e gerencia nativamente a escalabilidade e o balanceamento."
+  },
+  {
+    "id": "personal-078",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual pilar do AWS Well-Architected Framework cujo foco é usar recursos de computação de maneiras que atendam aos requisitos do sistema?",
+    "options": [
+      "Segurança",
+      "Confiabilidade",
+      "Eficiência de desempenho",
+      "Excelência operacional"
+    ],
+    "correct_answer": "Eficiência de desempenho.",
+    "explanation": "É sobre escolher os tipos e tamanhos eficientes dos seus componentes de computação."
+  },
+  {
+    "id": "personal-079",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço executa aplicações em contêineres na AWS?",
+    "options": [
+      "Amazon Aurora",
+      "Amazon Elastic Kubernetes Service (Amazon EKS)",
+      "Amazon SageMaker",
+      "Amazon Redshift"
+    ],
+    "correct_answer": "Amazon Elastic Kubernetes Service (Amazon EKS).",
+    "explanation": "Foca nos contêineres e orquestração do sistema open-source Kubernetes."
+  },
+  {
+    "id": "personal-080",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Na storage class S3 Intelligent-Tiering, o Amazon S3 move objetos entre um nível de acesso frequente e um nível de acesso pouco frequente. Quais classes de armazenamento são usadas para esses níveis? (Selecione DUAS opções.)",
+    "options": [
+      "S3 Standard",
+      "S3 Glacier Flexible Retrieval",
+      "S3 One Zone - IA",
+      "S3 Standard-IA",
+      "S3 Glacier Deep Archive"
+    ],
+    "correct_answer": "S3 Standard e S3 Standard-IA.",
+    "explanation": "Ele analisa continuamente padrões e movimenta em tempo real."
+  },
+  {
+    "id": "personal-081",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Um desenvolvedor de aplicação deseja armazenar dados em um banco de dados de chave-valor. Qual serviço deve ser utilizado?",
+    "options": [
+      "Amazon DynamoDB",
+      "Amazon RDS",
+      "Amazon DocumentDB",
+      "Amazon Aurora"
+    ],
+    "correct_answer": "Amazon DynamoDB.",
+    "explanation": "Poderoso serviço NoSQL no modelo Chave-Valor na AWS."
+  },
+  {
+    "id": "personal-082",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Quais tarefas são responsabilidades da AWS? (Selecione DUAS opções.)",
+    "options": [
+      "Criação de usuários e grupos do IAM",
+      "Treinamento de funcionários da empresa sobre como usar os serviços da AWS",
+      "Configuração de grupos de segurança em instâncias do Amazon EC2",
+      "Manutenção da infraestrutura de virtualização",
+      "Configuração de dispositivos de infraestrutura da AWS"
+    ],
+    "correct_answer": "Manutenção da infraestrutura de virtualização e Configuração de dispositivos de infraestrutura da AWS.",
+    "explanation": "É a parte fundamental de hardwares e a camada base do hypervisor."
+  },
+  {
+    "id": "personal-083",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual serviço permite consolidar e gerenciar várias contas AWS em um local central?",
+    "options": [
+      "AWS Identity and Access Management (IAM)",
+      "AWS Artifact",
+      "AWS Organizations",
+      "AWS Key Management Service (AWS KMS)"
+    ],
+    "correct_answer": "AWS Organizations.",
+    "explanation": "Governança unificada por toda organização (consolidating billing e SCPs)."
+  },
+  {
+    "id": "personal-084",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Um desenvolvedor de aplicação deseja enviar e receber mensagens entre componentes distribuídos de aplicações. Qual serviço deve ser utilizado?",
+    "options": [
+      "Amazon Simple Queue Service (Amazon SQS)",
+      "Amazon Route 53",
+      "AWS Snowball",
+      "Amazon ElastiCache"
+    ],
+    "correct_answer": "Amazon Simple Queue Service (Amazon SQS).",
+    "explanation": "Serviço que atua como fila altamente redundante entre microsserviços."
+  },
+  {
+    "id": "personal-085",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Qual estratégia de migração envolve alterar a forma como uma aplicação é arquitetada e desenvolvida, normalmente usando recursos nativos da nuvem?",
+    "options": [
+      "Redefinir plataforma",
+      "Recomprar",
+      "Redefinir hospedagem",
+      "Refatorar"
+    ],
+    "correct_answer": "Refatorar.",
+    "explanation": "Pois se reprograma a arquitetura de base para adotar Serverless ou outras soluções modernas."
+  },
+  {
+    "id": "personal-086",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Qual declaração é VERDADEIRA sobre o AWS Lambda?",
+    "options": [
+      "Para usar o AWS Lambda, uma empresa precisa pagar antecipadamente pelo tempo estimado de computação.",
+      "Para usar o AWS Lambda, uma empresa precisa configurar os servidores que executam o código.",
+      "A primeira etapa ao usar o AWS Lambda é provisionar um servidor.",
+      "A empresa paga apenas pelo tempo de computação durante a execução do código."
+    ],
+    "correct_answer": "A empresa paga apenas pelo tempo de computação durante a execução do código.",
+    "explanation": "Nenhuma necessidade de provisionamento explícito; o faturamento ocorre puramente nos milissegundos rodados."
+  },
+  {
+    "id": "personal-087",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual afirmação melhor descreve o Elastic Load Balancing?",
+    "options": [
+      "Um serviço que monitora aplicações e automaticamente adiciona ou remove capacidade dos Resource Groups em resposta a mudanças na demanda",
+      "Um serviço que fornece dados para monitorar aplicações, otimizar a utilização dos recursos, e responder a mudanças sistêmicas de desempenho",
+      "Um serviço que permite criar, configurar, gerenciar e dimensionar na nuvem um ambiente de cache ou em memória distribuído",
+      "Um serviço que distribui o tráfego de entrada entre vários destinos, como instâncias do Amazon EC2"
+    ],
+    "correct_answer": "Um serviço que distribui o tráfego de entrada entre vários destinos, como instâncias do Amazon EC2.",
+    "explanation": "Ponto de ancoragem para roteamento inteligente."
+  },
+  {
+    "id": "personal-088",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço permite criar fluxos de trabalho necessários para a revisão humana das previsões de machine learning?",
+    "options": [
+      "Amazon Lex",
+      "Amazon Augmented AI",
+      "Amazon Textract",
+      "Amazon Aurora"
+    ],
+    "correct_answer": "Amazon Augmented AI.",
+    "explanation": "Amazon A2I é o painel de verificação humana para análises imprecisas."
   }
 ]

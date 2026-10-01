@@ -50,7 +50,101 @@ function record(q, ok) {
 }
 
 /* ---------- Carregamento e validação ---------- */
-function validate(q, seen) {
+function normalizeText(s) {
+  return String(s ?? '')
+    .trim()
+    .replace(/[.?!;:]+$/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function normalizeQuestion(raw) {
+  if (!raw || typeof raw !== 'object') return raw;
+
+  const q = { ...raw };
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  if (Array.isArray(q.options)) {
+    q.options = q.options.reduce((acc, opt, index) => {
+      const key = letters[index] || String(index + 1);
+      acc[key] = String(opt);
+      return acc;
+    }, {});
+  } else if (!q.options || typeof q.options !== 'object' || Array.isArray(q.options)) {
+    q.options = {};
+  }
+
+  const keys = Object.keys(q.options);
+
+  function canonicalize(text) {
+    return String(text ?? '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\b(?:de|da|do|dos|das|e|em|com|para|por|um|uma|a|o|as|os|que|qual|como|quando|onde|se|nao|não)\b/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean);
+  }
+
+  function similarity(a, b) {
+    const left = canonicalize(a);
+    const right = canonicalize(b);
+    if (!left.length || !right.length) return 0;
+    const leftSet = new Set(left);
+    const rightSet = new Set(right);
+    const overlap = [...leftSet].filter(word => rightSet.has(word)).length;
+    const union = new Set([...leftSet, ...rightSet]).size;
+    const jaccard = union ? overlap / union : 0;
+    return normalizeText(a).includes(normalizeText(b)) || normalizeText(b).includes(normalizeText(a)) ? 1 : jaccard;
+  }
+
+  function matchChoice(value) {
+    const target = normalizeText(value);
+    if (!target) return null;
+
+    let bestKey = null;
+    let bestScore = 0;
+
+    for (const key of keys) {
+      const optionText = normalizeText(q.options[key]);
+      const score = similarity(target, optionText);
+      if (score > bestScore) {
+        bestKey = key;
+        bestScore = score;
+      }
+    }
+
+    return bestScore >= 0.35 ? bestKey : null;
+  }
+
+  if (typeof q.correct_answer === 'string') {
+    const rawValue = q.correct_answer.trim();
+    const segments = rawValue.includes(' e ') ? rawValue.split(/\s+e\s+/i) : [rawValue];
+    const resolved = segments
+      .map(segment => {
+        const key = matchChoice(segment);
+        if (key) return key;
+        const direct = normalizeText(segment).toUpperCase();
+        return /^[A-Z]$/.test(direct) ? direct : null;
+      })
+      .filter(Boolean);
+    q.correct_answer = resolved.length ? resolved : (matchChoice(rawValue) ? [matchChoice(rawValue)] : []);
+  } else if (Array.isArray(q.correct_answer)) {
+    q.correct_answer = q.correct_answer.map(item => {
+      if (typeof item === 'string' && /^[A-Z]$/.test(item.trim().toUpperCase())) return item.trim().toUpperCase();
+      return matchChoice(item) || normalizeText(item) || null;
+    }).filter(Boolean);
+  } else {
+    q.correct_answer = [];
+  }
+
+  if (q.type !== 'single_choice' && q.type !== 'multiple_choice') {
+    q.type = q.correct_answer.length > 1 ? 'multiple_choice' : 'single_choice';
+  }
+
+  return q;
+}
+
+function validate(raw, seen) {
+  const q = normalizeQuestion(raw);
   if (!q || typeof q !== 'object') return 'item inválido';
   if (!q.id || typeof q.id !== 'string') return 'sem id';
   if (seen.has(q.id)) return 'ID duplicado';
@@ -58,9 +152,9 @@ function validate(q, seen) {
   if (!['single_choice', 'multiple_choice'].includes(q.type)) return 'tipo inválido';
   const keys = q.options && typeof q.options === 'object' ? Object.keys(q.options) : [];
   if (keys.length < 2) return 'alternativas ausentes';
-  const c = q.correct_answer;
-  if (!Array.isArray(c) || !c.length) return 'resposta correta inexistente';
-  if (c.some(x => !keys.includes(x))) return 'correct_answer incompatível com as alternativas';
+  const c = Array.isArray(q.correct_answer) ? q.correct_answer : [];
+  if (!c.length) return 'resposta correta inexistente';
+  if (c.some(x => !keys.includes(String(x)))) return 'correct_answer incompatível com as alternativas';
   if (q.type === 'single_choice' && c.length !== 1) return 'single_choice com mais de uma resposta';
   return null;
 }
@@ -80,9 +174,14 @@ async function init() {
   }
   const seen = new Set(), problems = [];
   data.forEach((q, i) => {
-    const err = validate(q, seen);
-    if (err) problems.push(`#${i + 1} (${q && q.id ? q.id : 'sem id'}): ${err}`);
-    else { seen.add(q.id); Q.push(q); byId[q.id] = q; }
+    const normalized = normalizeQuestion(q);
+    const err = validate(normalized, seen);
+    if (err) problems.push(`#${i + 1} (${normalized && normalized.id ? normalized.id : 'sem id'}): ${err}`);
+    else {
+      seen.add(normalized.id);
+      Q.push(normalized);
+      byId[normalized.id] = normalized;
+    }
   });
   if (problems.length) {
     $('warn').hidden = false;

@@ -26,29 +26,32 @@ Edite apenas `data/questions.json` e inclua um objeto na lista. Não é necessá
 
 ```json
 {
-  "id": "cloudverse-718",
-  "source": "CloudVerse",
-  "type": "single_choice",
-  "question": "Which AWS service...",
-  "options": { "A": "...", "B": "...", "C": "...", "D": "..." },
-  "correct_answer": ["C"],
-  "explanation": "...",
-  "tags": ["Security"]
+  "id": "personal-001",
+  "source": "Personal",
+  "tag": "Conceitos de nuvem",
+  "question": "O que é computação em nuvem?",
+  "options": [
+    "Faça backup de arquivos armazenados...",
+    "Implantação de aplicativos conectados...",
+    "Execução de código sem a necessidade...",
+    "Fornecimento sob demanda..."
+  ],
+  "correct_answer": "Fornecimento sob demanda...",
+  "explanation": "..."
 }
 ```
 
 | Campo | Obrigatório | Observação |
 |---|---|---|
 | `id` | sim | Único e estável. O progresso é ligado a ele; não reutilize IDs. |
-| `source` | não | Origem (ExamTopics, CloudVerse, AWS Official, Personal...). |
-| `type` | sim | `single_choice` ou `multiple_choice`. |
+| `source` | não | Origem (Personal, AWS Official, ExamTopics...). |
+| `tag` | não | Categoria/tema da questão. |
 | `question` | sim | Texto da questão. |
-| `options` | sim | Objeto `letra: texto`, com ao menos 2 alternativas. |
-| `correct_answer` | sim | Array de letras existentes em `options`. Uma letra em `single_choice`; várias em `multiple_choice`. |
+| `options` | sim | Array de strings com as alternativas, ou objeto `{ "A": "..." }` em formatos legados. |
+| `correct_answer` | sim | Texto exato da alternativa correta, ou array de letras em formatos legados. |
 | `explanation` | não | Só aparece se existir. |
-| `tags` | não | Guardadas para uso futuro (filtros ainda não implementados). |
 
-Questões inválidas (ID duplicado, sem texto, alternativas ausentes, `correct_answer` incompatível) são ignoradas e listadas em um aviso no topo da página. O restante continua funcionando.
+O app aceita o formato atual do `questions.json` e também o formato antigo com `type`, `options` em objeto e `correct_answer` em array. Questões inválidas (ID duplicado, sem texto, alternativas ausentes, `correct_answer` incompatível) são ignoradas e listadas em um aviso no topo da página. O restante continua funcionando.
 
 Em `multiple_choice`, a resposta só é correta quando o conjunto selecionado é igual ao conjunto de `correct_answer`, em qualquer ordem.
 
