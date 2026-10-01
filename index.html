@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AWS CLF-C02 Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>AWS CLF-C02 Simulator</h1>
+    <nav>
+      <button data-mode="all">Todas</button>
+      <button data-mode="new">Questões novas</button>
+      <button data-mode="errors">Banco de Erros</button>
+      <span class="exam">
+        <button data-mode="exam">Simulado</button>
+        <input id="examCount" type="number" min="1" value="60" aria-label="Quantidade de questões do simulado">
+      </span>
+    </nav>
+  </header>
+
+  <div id="warn" class="banner warn" hidden></div>
+  <div id="stats" class="stats"></div>
+  <main id="main"></main>
+
+  <footer>
+    <button id="exportBtn" class="link">Exportar progresso</button>
+    <button id="importBtn" class="link">Importar progresso</button>
+    <button id="resetBtn" class="link danger">Apagar progresso</button>
+    <input id="importFile" type="file" accept="application/json" hidden>
+  </footer>
+
+  <div id="toast" role="status" hidden></div>
+  <script src="app.js"></script>
+</body>
+</html>

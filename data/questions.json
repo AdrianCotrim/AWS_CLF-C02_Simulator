@@ -1,0 +1,64 @@
+[
+  {
+    "id": "test-001",
+    "source": "Personal",
+    "type": "single_choice",
+    "question": "Which AWS service provides object storage?",
+    "options": { "A": "Amazon EC2", "B": "Amazon S3", "C": "Amazon RDS", "D": "Amazon VPC" },
+    "correct_answer": ["B"],
+    "explanation": "Amazon S3 is an object storage service.",
+    "tags": ["S3", "Storage"]
+  },
+  {
+    "id": "test-002",
+    "source": "Personal",
+    "type": "single_choice",
+    "question": "Which AWS service is used to manage users and permissions?",
+    "options": { "A": "AWS IAM", "B": "Amazon CloudFront", "C": "AWS Budgets", "D": "Amazon SNS" },
+    "correct_answer": ["A"],
+    "explanation": "AWS Identity and Access Management (IAM) controls who can access which AWS resources.",
+    "tags": ["IAM", "Security"]
+  },
+  {
+    "id": "test-003",
+    "source": "Personal",
+    "type": "multiple_choice",
+    "question": "Which TWO of the following are AWS compute services? (Choose two.)",
+    "options": { "A": "Amazon EC2", "B": "Amazon S3", "C": "AWS Lambda", "D": "Amazon Route 53", "E": "AWS Artifact" },
+    "correct_answer": ["A", "C"],
+    "explanation": "Amazon EC2 and AWS Lambda are compute services.",
+    "tags": ["EC2", "Lambda", "Compute"]
+  },
+  {
+    "id": "test-004",
+    "source": "Personal",
+    "type": "single_choice",
+    "question": "Which AWS tool lets you view and forecast your AWS costs and usage?",
+    "options": { "A": "AWS Config", "B": "AWS Cost Explorer", "C": "AWS Shield", "D": "AWS Direct Connect" },
+    "correct_answer": ["B"],
+    "tags": ["Billing"]
+  },
+  {
+    "id": "test-005",
+    "source": "Personal",
+    "type": "multiple_choice",
+    "question": "Which THREE are benefits of cloud computing? (Choose three.)",
+    "options": {
+      "A": "Trade fixed expense for variable expense",
+      "B": "Benefit from massive economies of scale",
+      "C": "Increase speed and agility",
+      "D": "Buy hardware before it is needed"
+    },
+    "correct_answer": ["A", "B", "C"],
+    "explanation": "Guessing capacity and buying hardware up front is what the cloud helps you avoid.",
+    "tags": ["Cloud Concepts"]
+  },
+  {
+    "id": "test-006",
+    "source": "Personal",
+    "type": "single_choice",
+    "question": "Questão inválida de propósito (correct_answer inexistente) — deve aparecer no aviso de validação.",
+    "options": { "A": "Um", "B": "Dois" },
+    "correct_answer": ["Z"]
+  }
+]
