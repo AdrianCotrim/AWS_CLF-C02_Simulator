@@ -100,6 +100,7 @@ Endpoints disponíveis:
 - `GET /api/questions`: retorna a lista completa.
 - `GET /api/questions/:id`: retorna uma questão ou HTTP 404.
 - `POST /api/questions`: valida e adiciona uma questão, retornando HTTP 201. O servidor gera o ID `personal-NNN`; não envie `id`.
+- `DELETE /api/questions/:id`: exclui a questão e retorna seu ID; responde HTTP 404 se não existir.
 
 Exemplo de questão para criação (o campo `correct_answer` pode ser a letra da alternativa ou seu texto):
 
@@ -119,13 +120,18 @@ Teste os endpoints no PowerShell enquanto o servidor estiver em execução:
 ```powershell
 Invoke-RestMethod http://localhost:3000/api/questions
 Invoke-RestMethod http://localhost:3000/api/questions/personal-001
+Invoke-RestMethod -Method Delete -Uri http://localhost:3000/api/questions/personal-001
 $body = @{ source = 'Personal'; tag = 'Conceitos de nuvem'; question = 'Exemplo de pergunta?'; options = @('Alternativa A', 'Alternativa B'); correct_answer = 'A'; explanation = 'A alternativa A está correta.' } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/questions -ContentType 'application/json' -Body $body
 ```
 
 Para executar os testes automatizados da API, rode `npm test` dentro de `backend/`.
 
+No simulador, **Banco de Questões** carrega a lista atual pela API e permite pesquisar por texto, Source e Tag, além de abrir os detalhes de cada questão. Ao entrar na área, os dados são atualizados do backend.
+
 O POST altera o arquivo JSON persistente. Dados inválidos retornam HTTP 400 em JSON; erros de leitura, escrita ou arquivo corrompido retornam HTTP 500. CORS permite origens locais em `localhost` e `127.0.0.1` durante o desenvolvimento.
+
+O DELETE é permanente e a interface pede confirmação antes de executar. Uma sequência auxiliar de IDs preserva o maior número já emitido, para que a exclusão não faça o backend reutilizar IDs antigos.
 
 ## Decisões de implementação
 

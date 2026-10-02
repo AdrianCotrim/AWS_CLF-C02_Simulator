@@ -131,3 +131,26 @@ test('POST aceita explicação vazia sem inventar conteúdo', async () => {
   assert.equal(response.status, 201);
   assert.equal(created.explanation, '');
 });
+
+test('DELETE remove a questão, responde 404 para ID inexistente e não reutiliza o maior ID', async () => {
+  const beforeDelete = JSON.parse(await fs.readFile(questionsFile, 'utf8'));
+  const deletedId = beforeDelete[beforeDelete.length - 1].id;
+
+  const deleteResponse = await fetch(`${baseUrl}/api/questions/${deletedId}`, { method: 'DELETE' });
+  const deletion = await deleteResponse.json();
+  assert.equal(deleteResponse.status, 200);
+  assert.equal(deletion.id, deletedId);
+
+  const missingResponse = await fetch(`${baseUrl}/api/questions/inexistente`, { method: 'DELETE' });
+  assert.equal(missingResponse.status, 404);
+  assert.equal((await missingResponse.json()).error.code, 'QUESTION_NOT_FOUND');
+
+  const createResponse = await fetch(`${baseUrl}/api/questions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validQuestion)
+  });
+  const created = await createResponse.json();
+  assert.equal(createResponse.status, 201);
+  assert.notEqual(created.id, deletedId);
+});

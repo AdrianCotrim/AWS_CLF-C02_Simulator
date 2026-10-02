@@ -3,7 +3,8 @@
 const {
   readQuestions,
   getQuestionById,
-  addQuestion
+  addQuestion,
+  deleteQuestion: removeQuestion
 } = require('../data/questionsStore');
 
 const allowedFields = new Set([
@@ -92,4 +93,12 @@ async function createQuestion(req, res) {
   res.status(201).json(question);
 }
 
-module.exports = { getQuestions, getQuestion, createQuestion, ApiError };
+async function deleteQuestion(req, res) {
+  const deleted = await removeQuestion(req.params.id);
+  if (!deleted) {
+    throw new ApiError(404, 'QUESTION_NOT_FOUND', `Nenhuma questão encontrada com o ID ${req.params.id}.`);
+  }
+  res.json({ id: deleted.id, message: 'Questão excluída.' });
+}
+
+module.exports = { getQuestions, getQuestion, createQuestion, deleteQuestion, ApiError };

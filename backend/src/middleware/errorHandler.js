@@ -5,6 +5,7 @@ const storeMessages = {
   QUESTIONS_FILE_INVALID: 'O arquivo do banco de questões está inválido ou corrompido.',
   QUESTIONS_READ_FAILED: 'Não foi possível ler o banco de questões.',
   QUESTIONS_WRITE_FAILED: 'Não foi possível salvar o banco de questões.',
+  QUESTION_ID_SEQUENCE_INVALID: 'A sequência de IDs está inválida.',
   DUPLICATE_QUESTION_ID: 'O ID gerado já existe no banco de questões.'
 };
 
