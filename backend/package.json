@@ -1,0 +1,18 @@
+{
+  "name": "aws-clf-c02-questions-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API local para leitura e criação de questões do AWS CLF-C02 Simulator",
+  "main": "server.js",
+  "scripts": {
+    "server": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}

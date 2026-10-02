@@ -1,6 +1,6 @@
 # AWS CLF-C02 Simulator
 
-Ferramenta pessoal e local para praticar questões do exame AWS Certified Cloud Practitioner. Usa apenas HTML, CSS, JavaScript puro, JSON e LocalStorage, sem backend e sem dependências.
+Ferramenta pessoal e local para praticar questões do exame AWS Certified Cloud Practitioner. O simulador continua usando HTML, CSS, JavaScript puro, JSON e LocalStorage. Um backend Express opcional, documentado abaixo, expõe uma API local para o banco de questões.
 
 ## Como executar
 
@@ -22,7 +22,7 @@ Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servid
 
 ## Como adicionar questões
 
-Edite apenas `data/questions.json` e inclua um objeto na lista. Não é necessário alterar o código.
+Para editar o banco manualmente, inclua um objeto em `data/questions.json`. O backend local também pode adicionar questões por API e gera os IDs automaticamente; o simulador continua lendo o mesmo arquivo diretamente.
 
 ```json
 {
@@ -63,7 +63,7 @@ O progresso fica na chave `clf-c02-progress` do navegador. As questões nunca s�
 { "timesAnswered": 3, "timesWrong": 2, "lastAnswered": "2026-09-30", "lastCorrect": false, "inErrorBank": true }
 ```
 
-Também ficam salvos o histórico de respostas, as estatísticas e o simulado em andamento. O `questions.json` nunca é modificado.
+Também ficam salvos o histórico de respostas, as estatísticas e o simulado em andamento. O LocalStorage não modifica `data/questions.json`; ele pode ser alterado manualmente ou pela API local documentada abaixo.
 
 Limite: o LocalStorage pertence ao navegador e ao endereço usado (`localhost:8000` e `localhost:5500` têm armazenamentos separados). Limpar os dados do navegador apaga o progresso.
 
@@ -74,6 +74,50 @@ Limite: o LocalStorage pertence ao navegador e ao endereço usado (`localhost:80
 - **Apagar progresso** remove tudo do LocalStorage após confirmação; o `questions.json` não é afetado.
 
 Faça backups periódicos.
+
+## API local de questões
+
+O backend é independente do simulador: o frontend continua lendo `data/questions.json` diretamente. Para instalar e iniciar a API, use Node.js 18 ou superior:
+
+```bash
+cd backend
+npm install
+npm run server
+```
+
+A API fica em `http://localhost:3000`; a porta pode ser alterada pela variável de ambiente `PORT`. O armazenamento continua sendo `data/questions.json`, na raiz do projeto. O backend não cria o arquivo automaticamente: se ele estiver ausente, a API responde com erro e não substitui o banco.
+
+Endpoints disponíveis:
+
+- `GET /api/questions`: retorna a lista completa.
+- `GET /api/questions/:id`: retorna uma questão ou HTTP 404.
+- `POST /api/questions`: valida e adiciona uma questão, retornando HTTP 201. O servidor gera o ID `personal-NNN`; não envie `id`.
+
+Exemplo de questão para criação (o campo `correct_answer` pode ser a letra da alternativa ou seu texto):
+
+```json
+{
+  "source": "Personal",
+  "tag": "Conceitos de nuvem",
+  "question": "Qual é outro nome para implantação on-premises?",
+  "options": ["Nuvem privada", "Aplicativo baseado na nuvem", "Implantação híbrida", "Nuvem AWS"],
+  "correct_answer": "A",
+  "explanation": "Uma implantação on-premises também é chamada de implantação de nuvem privada."
+}
+```
+
+Teste os endpoints no PowerShell enquanto o servidor estiver em execução:
+
+```powershell
+Invoke-RestMethod http://localhost:3000/api/questions
+Invoke-RestMethod http://localhost:3000/api/questions/personal-001
+$body = @{ source = 'Personal'; tag = 'Conceitos de nuvem'; question = 'Exemplo de pergunta?'; options = @('Alternativa A', 'Alternativa B'); correct_answer = 'A'; explanation = 'A alternativa A está correta.' } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/questions -ContentType 'application/json' -Body $body
+```
+
+Para executar os testes automatizados da API, rode `npm test` dentro de `backend/`.
+
+O POST altera o arquivo JSON persistente. Dados inválidos retornam HTTP 400 em JSON; erros de leitura, escrita ou arquivo corrompido retornam HTTP 500. CORS permite origens locais em `localhost` e `127.0.0.1` durante o desenvolvimento.
 
 ## Decisões de implementação
 
