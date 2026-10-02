@@ -23,6 +23,7 @@ button:focus-visible, input:focus-visible, .opt:focus-within { outline: 2px soli
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 button.link { border: 0; background: none; color: var(--accent); padding: 4px 0; text-decoration: underline; }
 button.danger { color: var(--bad); }
+nav button[data-view="add"] { margin-left: auto; }
 .stats { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 16px; color: var(--muted); font-size: .9rem; }
 .stats b { color: var(--text); }
 main { padding-top: 16px; padding-bottom: 16px; }
@@ -48,6 +49,36 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .banner.err { background: var(--bad-bg); color: var(--bad); }
 .muted { color: var(--muted); }
 .wrong-list { padding-left: 20px; }
+.question-form-card { margin-bottom: 8px; }
+.form-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+.form-heading h2 { font-size: 1.15rem; margin: 0; }
+.form-heading p { margin: 4px 0 0; }
+.question-form { display: grid; gap: 18px; }
+.form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.form-field { display: grid; gap: 6px; font-weight: 600; }
+.form-control { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--text); font: inherit; font-weight: 400; }
+.form-control:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.form-field textarea { resize: vertical; }
+.question-textarea { min-height: 130px; }
+.explanation-textarea { min-height: 180px; }
+.optional-label { color: var(--muted); font-size: .9em; font-weight: 400; }
+.options-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.options-fieldset legend { margin-bottom: 10px; font-weight: 600; }
+.option-editors { display: grid; gap: 12px; margin-bottom: 12px; }
+.option-editor { min-width: 0; }
+.option-editor-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 5px; }
+.option-editor-heading label { font-weight: 500; }
+.remove-option { width: 34px; min-height: 34px; padding: 2px; font-weight: 700; }
+.form-submit-row { display: flex; justify-content: flex-start; }
+.form-feedback { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 16px; padding: 10px 12px; border-radius: 6px; }
+.form-feedback.success { background: var(--ok-bg); color: var(--ok); }
+.form-feedback.error { background: var(--bad-bg); color: var(--bad); }
+.form-feedback.pending { background: var(--warn-bg); }
 footer { padding-bottom: 32px; display: flex; gap: 16px; flex-wrap: wrap; }
 #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 6px; max-width: 90vw; }
-@media (max-width: 520px) { .card { padding: 14px; } }
+@media (max-width: 520px) {
+  .card { padding: 14px; }
+  nav button[data-view="add"] { margin-left: 0; }
+  .form-row { grid-template-columns: minmax(0, 1fr); }
+  .form-heading { flex-direction: column; }
+}

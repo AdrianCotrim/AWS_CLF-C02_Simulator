@@ -86,8 +86,7 @@ test('POST valida o payload e não aceita ID fornecido pelo cliente', async () =
   const invalidQuestions = [
     { ...validQuestion, id: 'personal-999' },
     { ...validQuestion, options: ['Única alternativa'] },
-    { ...validQuestion, correct_answer: 'Resposta inexistente' },
-    { ...validQuestion, explanation: '   ' }
+    { ...validQuestion, correct_answer: 'Resposta inexistente' }
   ];
 
   for (const question of invalidQuestions) {
@@ -119,4 +118,16 @@ test('POST gera IDs acima do maior existente mesmo em inclusões concorrentes', 
 
   const persisted = JSON.parse(await fs.readFile(questionsFile, 'utf8'));
   assert.deepEqual(persisted.slice(-2).map(question => question.id), ['personal-089', 'personal-090']);
+});
+
+test('POST aceita explicação vazia sem inventar conteúdo', async () => {
+  const response = await fetch(`${baseUrl}/api/questions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...validQuestion, explanation: '' })
+  });
+  const created = await response.json();
+
+  assert.equal(response.status, 201);
+  assert.equal(created.explanation, '');
 });

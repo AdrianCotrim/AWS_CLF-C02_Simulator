@@ -9,6 +9,23 @@ let byId = {};
 let P = loadProgress();   // progresso (LocalStorage)
 let S = null;        // sessão atual: { mode, ids, idx, answers, persist, done }
 let sel = [];        // seleção atual na tela
+const QUESTION_SOURCES = ['Personal', 'Cloudverse', 'Examtopics'];
+const QUESTION_TAGS = ['Conceitos de nuvem', 'Segurança e conformidade', 'Tecnologia', 'Faturamento e definição de preço'];
+let currentView = 'simulator';
+let questionDraft = createQuestionDraft();
+let questionFeedback = null;
+let isSubmittingQuestion = false;
+
+function createQuestionDraft() {
+  return {
+    source: 'Personal',
+    tag: QUESTION_TAGS[0],
+    question: '',
+    options: ['', ''],
+    correctAnswer: '',
+    explanation: ''
+  };
+}
 
 /* ---------- Progresso ---------- */
 function loadProgress() {
@@ -229,6 +246,7 @@ function renderStats() {
 function render() {
   renderStats();
   const m = $('main');
+  if (currentView === 'add') return renderQuestionForm(m);
   if (!S) { m.innerHTML = '<p class="muted">Escolha um modo acima para começar.</p>'; return; }
   if (S.done) return renderResult(m);
 
@@ -266,6 +284,137 @@ function render() {
     </div></div>`;
 }
 
+function renderQuestionForm(main, focus) {
+  const options = questionDraft.options.map((option, index) => `<div class="option-editor">
+    <div class="option-editor-heading">
+      <label for="question-option-${index}">Resposta ${index + 1}</label>
+      <button type="button" class="remove-option" data-form-action="remove-option" data-index="${index}"
+        aria-label="Remover resposta ${index + 1}" title="Remover resposta" ${questionDraft.options.length <= 2 ? 'disabled' : ''}>X</button>
+    </div>
+    <input class="form-control" id="question-option-${index}" data-question-field="option" data-index="${index}"
+      type="text" maxlength="500" value="${esc(option)}" placeholder="Digite uma alternativa" required>
+  </div>`).join('');
+  const correctAnswers = questionDraft.options.map((option, index) => {
+    const label = option.trim() || `Resposta ${index + 1} (preencha o texto)`;
+    return `<option value="${index}" ${questionDraft.correctAnswer === String(index) ? 'selected' : ''}>${esc(label)}</option>`;
+  }).join('');
+  const feedback = questionFeedback ? `<div id="questionFeedback" class="form-feedback ${questionFeedback.type}"
+    role="${questionFeedback.type === 'error' ? 'alert' : 'status'}" aria-live="polite">
+    <span>${esc(questionFeedback.message)}</span>${questionFeedback.id ? `<strong>ID: ${esc(questionFeedback.id)}</strong>` : ''}
+  </div>` : '';
+
+  main.innerHTML = `<section class="card question-form-card" aria-labelledby="question-form-title">
+    <div class="form-heading">
+      <div><h2 id="question-form-title">Adicionar questão</h2><p class="muted">O ID será gerado automaticamente.</p></div>
+      <button type="button" data-form-action="return">Voltar ao simulador</button>
+    </div>
+    ${feedback}
+    <form id="questionForm" class="question-form" novalidate>
+      <div class="form-row">
+        <label class="form-field"><span>Source</span>
+          <select class="form-control" data-question-field="source" required>${QUESTION_SOURCES.map(source => `<option value="${esc(source)}" ${questionDraft.source === source ? 'selected' : ''}>${esc(source)}</option>`).join('')}</select>
+        </label>
+        <label class="form-field"><span>Tag</span>
+          <select class="form-control" data-question-field="tag" required>${QUESTION_TAGS.map(tag => `<option value="${esc(tag)}" ${questionDraft.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}</select>
+        </label>
+      </div>
+      <label class="form-field"><span>Question</span>
+        <textarea class="form-control question-textarea" data-question-field="question" maxlength="10000" placeholder="Digite o enunciado da questão..." required>${esc(questionDraft.question)}</textarea>
+      </label>
+      <fieldset class="options-fieldset">
+        <legend>Options</legend>
+        <div class="option-editors">${options}</div>
+        <button type="button" data-form-action="add-option" ${questionDraft.options.length >= 26 ? 'disabled title="Limite de 26 alternativas da API"' : ''}>+ Adicionar resposta</button>
+      </fieldset>
+      <label class="form-field"><span>Correct Answer</span>
+        <select class="form-control" data-question-field="correctAnswer" required>
+          <option value="">Selecione a resposta correta</option>${correctAnswers}
+        </select>
+      </label>
+      <label class="form-field"><span>Explanation <span class="optional-label">(opcional)</span></span>
+        <textarea class="form-control explanation-textarea" data-question-field="explanation" maxlength="10000" placeholder="Explique por que essa é a resposta correta.">${esc(questionDraft.explanation)}</textarea>
+      </label>
+      <div class="form-submit-row"><button class="primary" type="submit" ${isSubmittingQuestion ? 'disabled' : ''}>${isSubmittingQuestion ? 'Enviando...' : 'Adicionar questão'}</button></div>
+    </form>
+  </section>`;
+
+  if (focus) {
+    const field = focus.field === 'option'
+      ? main.querySelector(`[data-question-field="option"][data-index="${focus.index}"]`)
+      : main.querySelector(`[data-question-field="${focus.field}"]`);
+    if (field) field.focus();
+  }
+}
+
+function refreshCorrectAnswerOptions() {
+  const select = $('main').querySelector('[data-question-field="correctAnswer"]');
+  if (!select) return;
+  const selected = questionDraft.correctAnswer;
+  select.innerHTML = `<option value="">Selecione a resposta correta</option>${questionDraft.options.map((option, index) => {
+    const label = option.trim() || `Resposta ${index + 1} (preencha o texto)`;
+    return `<option value="${index}" ${selected === String(index) ? 'selected' : ''}>${esc(label)}</option>`;
+  }).join('')}`;
+}
+
+function clearQuestionFeedback() {
+  questionFeedback = null;
+  const feedback = $('questionFeedback');
+  if (feedback) feedback.remove();
+}
+
+function validateQuestionDraft() {
+  if (!QUESTION_SOURCES.includes(questionDraft.source)) return 'Selecione uma origem válida.';
+  if (!QUESTION_TAGS.includes(questionDraft.tag)) return 'Selecione uma categoria válida.';
+  if (!questionDraft.question.trim()) return 'Preencha o enunciado da questão.';
+  if (questionDraft.options.length < 2) return 'Adicione pelo menos duas alternativas.';
+  if (questionDraft.options.some(option => !option.trim())) return 'Preencha todas as alternativas.';
+  const normalizedOptions = questionDraft.options.map(option => option.trim().toLocaleLowerCase('pt-BR'));
+  if (new Set(normalizedOptions).size !== normalizedOptions.length) return 'As alternativas não podem ser duplicadas.';
+  if (!questionDraft.correctAnswer || !questionDraft.options[Number(questionDraft.correctAnswer)]) return 'Selecione uma resposta correta.';
+  return '';
+}
+
+async function submitQuestion(event) {
+  event.preventDefault();
+  if (isSubmittingQuestion) return;
+
+  const validationMessage = validateQuestionDraft();
+  if (validationMessage) {
+    questionFeedback = { type: 'error', message: validationMessage };
+    return renderQuestionForm($('main'));
+  }
+
+  const correctIndex = Number(questionDraft.correctAnswer);
+  const payload = {
+    source: questionDraft.source,
+    tag: questionDraft.tag,
+    question: questionDraft.question.trim(),
+    options: questionDraft.options.map(option => option.trim()),
+    correct_answer: String.fromCharCode(65 + correctIndex),
+    explanation: questionDraft.explanation.trim()
+  };
+
+  isSubmittingQuestion = true;
+  questionFeedback = { type: 'pending', message: 'Enviando questão...' };
+  renderQuestionForm($('main'));
+
+  try {
+    const created = await window.QuestionsApi.createQuestion(payload);
+    const normalized = normalizeQuestion(created);
+    Q.push(normalized);
+    byId[normalized.id] = normalized;
+    questionDraft = createQuestionDraft();
+    questionFeedback = { type: 'success', message: 'Questão adicionada com sucesso!', id: created.id };
+    isSubmittingQuestion = false;
+    renderStats();
+    renderQuestionForm($('main'), { field: 'question' });
+  } catch (error) {
+    questionFeedback = { type: 'error', message: error.message || 'Não foi possível adicionar a questão. Verifique os dados e tente novamente.' };
+    isSubmittingQuestion = false;
+    renderQuestionForm($('main'));
+  }
+}
+
 function renderResult(m) {
   const n = S.ids.length, right = S.ids.filter(id => S.answers[id] && S.answers[id].ok).length;
   const wrong = S.ids.filter(id => !(S.answers[id] && S.answers[id].ok));
@@ -275,6 +424,30 @@ function renderResult(m) {
       : '<p>Nenhum erro. Ótimo!</p>'}
     <div class="actions"><button class="primary" data-act="quit">Voltar ao início</button></div></div>`;
 }
+
+/* ---------- Cadastro de questões ---------- */
+$('main').addEventListener('input', e => {
+  const field = e.target.dataset.questionField;
+  if (!field || currentView !== 'add') return;
+  if (field === 'option') {
+    questionDraft.options[Number(e.target.dataset.index)] = e.target.value;
+    refreshCorrectAnswerOptions();
+  } else {
+    questionDraft[field] = e.target.value;
+  }
+  clearQuestionFeedback();
+});
+
+$('main').addEventListener('change', e => {
+  const field = e.target.dataset.questionField;
+  if (!field || currentView !== 'add') return;
+  questionDraft[field] = e.target.value;
+  clearQuestionFeedback();
+});
+
+$('main').addEventListener('submit', e => {
+  if (e.target.id === 'questionForm') submitQuestion(e);
+});
 
 /* ---------- Eventos ---------- */
 $('main').addEventListener('change', e => {
@@ -286,8 +459,35 @@ $('main').addEventListener('change', e => {
 });
 
 $('main').addEventListener('click', e => {
-  const act = e.target.dataset.act;
-  if (!act || !S) return;
+  const formAction = e.target.closest('[data-form-action]');
+  if (formAction) {
+    const action = formAction.dataset.formAction;
+    if (action === 'return') {
+      currentView = 'simulator';
+      render();
+    } else if (action === 'add-option' && questionDraft.options.length < 26) {
+      questionDraft.options.push('');
+      clearQuestionFeedback();
+      renderQuestionForm($('main'), { field: 'option', index: questionDraft.options.length - 1 });
+    } else if (action === 'remove-option' && questionDraft.options.length > 2) {
+      const removedIndex = Number(formAction.dataset.index);
+      questionDraft.options.splice(removedIndex, 1);
+      if (questionDraft.correctAnswer === String(removedIndex)) questionDraft.correctAnswer = '';
+      else if (Number(questionDraft.correctAnswer) > removedIndex) questionDraft.correctAnswer = String(Number(questionDraft.correctAnswer) - 1);
+      clearQuestionFeedback();
+      renderQuestionForm($('main'), { field: 'option', index: Math.max(0, removedIndex - 1) });
+    }
+    return;
+  }
+
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (!act) return;
+  if (act === 'return') {
+    currentView = 'simulator';
+    render();
+    return;
+  }
+  if (!S) return;
   const q = S.done ? null : byId[S.ids[S.idx]];
   if (act === 'submit') {
     if (!sel.length) return toast('Selecione uma alternativa.');
@@ -308,7 +508,17 @@ $('main').addEventListener('click', e => {
   }
 });
 
-document.querySelector('nav').addEventListener('click', e => { if (e.target.dataset.mode && Q.length) start(e.target.dataset.mode); });
+document.querySelector('nav').addEventListener('click', e => {
+  const button = e.target.closest('button');
+  if (!button) return;
+  if (button.dataset.view === 'add') {
+    currentView = 'add';
+    render();
+  } else if (button.dataset.mode && Q.length) {
+    currentView = 'simulator';
+    start(button.dataset.mode);
+  }
+});
 
 /* ---------- Backup, restauração e reset ---------- */
 $('exportBtn').onclick = () => {

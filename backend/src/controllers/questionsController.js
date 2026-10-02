@@ -40,7 +40,7 @@ function validateQuestion(body) {
     if (typeof body[field] !== 'string' && field !== 'options') {
       throw new ApiError(400, 'INVALID_QUESTION', `O campo ${field} deve ser texto.`);
     }
-    if (field !== 'options' && !body[field].trim()) {
+    if (!['options', 'explanation'].includes(field) && !body[field].trim()) {
       throw new ApiError(400, 'INVALID_QUESTION', `O campo ${field} não pode estar vazio.`);
     }
   }

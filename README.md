@@ -11,7 +11,7 @@ cd aws-simulado
 python -m http.server 8000
 ```
 
-Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servidor estático serve (`npx serve`, extensão Live Server do VS Code etc.).
+Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servidor estático serve (`npx serve`, extensão Live Server do VS Code etc.). Para usar o formulário de cadastro, mantenha também a API local em execução (instruções abaixo).
 
 ## Modos
 
@@ -22,7 +22,7 @@ Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servid
 
 ## Como adicionar questões
 
-Para editar o banco manualmente, inclua um objeto em `data/questions.json`. O backend local também pode adicionar questões por API e gera os IDs automaticamente; o simulador continua lendo o mesmo arquivo diretamente.
+Para editar o banco manualmente, inclua um objeto em `data/questions.json`. Também é possível cadastrar pela tela **Adicionar questão**: o formulário envia a questão à API, que gera o ID e grava no mesmo arquivo. A questão criada é incluída no simulador sem recarregar a página.
 
 ```json
 {
@@ -77,7 +77,7 @@ Faça backups periódicos.
 
 ## API local de questões
 
-O backend é independente do simulador: o frontend continua lendo `data/questions.json` diretamente. Para instalar e iniciar a API, use Node.js 18 ou superior:
+O simulador carrega o banco inicial de `data/questions.json`; a tela de cadastro usa a API local. Para instalar e iniciar a API, use Node.js 18 ou superior:
 
 ```bash
 cd backend
