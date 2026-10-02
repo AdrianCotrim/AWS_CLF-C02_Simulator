@@ -154,3 +154,34 @@ test('DELETE remove a questão, responde 404 para ID inexistente e não reutiliz
   assert.equal(createResponse.status, 201);
   assert.notEqual(created.id, deletedId);
 });
+
+test('PUT atualiza os campos sem alterar o ID e responde 404 para ID inexistente', async () => {
+  const response = await fetch(`${baseUrl}/api/questions/personal-088`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...validQuestion, question: 'Enunciado atualizado?' })
+  });
+  const updated = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(updated.id, 'personal-088');
+  assert.equal(updated.question, 'Enunciado atualizado?');
+
+  const invalidResponse = await fetch(`${baseUrl}/api/questions/personal-088`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...validQuestion, id: 'personal-999' })
+  });
+  assert.equal(invalidResponse.status, 400);
+
+  const missingResponse = await fetch(`${baseUrl}/api/questions/inexistente`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(validQuestion)
+  });
+  assert.equal(missingResponse.status, 404);
+
+  const persisted = JSON.parse(await fs.readFile(questionsFile, 'utf8'));
+  assert.equal(persisted.find(question => question.id === 'personal-088').question, 'Enunciado atualizado?');
+  assert.equal(persisted.some(question => question.id === 'personal-999'), false);
+});

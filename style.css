@@ -101,7 +101,7 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .bank-option-letter { font-weight: 700; }
 .bank-option-list li strong { color: var(--ok); font-size: .85rem; }
 .bank-correct-answer { margin: 0; font-weight: 700; color: var(--ok); overflow-wrap: anywhere; }
-.bank-delete-row { display: flex; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
+.bank-detail-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
 footer { padding-bottom: 32px; display: flex; gap: 16px; flex-wrap: wrap; }
 #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 6px; max-width: 90vw; }
 @media (max-width: 520px) {

@@ -86,5 +86,34 @@
     return result;
   }
 
-  window.QuestionsApi = { getQuestions, createQuestion, deleteQuestion };
+  async function updateQuestion(id, question) {
+    let response;
+    try {
+      response = await fetch(`${endpoint}/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(question)
+      });
+    } catch {
+      throw new Error('Não foi possível conectar à API. Confirme se o backend está em execução e tente novamente.');
+    }
+
+    let result;
+    try {
+      result = await response.json();
+    } catch {
+      result = null;
+    }
+
+    if (!response.ok) {
+      if (response.status === 400 && result && result.error && result.error.message) throw new Error(result.error.message);
+      if (response.status === 404) throw new Error('A questão não foi encontrada. Atualize o Banco de Questões e tente novamente.');
+      if (response.status >= 500) throw new Error('O backend não conseguiu salvar as alterações. Tente novamente mais tarde.');
+      throw new Error('Não foi possível salvar as alterações. Verifique os dados e tente novamente.');
+    }
+    if (!result || result.id !== id) throw new Error('O servidor respondeu em um formato inesperado.');
+    return result;
+  }
+
+  window.QuestionsApi = { getQuestions, createQuestion, deleteQuestion, updateQuestion };
 })();

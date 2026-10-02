@@ -4,7 +4,8 @@ const {
   readQuestions,
   getQuestionById,
   addQuestion,
-  deleteQuestion: removeQuestion
+  deleteQuestion: removeQuestion,
+  updateQuestion: saveQuestion
 } = require('../data/questionsStore');
 
 const allowedFields = new Set([
@@ -101,4 +102,12 @@ async function deleteQuestion(req, res) {
   res.json({ id: deleted.id, message: 'Questão excluída.' });
 }
 
-module.exports = { getQuestions, getQuestion, createQuestion, deleteQuestion, ApiError };
+async function updateQuestion(req, res) {
+  const updated = await saveQuestion(req.params.id, validateQuestion(req.body));
+  if (!updated) {
+    throw new ApiError(404, 'QUESTION_NOT_FOUND', `Nenhuma questão encontrada com o ID ${req.params.id}.`);
+  }
+  res.json(updated);
+}
+
+module.exports = { getQuestions, getQuestion, createQuestion, deleteQuestion, updateQuestion, ApiError };

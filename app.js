@@ -15,6 +15,7 @@ let currentView = 'simulator';
 let questionDraft = createQuestionDraft();
 let questionFeedback = null;
 let isSubmittingQuestion = false;
+let editingQuestionId = null;
 let bankQuestions = [];
 let bankStatus = 'idle';
 let bankError = '';
@@ -295,6 +296,17 @@ function render() {
 }
 
 function renderQuestionForm(main, focus) {
+  const editingQuestion = editingQuestionId
+    ? bankQuestions.find(question => question && question.id === editingQuestionId)
+    : null;
+  const sourceOptions = [...new Set([
+    ...QUESTION_SOURCES,
+    ...(editingQuestion && editingQuestion.source && !QUESTION_SOURCES.includes(editingQuestion.source) ? [editingQuestion.source] : [])
+  ])];
+  const tagOptions = [...new Set([
+    ...QUESTION_TAGS,
+    ...(editingQuestion && editingQuestion.tag && !QUESTION_TAGS.includes(editingQuestion.tag) ? [editingQuestion.tag] : [])
+  ])];
   const options = questionDraft.options.map((option, index) => `<div class="option-editor">
     <div class="option-editor-heading">
       <label for="question-option-${index}">Resposta ${index + 1}</label>
@@ -315,17 +327,18 @@ function renderQuestionForm(main, focus) {
 
   main.innerHTML = `<section class="card question-form-card" aria-labelledby="question-form-title">
     <div class="form-heading">
-      <div><h2 id="question-form-title">Adicionar questão</h2><p class="muted">O ID será gerado automaticamente.</p></div>
-      <button type="button" data-form-action="return">Voltar ao simulador</button>
+      <div><h2 id="question-form-title">${editingQuestionId ? 'Editar questão' : 'Adicionar questão'}</h2>
+        <p class="muted">${editingQuestionId ? `ID: ${esc(editingQuestionId)}. O ID não pode ser alterado.` : 'O ID será gerado automaticamente.'}</p></div>
+      <button type="button" data-form-action="${editingQuestionId ? 'cancel-edit' : 'return'}">${editingQuestionId ? 'Cancelar edição' : 'Voltar ao simulador'}</button>
     </div>
     ${feedback}
     <form id="questionForm" class="question-form" novalidate>
       <div class="form-row">
         <label class="form-field"><span>Source</span>
-          <select class="form-control" data-question-field="source" required>${QUESTION_SOURCES.map(source => `<option value="${esc(source)}" ${questionDraft.source === source ? 'selected' : ''}>${esc(source)}</option>`).join('')}</select>
+          <select class="form-control" data-question-field="source" required>${sourceOptions.map(source => `<option value="${esc(source)}" ${questionDraft.source === source ? 'selected' : ''}>${esc(source)}</option>`).join('')}</select>
         </label>
         <label class="form-field"><span>Tag</span>
-          <select class="form-control" data-question-field="tag" required>${QUESTION_TAGS.map(tag => `<option value="${esc(tag)}" ${questionDraft.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}</select>
+          <select class="form-control" data-question-field="tag" required>${tagOptions.map(tag => `<option value="${esc(tag)}" ${questionDraft.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}</select>
         </label>
       </div>
       <label class="form-field"><span>Question</span>
@@ -344,7 +357,7 @@ function renderQuestionForm(main, focus) {
       <label class="form-field"><span>Explanation <span class="optional-label">(opcional)</span></span>
         <textarea class="form-control explanation-textarea" data-question-field="explanation" maxlength="10000" placeholder="Explique por que essa é a resposta correta.">${esc(questionDraft.explanation)}</textarea>
       </label>
-      <div class="form-submit-row"><button class="primary" type="submit" ${isSubmittingQuestion ? 'disabled' : ''}>${isSubmittingQuestion ? 'Enviando...' : 'Adicionar questão'}</button></div>
+      <div class="form-submit-row"><button class="primary" type="submit" ${isSubmittingQuestion ? 'disabled' : ''}>${isSubmittingQuestion ? (editingQuestionId ? 'Salvando...' : 'Enviando...') : (editingQuestionId ? 'Salvar alterações' : 'Adicionar questão')}</button></div>
     </form>
   </section>`;
 
@@ -503,9 +516,12 @@ function renderQuestionBankDetail(main) {
     </section>
     <section class="bank-detail-section"><h3>Correct Answer</h3><p class="bank-correct-answer">${esc(correctAnswer || 'Não informada')}</p></section>
     ${explanation ? `<section class="bank-detail-section"><h3>Explanation</h3><p class="bank-explanation">${esc(explanation)}</p></section>` : ''}
-    <div class="bank-delete-row"><button type="button" class="danger" data-bank-action="delete" ${isDeletingQuestion ? 'disabled' : ''}>
-      ${isDeletingQuestion ? 'Excluindo...' : 'Excluir questão'}
-    </button></div>
+    <div class="bank-detail-actions">
+      <button type="button" data-bank-action="edit" ${isDeletingQuestion ? 'disabled' : ''}>Editar questão</button>
+      <button type="button" class="danger" data-bank-action="delete" ${isDeletingQuestion ? 'disabled' : ''}>
+        ${isDeletingQuestion ? 'Excluindo...' : 'Excluir questão'}
+      </button>
+    </div>
   </section>`;
 }
 
@@ -522,6 +538,29 @@ function returnToQuestionBankList() {
   bankSelectedId = null;
   renderQuestionBank($('main'));
   window.scrollTo(0, bankListScrollY);
+}
+
+function startEditingQuestion(id) {
+  const question = bankQuestions.find(item => item && item.id === id);
+  if (!question) return;
+
+  const normalized = normalizeQuestion(question);
+  const options = Object.entries(normalized.options);
+  const correctIndex = options.findIndex(([letter]) => normalized.correct_answer.includes(letter));
+  questionDraft = {
+    source: question.source || QUESTION_SOURCES[0],
+    tag: question.tag || QUESTION_TAGS[0],
+    question: question.question || '',
+    options: options.length ? options.map(([, text]) => String(text)) : ['', ''],
+    correctAnswer: correctIndex >= 0 ? String(correctIndex) : '',
+    explanation: typeof question.explanation === 'string' ? question.explanation : ''
+  };
+  editingQuestionId = id;
+  questionFeedback = null;
+  isSubmittingQuestion = false;
+  currentView = 'add';
+  renderQuestionForm($('main'));
+  window.scrollTo(0, 0);
 }
 
 async function deleteQuestionFromBank(id) {
@@ -565,6 +604,17 @@ async function deleteQuestionFromBank(id) {
   }
 }
 
+function cancelQuestionEdit() {
+  const id = editingQuestionId;
+  editingQuestionId = null;
+  questionDraft = createQuestionDraft();
+  questionFeedback = null;
+  currentView = 'bank';
+  bankSelectedId = id;
+  render();
+  window.scrollTo(0, 0);
+}
+
 function refreshCorrectAnswerOptions() {
   const select = $('main').querySelector('[data-question-field="correctAnswer"]');
   if (!select) return;
@@ -582,8 +632,9 @@ function clearQuestionFeedback() {
 }
 
 function validateQuestionDraft() {
-  if (!QUESTION_SOURCES.includes(questionDraft.source)) return 'Selecione uma origem válida.';
-  if (!QUESTION_TAGS.includes(questionDraft.tag)) return 'Selecione uma categoria válida.';
+  const original = editingQuestionId ? bankQuestions.find(question => question && question.id === editingQuestionId) : null;
+  if (!QUESTION_SOURCES.includes(questionDraft.source) && questionDraft.source !== original?.source) return 'Selecione uma origem válida.';
+  if (!QUESTION_TAGS.includes(questionDraft.tag) && questionDraft.tag !== original?.tag) return 'Selecione uma categoria válida.';
   if (!questionDraft.question.trim()) return 'Preencha o enunciado da questão.';
   if (questionDraft.options.length < 2) return 'Adicione pelo menos duas alternativas.';
   if (questionDraft.options.some(option => !option.trim())) return 'Preencha todas as alternativas.';
@@ -614,21 +665,45 @@ async function submitQuestion(event) {
   };
 
   isSubmittingQuestion = true;
-  questionFeedback = { type: 'pending', message: 'Enviando questão...' };
+  questionFeedback = { type: 'pending', message: editingQuestionId ? 'Salvando alterações...' : 'Enviando questão...' };
   renderQuestionForm($('main'));
 
   try {
-    const created = await window.QuestionsApi.createQuestion(payload);
-    const normalized = normalizeQuestion(created);
+    const wasEditing = Boolean(editingQuestionId);
+    const saved = wasEditing
+      ? await window.QuestionsApi.updateQuestion(editingQuestionId, payload)
+      : await window.QuestionsApi.createQuestion(payload);
+    const normalized = normalizeQuestion(saved);
+    if (wasEditing) {
+      bankQuestions = bankQuestions.map(question => question && question.id === saved.id ? saved : question);
+      Q = Q.map(question => question.id === saved.id ? normalized : question);
+      byId[saved.id] = normalized;
+      delete P.questionProgress[saved.id];
+      if (Array.isArray(P.history)) P.history = P.history.filter(entry => entry.id !== saved.id);
+      if (S && S.answers) delete S.answers[saved.id];
+      if (S && S.done) S = null;
+      else if (S && S.ids[S.idx] === saved.id) sel = [];
+      bankSelectedId = saved.id;
+      editingQuestionId = null;
+      currentView = 'bank';
+      bankDeleteError = '';
+      isSubmittingQuestion = false;
+      save();
+      render();
+      window.scrollTo(0, 0);
+      toast(`Questão ${saved.id} atualizada.`);
+      return;
+    }
+
     Q.push(normalized);
     byId[normalized.id] = normalized;
     questionDraft = createQuestionDraft();
-    questionFeedback = { type: 'success', message: 'Questão adicionada com sucesso!', id: created.id };
+    questionFeedback = { type: 'success', message: 'Questão adicionada com sucesso!', id: saved.id };
     isSubmittingQuestion = false;
     renderStats();
     renderQuestionForm($('main'), { field: 'question' });
   } catch (error) {
-    questionFeedback = { type: 'error', message: error.message || 'Não foi possível adicionar a questão. Verifique os dados e tente novamente.' };
+    questionFeedback = { type: 'error', message: error.message || `Não foi possível ${editingQuestionId ? 'salvar as alterações' : 'adicionar a questão'}. Verifique os dados e tente novamente.` };
     isSubmittingQuestion = false;
     renderQuestionForm($('main'));
   }
@@ -692,6 +767,7 @@ $('main').addEventListener('click', e => {
   if (bankAction) {
     if (bankAction.dataset.bankAction === 'open') openQuestionBankQuestion(bankAction.dataset.questionId);
     else if (bankAction.dataset.bankAction === 'back') returnToQuestionBankList();
+    else if (bankAction.dataset.bankAction === 'edit') startEditingQuestion(bankSelectedId);
     else if (bankAction.dataset.bankAction === 'delete') deleteQuestionFromBank(bankSelectedId);
     else if (bankAction.dataset.bankAction === 'retry') loadQuestionBank();
     else if (bankAction.dataset.bankAction === 'clear-filters') {
@@ -721,6 +797,8 @@ $('main').addEventListener('click', e => {
       else if (Number(questionDraft.correctAnswer) > removedIndex) questionDraft.correctAnswer = String(Number(questionDraft.correctAnswer) - 1);
       clearQuestionFeedback();
       renderQuestionForm($('main'), { field: 'option', index: Math.max(0, removedIndex - 1) });
+    } else if (action === 'cancel-edit') {
+      cancelQuestionEdit();
     }
     return;
   }

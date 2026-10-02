@@ -100,6 +100,7 @@ Endpoints disponíveis:
 - `GET /api/questions`: retorna a lista completa.
 - `GET /api/questions/:id`: retorna uma questão ou HTTP 404.
 - `POST /api/questions`: valida e adiciona uma questão, retornando HTTP 201. O servidor gera o ID `personal-NNN`; não envie `id`.
+- `PUT /api/questions/:id`: valida e atualiza os campos da questão sem alterar o ID; responde HTTP 404 se não existir.
 - `DELETE /api/questions/:id`: exclui a questão e retorna seu ID; responde HTTP 404 se não existir.
 
 Exemplo de questão para criação (o campo `correct_answer` pode ser a letra da alternativa ou seu texto):
@@ -120,6 +121,8 @@ Teste os endpoints no PowerShell enquanto o servidor estiver em execução:
 ```powershell
 Invoke-RestMethod http://localhost:3000/api/questions
 Invoke-RestMethod http://localhost:3000/api/questions/personal-001
+$body = @{ source = 'Personal'; tag = 'Conceitos de nuvem'; question = 'Enunciado atualizado?'; options = @('Alternativa A', 'Alternativa B'); correct_answer = 'A'; explanation = '' } | ConvertTo-Json
+Invoke-RestMethod -Method Put -Uri http://localhost:3000/api/questions/personal-001 -ContentType 'application/json' -Body $body
 Invoke-RestMethod -Method Delete -Uri http://localhost:3000/api/questions/personal-001
 $body = @{ source = 'Personal'; tag = 'Conceitos de nuvem'; question = 'Exemplo de pergunta?'; options = @('Alternativa A', 'Alternativa B'); correct_answer = 'A'; explanation = 'A alternativa A está correta.' } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/questions -ContentType 'application/json' -Body $body

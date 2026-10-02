@@ -146,4 +146,20 @@ function deleteQuestion(id) {
   return operation;
 }
 
-module.exports = { readQuestions, writeQuestions, getQuestionById, addQuestion, deleteQuestion };
+function updateQuestion(id, question) {
+  const operation = writeQueue.then(async () => {
+    const questions = await readQuestions();
+    const index = questions.findIndex(existing => existing && existing.id === id);
+    if (index === -1) return null;
+
+    const updated = { id: questions[index].id, ...question };
+    questions[index] = updated;
+    await writeQuestions(questions);
+    return updated;
+  });
+
+  writeQueue = operation.catch(() => {});
+  return operation;
+}
+
+module.exports = { readQuestions, writeQuestions, getQuestionById, addQuestion, deleteQuestion, updateQuestion };
