@@ -1246,5 +1246,156 @@
     "correct_answer": "Amazon Augmented AI.",
     "explanation": "Amazon A2I é o painel de verificação humana para análises imprecisas."
   },
-  { "id": "personal-089", "source": "Personal", "tag": "Cobrança e preços", "question": "Por que a AWS é mais econômica do que os data centers tradicionais para aplicações com cargas de trabalho de computação variáveis?", "options": [ "Os custos do Amazon Elastic Compute Cloud (Amazon EC2) são cobrados mensalmente.", "Os usuários retêm acesso total administrativo a suas instâncias do Amazon EC2.", "As instâncias do Amazon EC2 podem ser lançadas sob demanda quando necessário.", "Os usuários podem executar de forma permanente instâncias suficientes para gerenciar cargas de trabalho de pico." ], "correct_answer": "As instâncias do Amazon EC2 podem ser lançadas sob demanda quando necessário.", "explanation": "A AWS permite provisionar recursos de computação sob demanda, evitando a necessidade de manter capacidade permanente para lidar com picos de utilização. Em um data center tradicional, seria necessário adquirir e manter infraestrutura suficiente para atender à demanda máxima, mesmo quando os recursos permanecem ociosos." }, { "id": "personal-090", "source": "Personal", "tag": "Segurança e conformidade", "question": "Qual dos seguintes é de responsabilidade da AWS conforme o modelo de responsabilidade compartilhada AWS?", "options": [ "Configurar aplicações de terceiros", "Fazer manutenção de hardware físico", "Proteger acesso e dados da aplicação", "Gerenciar as Amazon Machine Images (AMIs) customizadas" ], "correct_answer": "Fazer manutenção de hardware físico.", "explanation": "No modelo de responsabilidade compartilhada, a AWS é responsável pela segurança da nuvem, incluindo a proteção da infraestrutura física, como data centers, hardware, redes e instalações. O cliente é responsável pela segurança dentro da nuvem, incluindo dados, aplicações, configurações e controles de acesso." }, { "id": "personal-091", "source": "Personal", "tag": "Segurança e conformidade", "question": "Onde um usuário pode encontrar informações sobre ações proibidas na infraestrutura da AWS?", "options": [ "AWS Trusted Advisor", "AWS Identity and Access Management (IAM)", "AWS Billing Console", "Política de uso aceitável AWS" ], "correct_answer": "Política de uso aceitável AWS", "explanation": "A Política de uso aceitável da AWS descreve atividades e comportamentos proibidos ao utilizar os serviços da AWS. O AWS Trusted Advisor fornece recomendações de boas práticas, o IAM gerencia identidades e permissões, e o Billing Console é usado para informações de cobrança." }, { "id": "personal-092", "source": "Personal", "tag": "Segurança e conformidade", "question": "Como um administrador do sistema incluiria uma camada adicional de segurança de login em um AWS Management Console de um usuário?", "options": [ "Usando o AWS Cloud Directory", "Auditando roles do AWS Identity and Access Management (IAM)", "Ativando a autenticação multifactor", "Ativando o AWS CloudTrail" ], "correct_answer": "Ativando a autenticação multifactor.", "explanation": "A autenticação multifator (MFA) adiciona uma camada adicional de segurança ao exigir uma segunda forma de autenticação além da senha. Mesmo que a senha seja comprometida, o invasor ainda precisaria do segundo fator para acessar a conta." }, { "id": "personal-093", "source": "Personal", "tag": "Tecnologia", "question": "Qual componente da infraestrutura global da AWS o Amazon CloudFront usa para garantir a entrega de baixa latência?", "options": [ "Regiões AWS", "Locais de borda (edge locations)", "Zonas de Disponibilidade", "Amazon Virtual Private Cloud (Amazon VPC)" ], "correct_answer": "Locais de borda (edge locations).", "explanation": "O Amazon CloudFront utiliza uma rede global de locais de borda para armazenar em cache e entregar conteúdo mais próximo dos usuários finais. Isso reduz a distância percorrida pelos dados e ajuda a diminuir a latência." }, { "id": "personal-094", "source": "Personal", "tag": "Tecnologia", "question": "Qual serviço de rede AWS permite que uma empresa crie uma rede virtual na AWS?", "options": [ "AWS Config", "Amazon Route 53", "AWS Direct Connect", "Amazon Virtual Private Cloud (Amazon VPC)" ], "correct_answer": "Amazon Virtual Private Cloud (Amazon VPC).", "explanation": "O Amazon VPC permite criar uma rede virtual isolada logicamente dentro da AWS. Nela, é possível configurar sub-redes, tabelas de rotas, gateways e controles de segurança para executar recursos da AWS de forma organizada e segura." }, { "id": "personal-095", "source": "Personal", "tag": "Segurança e conformidade", "question": "Qual serviço pode identificar o usuário que fez a chamada de API quando uma instância do Amazon Elastic Compute Cloud (Amazon EC2) foi encerrada?", "options": [ "Amazon CloudWatch", "AWS CloudTrail", "AWS X-Ray", "AWS Identity and Access Management (AWS IAM)" ], "correct_answer": "AWS CloudTrail.", "explanation": "O AWS CloudTrail registra atividades realizadas por usuários, aplicações e serviços por meio de chamadas de API. Dessa forma, é possível consultar os eventos e identificar quem realizou uma ação, como o encerramento de uma instância do Amazon EC2." }, { "id": "personal-096", "source": "Personal", "tag": "Tecnologia", "question": "Qual oferta da AWS permite que os clientes encontrem, comprem e comecem a usar soluções de software em seu ambiente AWS?", "options": [ "AWS Config", "AWS OpsWorks", "SDK da AWS", "AWS Marketplace" ], "correct_answer": "AWS Marketplace.", "explanation": "O AWS Marketplace é um catálogo digital que permite encontrar, comprar e utilizar soluções de software de terceiros que podem ser executadas no ambiente AWS. Ele oferece soluções de diferentes fornecedores e categorias." }, { "id": "personal-097", "source": "Personal", "tag": "Tecnologia", "question": "Qual serviço da AWS simplificaria a migração de um banco de dados para a AWS?", "options": [ "AWS Storage Gateway", "AWS Database Migration Service (AWS DMS)", "Amazon EC2", "Amazon AppStream 2.0" ], "correct_answer": "AWS Database Migration Service (AWS DMS).", "explanation": "O AWS Database Migration Service (AWS DMS) foi projetado para facilitar a migração de bancos de dados para a AWS. Ele pode ajudar a migrar dados entre diferentes mecanismos de banco de dados e manter o banco de dados de origem em funcionamento durante grande parte do processo de migração." }, { "id": "personal-098", "source": "Personal", "tag": "Tecnologia", "question": "Qual serviço seria usado para enviar alertas com base em alarmes do Amazon CloudWatch?", "options": [ "Amazon Simple Notification Service (Amazon SNS)", "AWS CloudTrail", "AWS Trusted Advisor", "Amazon Route 53" ], "correct_answer": "Amazon Simple Notification Service (Amazon SNS).", "explanation": "O Amazon SNS é um serviço de publicação e assinatura que pode enviar notificações para diferentes destinos. Quando um alarme do Amazon CloudWatch é acionado, ele pode publicar uma mensagem em um tópico do SNS para enviar alertas aos destinatários configurados." }
+  {
+    "id": "personal-089",
+    "source": "Personal",
+    "tag": "Cobrança e preços",
+    "question": "Por que a AWS é mais econômica do que os data centers tradicionais para aplicações com cargas de trabalho de computação variáveis?",
+    "options": [
+      "Os custos do Amazon Elastic Compute Cloud (Amazon EC2) são cobrados mensalmente.",
+      "Os usuários retêm acesso total administrativo a suas instâncias do Amazon EC2.",
+      "As instâncias do Amazon EC2 podem ser lançadas sob demanda quando necessário.",
+      "Os usuários podem executar de forma permanente instâncias suficientes para gerenciar cargas de trabalho de pico."
+    ],
+    "correct_answer": "As instâncias do Amazon EC2 podem ser lançadas sob demanda quando necessário.",
+    "explanation": "A AWS permite provisionar recursos de computação sob demanda, evitando a necessidade de manter capacidade permanente para lidar com picos de utilização. Em um data center tradicional, seria necessário adquirir e manter infraestrutura suficiente para atender à demanda máxima, mesmo quando os recursos permanecem ociosos."
+  },
+  {
+    "id": "personal-090",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual dos seguintes é de responsabilidade da AWS conforme o modelo de responsabilidade compartilhada AWS?",
+    "options": [
+      "Configurar aplicações de terceiros",
+      "Fazer manutenção de hardware físico",
+      "Proteger acesso e dados da aplicação",
+      "Gerenciar as Amazon Machine Images (AMIs) customizadas"
+    ],
+    "correct_answer": "Fazer manutenção de hardware físico.",
+    "explanation": "No modelo de responsabilidade compartilhada, a AWS é responsável pela segurança da nuvem, incluindo a proteção da infraestrutura física, como data centers, hardware, redes e instalações. O cliente é responsável pela segurança dentro da nuvem, incluindo dados, aplicações, configurações e controles de acesso."
+  },
+  {
+    "id": "personal-091",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Onde um usuário pode encontrar informações sobre ações proibidas na infraestrutura da AWS?",
+    "options": [
+      "AWS Trusted Advisor",
+      "AWS Identity and Access Management (IAM)",
+      "AWS Billing Console",
+      "Política de uso aceitável AWS"
+    ],
+    "correct_answer": "Política de uso aceitável AWS",
+    "explanation": "A Política de uso aceitável da AWS descreve atividades e comportamentos proibidos ao utilizar os serviços da AWS. O AWS Trusted Advisor fornece recomendações de boas práticas, o IAM gerencia identidades e permissões, e o Billing Console é usado para informações de cobrança."
+  },
+  {
+    "id": "personal-092",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Como um administrador do sistema incluiria uma camada adicional de segurança de login em um AWS Management Console de um usuário?",
+    "options": [
+      "Usando o AWS Cloud Directory",
+      "Auditando roles do AWS Identity and Access Management (IAM)",
+      "Ativando a autenticação multifactor",
+      "Ativando o AWS CloudTrail"
+    ],
+    "correct_answer": "Ativando a autenticação multifactor.",
+    "explanation": "A autenticação multifator (MFA) adiciona uma camada adicional de segurança ao exigir uma segunda forma de autenticação além da senha. Mesmo que a senha seja comprometida, o invasor ainda precisaria do segundo fator para acessar a conta."
+  },
+  {
+    "id": "personal-093",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual componente da infraestrutura global da AWS o Amazon CloudFront usa para garantir a entrega de baixa latência?",
+    "options": [
+      "Regiões AWS",
+      "Locais de borda (edge locations)",
+      "Zonas de Disponibilidade",
+      "Amazon Virtual Private Cloud (Amazon VPC)"
+    ],
+    "correct_answer": "Locais de borda (edge locations).",
+    "explanation": "O Amazon CloudFront utiliza uma rede global de locais de borda para armazenar em cache e entregar conteúdo mais próximo dos usuários finais. Isso reduz a distância percorrida pelos dados e ajuda a diminuir a latência."
+  },
+  {
+    "id": "personal-094",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço de rede AWS permite que uma empresa crie uma rede virtual na AWS?",
+    "options": [
+      "AWS Config",
+      "Amazon Route 53",
+      "AWS Direct Connect",
+      "Amazon Virtual Private Cloud (Amazon VPC)"
+    ],
+    "correct_answer": "Amazon Virtual Private Cloud (Amazon VPC).",
+    "explanation": "O Amazon VPC permite criar uma rede virtual isolada logicamente dentro da AWS. Nela, é possível configurar sub-redes, tabelas de rotas, gateways e controles de segurança para executar recursos da AWS de forma organizada e segura."
+  },
+  {
+    "id": "personal-095",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Qual serviço pode identificar o usuário que fez a chamada de API quando uma instância do Amazon Elastic Compute Cloud (Amazon EC2) foi encerrada?",
+    "options": [
+      "Amazon CloudWatch",
+      "AWS CloudTrail",
+      "AWS X-Ray",
+      "AWS Identity and Access Management (AWS IAM)"
+    ],
+    "correct_answer": "AWS CloudTrail.",
+    "explanation": "O AWS CloudTrail registra atividades realizadas por usuários, aplicações e serviços por meio de chamadas de API. Dessa forma, é possível consultar os eventos e identificar quem realizou uma ação, como o encerramento de uma instância do Amazon EC2."
+  },
+  {
+    "id": "personal-096",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual oferta da AWS permite que os clientes encontrem, comprem e comecem a usar soluções de software em seu ambiente AWS?",
+    "options": [
+      "AWS Config",
+      "AWS OpsWorks",
+      "SDK da AWS",
+      "AWS Marketplace"
+    ],
+    "correct_answer": "AWS Marketplace.",
+    "explanation": "O AWS Marketplace é um catálogo digital que permite encontrar, comprar e utilizar soluções de software de terceiros que podem ser executadas no ambiente AWS. Ele oferece soluções de diferentes fornecedores e categorias."
+  },
+  {
+    "id": "personal-097",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço da AWS simplificaria a migração de um banco de dados para a AWS?",
+    "options": [
+      "AWS Storage Gateway",
+      "AWS Database Migration Service (AWS DMS)",
+      "Amazon EC2",
+      "Amazon AppStream 2.0"
+    ],
+    "correct_answer": "AWS Database Migration Service (AWS DMS).",
+    "explanation": "O AWS Database Migration Service (AWS DMS) foi projetado para facilitar a migração de bancos de dados para a AWS. Ele pode ajudar a migrar dados entre diferentes mecanismos de banco de dados e manter o banco de dados de origem em funcionamento durante grande parte do processo de migração."
+  },
+  {
+    "id": "personal-098",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Qual serviço seria usado para enviar alertas com base em alarmes do Amazon CloudWatch?",
+    "options": [
+      "Amazon Simple Notification Service (Amazon SNS)",
+      "AWS CloudTrail",
+      "AWS Trusted Advisor",
+      "Amazon Route 53"
+    ],
+    "correct_answer": "Amazon Simple Notification Service (Amazon SNS).",
+    "explanation": "O Amazon SNS é um serviço de publicação e assinatura que pode enviar notificações para diferentes destinos. Quando um alarme do Amazon CloudWatch é acionado, ele pode publicar uma mensagem em um tópico do SNS para enviar alertas aos destinatários configurados."
+  },
+  {
+    "id": "personal-099",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Teste",
+    "options": [
+      "Resposta A",
+      "Resposta B"
+    ],
+    "correct_answer": "A",
+    "explanation": "Testandooooooooooo"
+  }
 ]

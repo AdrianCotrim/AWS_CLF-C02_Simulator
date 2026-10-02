@@ -4,6 +4,14 @@ Ferramenta pessoal e local para praticar questões do exame AWS Certified Cloud 
 
 ## Como executar
 
+No Windows, inicie o backend e o frontend juntos com:
+
+```powershell
+.\start-app.bat
+```
+
+O iniciador reutiliza os servidores deste projeto se já estiverem ativos e abre `http://localhost:8000` no Brave, se instalado. Caso contrário, abre o navegador padrão.
+
 Navegadores bloqueiam `fetch` de arquivos locais quando o `index.html` é aberto com duplo clique (`file://`). Por isso, sirva a pasta com um servidor estático simples:
 
 ```bash
