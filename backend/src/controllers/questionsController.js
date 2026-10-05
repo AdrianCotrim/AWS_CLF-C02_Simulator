@@ -39,10 +39,10 @@ function validateQuestion(body) {
     if (!(field in body)) {
       throw new ApiError(400, 'INVALID_QUESTION', `Campo obrigatório ausente: ${field}.`);
     }
-    if (typeof body[field] !== 'string' && field !== 'options') {
+    if (typeof body[field] !== 'string' && !['options', 'correct_answer'].includes(field)) {
       throw new ApiError(400, 'INVALID_QUESTION', `O campo ${field} deve ser texto.`);
     }
-    if (!['options', 'explanation'].includes(field) && !body[field].trim()) {
+    if (!['options', 'explanation', 'correct_answer'].includes(field) && !body[field].trim()) {
       throw new ApiError(400, 'INVALID_QUESTION', `O campo ${field} não pode estar vazio.`);
     }
   }
@@ -59,20 +59,38 @@ function validateQuestion(body) {
     throw new ApiError(400, 'INVALID_QUESTION', 'As alternativas não podem ser duplicadas.');
   }
 
-  const answer = body.correct_answer.trim();
-  const answerIndex = /^[A-Z]$/i.test(answer) ? answer.toUpperCase().charCodeAt(0) - 65 : -1;
-  const answerIsLetter = answerIndex >= 0 && answerIndex < options.length;
-  const answerText = options.find(option => option.toLocaleLowerCase('pt-BR') === answer.toLocaleLowerCase('pt-BR'));
-  if (!answerIsLetter && !answerText) {
-    throw new ApiError(400, 'INVALID_QUESTION', 'correct_answer deve corresponder à letra ou ao texto de uma alternativa.');
+  const isMultipleAnswer = Array.isArray(body.correct_answer);
+  const submittedAnswers = isMultipleAnswer ? body.correct_answer : [body.correct_answer];
+  if (!submittedAnswers.length || submittedAnswers.length > options.length) {
+    throw new ApiError(400, 'INVALID_QUESTION', 'correct_answer deve conter pelo menos uma resposta e não pode exceder o número de alternativas.');
   }
+
+  const correctAnswers = submittedAnswers.map(answer => {
+    if (typeof answer !== 'string' || !answer.trim()) {
+      throw new ApiError(400, 'INVALID_QUESTION', 'Cada resposta correta deve ser um texto não vazio.');
+    }
+    const normalizedAnswer = answer.trim();
+    const answerIndex = /^[A-Z]$/i.test(normalizedAnswer) ? normalizedAnswer.toUpperCase().charCodeAt(0) - 65 : -1;
+    if (answerIndex >= 0 && answerIndex < options.length) return String.fromCharCode(65 + answerIndex);
+    const optionIndex = options.findIndex(option => option.toLocaleLowerCase('pt-BR') === normalizedAnswer.toLocaleLowerCase('pt-BR'));
+    if (optionIndex >= 0) return String.fromCharCode(65 + optionIndex);
+    throw new ApiError(400, 'INVALID_QUESTION', 'correct_answer deve corresponder à letra ou ao texto de uma alternativa.');
+  });
+  if (new Set(correctAnswers).size !== correctAnswers.length) {
+    throw new ApiError(400, 'INVALID_QUESTION', 'As respostas corretas não podem ser duplicadas.');
+  }
+  const singleAnswer = typeof body.correct_answer === 'string' ? body.correct_answer.trim() : '';
+  const singleAnswerIndex = /^[A-Z]$/i.test(singleAnswer) ? singleAnswer.toUpperCase().charCodeAt(0) - 65 : -1;
+  const singleAnswerText = options.find(option => option.toLocaleLowerCase('pt-BR') === singleAnswer.toLocaleLowerCase('pt-BR'));
 
   return {
     source: body.source.trim(),
     tag: body.tag.trim(),
     question: body.question.trim(),
     options,
-    correct_answer: answerIsLetter ? answer.toUpperCase() : answerText,
+    correct_answer: isMultipleAnswer
+      ? correctAnswers
+      : singleAnswerIndex >= 0 && singleAnswerIndex < options.length ? correctAnswers[0] : singleAnswerText,
     explanation: body.explanation.trim()
   };
 }

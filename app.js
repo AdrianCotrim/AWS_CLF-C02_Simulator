@@ -32,7 +32,8 @@ function createQuestionDraft() {
     tag: QUESTION_TAGS[0],
     question: '',
     options: ['', ''],
-    correctAnswer: '',
+    multipleAnswers: false,
+    correctAnswers: [''],
     explanation: ''
   };
 }
@@ -89,6 +90,7 @@ function normalizeQuestion(raw) {
 
   const q = { ...raw };
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const hasMultipleAnswers = Array.isArray(q.correct_answer) || q.type === 'multiple_choice';
 
   if (Array.isArray(q.options)) {
     q.options = q.options.reduce((acc, opt, index) => {
@@ -126,6 +128,8 @@ function normalizeQuestion(raw) {
   function matchChoice(value) {
     const target = normalizeText(value);
     if (!target) return null;
+    const exactKey = keys.find(key => normalizeText(q.options[key]).toLocaleLowerCase('pt-BR') === target.toLocaleLowerCase('pt-BR'));
+    if (exactKey) return exactKey;
 
     let bestKey = null;
     let bestScore = 0;
@@ -142,18 +146,51 @@ function normalizeQuestion(raw) {
     return bestScore >= 0.35 ? bestKey : null;
   }
 
+  function matchChoices(value) {
+    const target = normalizeText(value).toLocaleLowerCase('pt-BR');
+    const exactKey = keys.find(key => normalizeText(q.options[key]).toLocaleLowerCase('pt-BR') === target);
+    if (exactKey) return [exactKey];
+
+    const matches = [];
+    for (const [keyIndex, key] of keys.entries()) {
+      const optionText = normalizeText(q.options[key]).toLocaleLowerCase('pt-BR');
+      if (!optionText) continue;
+      let start = target.indexOf(optionText);
+      while (start !== -1) {
+        matches.push({ key, keyIndex, start, end: start + optionText.length, length: optionText.length });
+        start = target.indexOf(optionText, start + 1);
+      }
+    }
+
+    if (matches.length) {
+      const selected = [];
+      for (const match of matches.sort((left, right) => right.length - left.length || left.start - right.start)) {
+        if (!selected.some(item => item.key === match.key || (match.start < item.end && match.end > item.start))) {
+          selected.push(match);
+        }
+      }
+      const spans = selected.slice().sort((left, right) => left.start - right.start);
+      const remaining = spans.reduce((parts, match, index) => {
+        const previousEnd = index ? spans[index - 1].end : 0;
+        parts.push(target.slice(previousEnd, match.start));
+        if (index === spans.length - 1) parts.push(target.slice(match.end));
+        return parts;
+      }, []).join(' ');
+      const remainingKey = matchChoice(remaining);
+      if (remainingKey && !selected.some(match => match.key === remainingKey)) {
+        selected.push({ key: remainingKey, keyIndex: keys.indexOf(remainingKey), start: -1, end: -1, length: 0 });
+      }
+      return selected.sort((left, right) => left.keyIndex - right.keyIndex).map(match => match.key);
+    }
+
+    const key = matchChoice(value);
+    return key ? [key] : [];
+  }
+
   if (typeof q.correct_answer === 'string') {
     const rawValue = q.correct_answer.trim();
-    const segments = rawValue.includes(' e ') ? rawValue.split(/\s+e\s+/i) : [rawValue];
-    const resolved = segments
-      .map(segment => {
-        const key = matchChoice(segment);
-        if (key) return key;
-        const direct = normalizeText(segment).toUpperCase();
-        return /^[A-Z]$/.test(direct) ? direct : null;
-      })
-      .filter(Boolean);
-    q.correct_answer = resolved.length ? resolved : (matchChoice(rawValue) ? [matchChoice(rawValue)] : []);
+    const direct = normalizeText(rawValue).toUpperCase();
+    q.correct_answer = /^[A-Z]$/.test(direct) ? [direct] : matchChoices(rawValue);
   } else if (Array.isArray(q.correct_answer)) {
     q.correct_answer = q.correct_answer.map(item => {
       if (typeof item === 'string' && /^[A-Z]$/.test(item.trim().toUpperCase())) return item.trim().toUpperCase();
@@ -163,9 +200,7 @@ function normalizeQuestion(raw) {
     q.correct_answer = [];
   }
 
-  if (q.type !== 'single_choice' && q.type !== 'multiple_choice') {
-    q.type = q.correct_answer.length > 1 ? 'multiple_choice' : 'single_choice';
-  }
+  q.type = hasMultipleAnswers || q.correct_answer.length > 1 ? 'multiple_choice' : 'single_choice';
 
   return q;
 }
@@ -182,6 +217,7 @@ function validate(raw, seen) {
   const c = Array.isArray(q.correct_answer) ? q.correct_answer : [];
   if (!c.length) return 'resposta correta inexistente';
   if (c.some(x => !keys.includes(String(x)))) return 'correct_answer incompatível com as alternativas';
+  if (new Set(c).size !== c.length) return 'respostas corretas duplicadas';
   if (q.type === 'single_choice' && c.length !== 1) return 'single_choice com mais de uma resposta';
   return null;
 }
@@ -316,10 +352,30 @@ function renderQuestionForm(main, focus) {
     <input class="form-control" id="question-option-${index}" data-question-field="option" data-index="${index}"
       type="text" maxlength="500" value="${esc(option)}" placeholder="Digite uma alternativa" required>
   </div>`).join('');
-  const correctAnswers = questionDraft.options.map((option, index) => {
-    const label = option.trim() || `Resposta ${index + 1} (preencha o texto)`;
-    return `<option value="${index}" ${questionDraft.correctAnswer === String(index) ? 'selected' : ''}>${esc(label)}</option>`;
-  }).join('');
+  const correctAnswerFields = questionDraft.multipleAnswers
+    ? questionDraft.correctAnswers.map((answer, answerIndex) => {
+      const selectedElsewhere = new Set(questionDraft.correctAnswers.filter((_, index) => index !== answerIndex));
+      const choices = questionDraft.options.map((option, optionIndex) => {
+        const label = option.trim() || `Resposta ${optionIndex + 1} (preencha o texto)`;
+        const value = String(optionIndex);
+        const unavailable = selectedElsewhere.has(value);
+        return `<option value="${value}" ${answer === value ? 'selected' : ''} ${unavailable ? 'disabled' : ''}>${esc(label)}</option>`;
+      }).join('');
+      return `<div class="option-editor">
+        <div class="option-editor-heading">
+          <label for="correct-answer-${answerIndex}">Resposta correta ${answerIndex + 1}</label>
+          <button type="button" class="remove-option" data-form-action="remove-correct-answer" data-index="${answerIndex}"
+            aria-label="Remover resposta correta ${answerIndex + 1}" title="Remover resposta correta" ${questionDraft.correctAnswers.length <= 1 ? 'disabled' : ''}>X</button>
+        </div>
+        <select class="form-control" id="correct-answer-${answerIndex}" data-question-field="correctAnswer" data-index="${answerIndex}" required>
+          <option value="">Selecione uma resposta</option>${choices}
+        </select>
+      </div>`;
+    }).join('')
+    : questionDraft.options.map((option, index) => {
+      const label = option.trim() || `Resposta ${index + 1} (preencha o texto)`;
+      return `<option value="${index}" ${questionDraft.correctAnswers[0] === String(index) ? 'selected' : ''}>${esc(label)}</option>`;
+    }).join('');
   const feedback = questionFeedback ? `<div id="questionFeedback" class="form-feedback ${questionFeedback.type}"
     role="${questionFeedback.type === 'error' ? 'alert' : 'status'}" aria-live="polite">
     <span>${esc(questionFeedback.message)}</span>${questionFeedback.id ? `<strong>ID: ${esc(questionFeedback.id)}</strong>` : ''}
@@ -344,16 +400,26 @@ function renderQuestionForm(main, focus) {
       <label class="form-field"><span>Question</span>
         <textarea class="form-control question-textarea" data-question-field="question" maxlength="10000" placeholder="Digite o enunciado da questão..." required>${esc(questionDraft.question)}</textarea>
       </label>
+      <label class="question-multichoice-toggle">
+        <input type="checkbox" data-question-field="multipleAnswers" ${questionDraft.multipleAnswers ? 'checked' : ''}>
+        <span class="toggle-track" aria-hidden="true"></span>
+        <span>Tipo de resposta: múltiplas respostas</span>
+      </label>
       <fieldset class="options-fieldset">
         <legend>Options</legend>
         <div class="option-editors">${options}</div>
         <button type="button" data-form-action="add-option" ${questionDraft.options.length >= 26 ? 'disabled title="Limite de 26 alternativas da API"' : ''}>+ Adicionar resposta</button>
       </fieldset>
-      <label class="form-field"><span>Correct Answer</span>
-        <select class="form-control" data-question-field="correctAnswer" required>
-          <option value="">Selecione a resposta correta</option>${correctAnswers}
-        </select>
-      </label>
+      <fieldset class="options-fieldset">
+        <legend>${questionDraft.multipleAnswers ? 'Respostas corretas' : 'Resposta correta'}</legend>
+        <div class="option-editors">${questionDraft.multipleAnswers ? correctAnswerFields : `<label class="form-field">
+          <select class="form-control" data-question-field="correctAnswer" data-index="0" required>
+            <option value="">Selecione a resposta correta</option>${correctAnswerFields}
+          </select>
+        </label>`}</div>
+        ${questionDraft.multipleAnswers ? `<button type="button" data-form-action="add-correct-answer"
+          ${questionDraft.correctAnswers.length >= questionDraft.options.length ? 'disabled title="Cada alternativa pode ser selecionada apenas uma vez"' : ''}>+ Adicionar resposta correta</button>` : ''}
+      </fieldset>
       <label class="form-field"><span>Explanation <span class="optional-label">(opcional)</span></span>
         <textarea class="form-control explanation-textarea" data-question-field="explanation" maxlength="10000" placeholder="Explique por que essa é a resposta correta.">${esc(questionDraft.explanation)}</textarea>
       </label>
@@ -364,6 +430,8 @@ function renderQuestionForm(main, focus) {
   if (focus) {
     const field = focus.field === 'option'
       ? main.querySelector(`[data-question-field="option"][data-index="${focus.index}"]`)
+      : focus.field === 'correctAnswer'
+        ? main.querySelector(`[data-question-field="correctAnswer"][data-index="${focus.index}"]`)
       : main.querySelector(`[data-question-field="${focus.field}"]`);
     if (field) field.focus();
   }
@@ -546,13 +614,16 @@ function startEditingQuestion(id) {
 
   const normalized = normalizeQuestion(question);
   const options = Object.entries(normalized.options);
-  const correctIndex = options.findIndex(([letter]) => normalized.correct_answer.includes(letter));
+  const correctAnswers = normalized.correct_answer.map(answer => options.findIndex(([letter]) => letter === answer))
+    .filter(index => index >= 0)
+    .map(String);
   questionDraft = {
     source: question.source || QUESTION_SOURCES[0],
     tag: question.tag || QUESTION_TAGS[0],
     question: question.question || '',
     options: options.length ? options.map(([, text]) => String(text)) : ['', ''],
-    correctAnswer: correctIndex >= 0 ? String(correctIndex) : '',
+    multipleAnswers: normalized.type === 'multiple_choice',
+    correctAnswers: correctAnswers.length ? correctAnswers : [''],
     explanation: typeof question.explanation === 'string' ? question.explanation : ''
   };
   editingQuestionId = id;
@@ -616,13 +687,16 @@ function cancelQuestionEdit() {
 }
 
 function refreshCorrectAnswerOptions() {
-  const select = $('main').querySelector('[data-question-field="correctAnswer"]');
-  if (!select) return;
-  const selected = questionDraft.correctAnswer;
-  select.innerHTML = `<option value="">Selecione a resposta correta</option>${questionDraft.options.map((option, index) => {
-    const label = option.trim() || `Resposta ${index + 1} (preencha o texto)`;
-    return `<option value="${index}" ${selected === String(index) ? 'selected' : ''}>${esc(label)}</option>`;
-  }).join('')}`;
+  $('main').querySelectorAll('[data-question-field="correctAnswer"]').forEach(select => {
+    const answerIndex = Number(select.dataset.index);
+    const selected = questionDraft.correctAnswers[answerIndex];
+    const selectedElsewhere = new Set(questionDraft.correctAnswers.filter((_, index) => index !== answerIndex));
+    select.innerHTML = `<option value="">Selecione uma resposta</option>${questionDraft.options.map((option, index) => {
+      const label = option.trim() || `Resposta ${index + 1} (preencha o texto)`;
+      const value = String(index);
+      return `<option value="${value}" ${selected === value ? 'selected' : ''} ${selectedElsewhere.has(value) ? 'disabled' : ''}>${esc(label)}</option>`;
+    }).join('')}`;
+  });
 }
 
 function clearQuestionFeedback() {
@@ -640,7 +714,9 @@ function validateQuestionDraft() {
   if (questionDraft.options.some(option => !option.trim())) return 'Preencha todas as alternativas.';
   const normalizedOptions = questionDraft.options.map(option => option.trim().toLocaleLowerCase('pt-BR'));
   if (new Set(normalizedOptions).size !== normalizedOptions.length) return 'As alternativas não podem ser duplicadas.';
-  if (!questionDraft.correctAnswer || !questionDraft.options[Number(questionDraft.correctAnswer)]) return 'Selecione uma resposta correta.';
+  if (!questionDraft.correctAnswers.length) return 'Selecione pelo menos uma resposta correta.';
+  if (questionDraft.correctAnswers.some(answer => answer === '' || !questionDraft.options[Number(answer)])) return 'Selecione todas as respostas corretas.';
+  if (new Set(questionDraft.correctAnswers).size !== questionDraft.correctAnswers.length) return 'As respostas corretas não podem ser duplicadas.';
   return '';
 }
 
@@ -654,13 +730,13 @@ async function submitQuestion(event) {
     return renderQuestionForm($('main'));
   }
 
-  const correctIndex = Number(questionDraft.correctAnswer);
+  const correctAnswers = questionDraft.correctAnswers.map(index => String.fromCharCode(65 + Number(index)));
   const payload = {
     source: questionDraft.source,
     tag: questionDraft.tag,
     question: questionDraft.question.trim(),
     options: questionDraft.options.map(option => option.trim()),
-    correct_answer: String.fromCharCode(65 + correctIndex),
+    correct_answer: questionDraft.multipleAnswers ? correctAnswers : correctAnswers[0],
     explanation: questionDraft.explanation.trim()
   };
 
@@ -731,6 +807,13 @@ $('main').addEventListener('input', e => {
   if (field === 'option') {
     questionDraft.options[Number(e.target.dataset.index)] = e.target.value;
     refreshCorrectAnswerOptions();
+  } else if (field === 'correctAnswer') {
+    questionDraft.correctAnswers[Number(e.target.dataset.index)] = e.target.value;
+    clearQuestionFeedback();
+    renderQuestionForm($('main'));
+    return;
+  } else if (field === 'multipleAnswers') {
+    return;
   } else {
     questionDraft[field] = e.target.value;
   }
@@ -745,8 +828,20 @@ $('main').addEventListener('change', e => {
   }
   const field = e.target.dataset.questionField;
   if (!field || currentView !== 'add') return;
-  questionDraft[field] = e.target.value;
+  if (field === 'multipleAnswers') {
+    if (!e.target.checked && questionDraft.correctAnswers.filter(Boolean).length > 1) {
+      e.target.checked = true;
+      return toast('Remova as respostas corretas extras antes de voltar para resposta única.');
+    }
+    questionDraft.multipleAnswers = e.target.checked;
+    if (!e.target.checked) questionDraft.correctAnswers = [questionDraft.correctAnswers.find(Boolean) || ''];
+  } else if (field === 'correctAnswer') {
+    questionDraft.correctAnswers[Number(e.target.dataset.index)] = e.target.value;
+  } else {
+    questionDraft[field] = e.target.value;
+  }
   clearQuestionFeedback();
+  if (field === 'multipleAnswers' || field === 'correctAnswer') renderQuestionForm($('main'));
 });
 
 $('main').addEventListener('submit', e => {
@@ -793,10 +888,18 @@ $('main').addEventListener('click', e => {
     } else if (action === 'remove-option' && questionDraft.options.length > 2) {
       const removedIndex = Number(formAction.dataset.index);
       questionDraft.options.splice(removedIndex, 1);
-      if (questionDraft.correctAnswer === String(removedIndex)) questionDraft.correctAnswer = '';
-      else if (Number(questionDraft.correctAnswer) > removedIndex) questionDraft.correctAnswer = String(Number(questionDraft.correctAnswer) - 1);
+      questionDraft.correctAnswers = questionDraft.correctAnswers
+        .map(answer => answer === String(removedIndex) ? '' : Number(answer) > removedIndex ? String(Number(answer) - 1) : answer);
       clearQuestionFeedback();
       renderQuestionForm($('main'), { field: 'option', index: Math.max(0, removedIndex - 1) });
+    } else if (action === 'add-correct-answer' && questionDraft.correctAnswers.length < questionDraft.options.length) {
+      questionDraft.correctAnswers.push('');
+      clearQuestionFeedback();
+      renderQuestionForm($('main'), { field: 'correctAnswer', index: questionDraft.correctAnswers.length - 1 });
+    } else if (action === 'remove-correct-answer' && questionDraft.correctAnswers.length > 1) {
+      questionDraft.correctAnswers.splice(Number(formAction.dataset.index), 1);
+      clearQuestionFeedback();
+      renderQuestionForm($('main'));
     } else if (action === 'cancel-edit') {
       cancelQuestionEdit();
     }

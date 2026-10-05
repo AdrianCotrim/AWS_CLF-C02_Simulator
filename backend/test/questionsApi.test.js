@@ -86,7 +86,10 @@ test('POST valida o payload e não aceita ID fornecido pelo cliente', async () =
   const invalidQuestions = [
     { ...validQuestion, id: 'personal-999' },
     { ...validQuestion, options: ['Única alternativa'] },
-    { ...validQuestion, correct_answer: 'Resposta inexistente' }
+    { ...validQuestion, correct_answer: 'Resposta inexistente' },
+    { ...validQuestion, correct_answer: [] },
+    { ...validQuestion, correct_answer: ['A', 'A'] },
+    { ...validQuestion, correct_answer: ['A', 'Z'] }
   ];
 
   for (const question of invalidQuestions) {
@@ -184,4 +187,43 @@ test('PUT atualiza os campos sem alterar o ID e responde 404 para ID inexistente
   const persisted = JSON.parse(await fs.readFile(questionsFile, 'utf8'));
   assert.equal(persisted.find(question => question.id === 'personal-088').question, 'Enunciado atualizado?');
   assert.equal(persisted.some(question => question.id === 'personal-999'), false);
+});
+
+test('POST e PUT preservam respostas múltiplas como array e validam duplicidades', async () => {
+  const multipleQuestion = {
+    ...validQuestion,
+    question: 'Quais são as respostas corretas? (Choose two.)',
+    options: ['Alternativa A', 'Alternativa B', 'Alternativa C', 'Alternativa D', 'Alternativa E'],
+    correct_answer: ['A', 'E']
+  };
+  const createResponse = await fetch(`${baseUrl}/api/questions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(multipleQuestion)
+  });
+  const created = await createResponse.json();
+
+  assert.equal(createResponse.status, 201);
+  assert.deepEqual(created.correct_answer, ['A', 'E']);
+
+  const updateResponse = await fetch(`${baseUrl}/api/questions/${created.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...multipleQuestion, correct_answer: ['B', 'D'] })
+  });
+  const updated = await updateResponse.json();
+  assert.equal(updateResponse.status, 200);
+  assert.deepEqual(updated.correct_answer, ['B', 'D']);
+
+  const oneAnswerArrayResponse = await fetch(`${baseUrl}/api/questions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...multipleQuestion, question: 'Uma resposta em modo múltiplo?', correct_answer: ['C'] })
+  });
+  const oneAnswerArray = await oneAnswerArrayResponse.json();
+  assert.equal(oneAnswerArrayResponse.status, 201);
+  assert.deepEqual(oneAnswerArray.correct_answer, ['C']);
+
+  const persisted = JSON.parse(await fs.readFile(questionsFile, 'utf8'));
+  assert.deepEqual(persisted.find(question => question.id === created.id).correct_answer, ['B', 'D']);
 });

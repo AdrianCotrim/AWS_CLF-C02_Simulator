@@ -56,6 +56,13 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .question-form { display: grid; gap: 18px; }
 .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .form-field { display: grid; gap: 6px; font-weight: 600; }
+.question-multichoice-toggle { display: inline-flex; align-items: center; gap: 10px; width: fit-content; font-weight: 600; cursor: pointer; }
+.question-multichoice-toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.question-multichoice-toggle .toggle-track { position: relative; width: 42px; height: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--line); transition: background .15s, border-color .15s; }
+.question-multichoice-toggle .toggle-track::after { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--card); content: ""; transition: transform .15s; }
+.question-multichoice-toggle input:checked + .toggle-track { border-color: var(--accent); background: var(--accent); }
+.question-multichoice-toggle input:checked + .toggle-track::after { transform: translateX(18px); }
+.question-multichoice-toggle input:focus-visible + .toggle-track { outline: 2px solid var(--accent); outline-offset: 2px; }
 .form-control { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--text); font: inherit; font-weight: 400; }
 .form-control:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .form-field textarea { resize: vertical; }
