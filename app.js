@@ -34,6 +34,7 @@ function createQuestionDraft() {
     options: ['', ''],
     multipleAnswers: false,
     correctAnswers: [''],
+    addToErrorBank: false,
     explanation: ''
   };
 }
@@ -48,13 +49,13 @@ function loadProgress() {
 }
 
 function stats() {
-  const v = Object.entries(P.questionProgress).filter(([id]) => byId[id]);
+  const v = Object.entries(P.questionProgress).filter(([id, progress]) => byId[id] && progress.timesAnswered > 0);
   const answered = v.length, correct = v.filter(([, p]) => p.lastCorrect).length;
   return {
     answered, correct, wrong: answered - correct,
     percent: answered ? Math.round(correct / answered * 1000) / 10 : 0,
     new: Q.length - answered, total: Q.length,
-    errorBank: v.filter(([, p]) => p.inErrorBank).length
+    errorBank: Q.filter(question => P.questionProgress[question.id] && P.questionProgress[question.id].inErrorBank).length
   };
 }
 
@@ -63,8 +64,38 @@ function save() {
   P.statistics = stats();
   P.errorBank = Object.keys(P.questionProgress).filter(id => P.questionProgress[id].inErrorBank);
   P.session = S && S.persist && !S.done ? S : null;
-  try { localStorage.setItem(KEY, JSON.stringify(P)); }
-  catch (e) { toast('Não foi possível salvar o progresso neste navegador.'); }
+  try {
+    localStorage.setItem(KEY, JSON.stringify(P));
+    return true;
+  } catch (e) {
+    toast('Não foi possível salvar o progresso neste navegador.');
+    return false;
+  }
+}
+
+function setErrorBankMembership(id, shouldAdd, notify = true) {
+  if (!byId[id]) return false;
+
+  const previous = P.questionProgress[id];
+  const wasInBank = Boolean(previous && previous.inErrorBank);
+  if (wasInBank === shouldAdd) return true;
+
+  const progress = previous
+    ? { ...previous }
+    : { timesAnswered: 0, timesWrong: 0, inErrorBank: false };
+  progress.inErrorBank = shouldAdd;
+  P.questionProgress[id] = progress;
+  if (save()) {
+    if (notify) toast(shouldAdd ? 'Questão adicionada ao Banco de Erros.' : 'Questão removida do Banco de Erros.');
+    return true;
+  }
+
+  if (previous) P.questionProgress[id] = previous;
+  else delete P.questionProgress[id];
+  P.errorBank = Object.keys(P.questionProgress).filter(questionId => P.questionProgress[questionId].inErrorBank);
+  renderStats();
+  if (notify) toast('Não foi possível atualizar o Banco de Erros neste navegador.');
+  return false;
 }
 
 function record(q, ok) {
@@ -423,6 +454,11 @@ function renderQuestionForm(main, focus) {
       <label class="form-field"><span>Explanation <span class="optional-label">(opcional)</span></span>
         <textarea class="form-control explanation-textarea" data-question-field="explanation" maxlength="10000" placeholder="Explique por que essa é a resposta correta.">${esc(questionDraft.explanation)}</textarea>
       </label>
+      ${editingQuestionId ? '' : `<label class="question-multichoice-toggle error-bank-toggle">
+        <input type="checkbox" data-question-field="addToErrorBank" ${questionDraft.addToErrorBank ? 'checked' : ''}>
+        <span class="toggle-track" aria-hidden="true"></span>
+        <span>Adicionar ao Banco de Erros</span>
+      </label>`}
       <div class="form-submit-row"><button class="primary" type="submit" ${isSubmittingQuestion ? 'disabled' : ''}>${isSubmittingQuestion ? (editingQuestionId ? 'Salvando...' : 'Enviando...') : (editingQuestionId ? 'Salvar alterações' : 'Adicionar questão')}</button></div>
     </form>
   </section>`;
@@ -567,6 +603,7 @@ function renderQuestionBankDetail(main) {
   const correctTexts = options.filter(isCorrect).map(option => `${option.letter}. ${option.text}`);
   const correctAnswer = correctTexts.length ? correctTexts.join(' · ') : question.correct_answer;
   const explanation = typeof question.explanation === 'string' ? question.explanation.trim() : '';
+  const inErrorBank = Boolean(P.questionProgress[question.id] && P.questionProgress[question.id].inErrorBank);
 
   main.innerHTML = `<section class="card bank-detail" aria-labelledby="bank-detail-title">
     <button type="button" class="link bank-back" data-bank-action="back">← Voltar para Banco de Questões</button>
@@ -586,6 +623,10 @@ function renderQuestionBankDetail(main) {
     ${explanation ? `<section class="bank-detail-section"><h3>Explanation</h3><p class="bank-explanation">${esc(explanation)}</p></section>` : ''}
     <div class="bank-detail-actions">
       <button type="button" data-bank-action="edit" ${isDeletingQuestion ? 'disabled' : ''}>Editar questão</button>
+      <span class="error-bank-status ${inErrorBank ? 'in-bank' : ''}" role="status">${inErrorBank ? '✓ No Banco de Erros' : 'Fora do Banco de Erros'}</span>
+      <button type="button" data-bank-action="toggle-error-bank" ${isDeletingQuestion ? 'disabled' : ''}>
+        ${inErrorBank ? 'Remover do Banco de Erros' : 'Adicionar ao Banco de Erros'}
+      </button>
       <button type="button" class="danger" data-bank-action="delete" ${isDeletingQuestion ? 'disabled' : ''}>
         ${isDeletingQuestion ? 'Excluindo...' : 'Excluir questão'}
       </button>
@@ -754,7 +795,9 @@ async function submitQuestion(event) {
       bankQuestions = bankQuestions.map(question => question && question.id === saved.id ? saved : question);
       Q = Q.map(question => question.id === saved.id ? normalized : question);
       byId[saved.id] = normalized;
+      const wasInErrorBank = Boolean(P.questionProgress[saved.id] && P.questionProgress[saved.id].inErrorBank);
       delete P.questionProgress[saved.id];
+      if (wasInErrorBank) P.questionProgress[saved.id] = { timesAnswered: 0, timesWrong: 0, inErrorBank: true };
       if (Array.isArray(P.history)) P.history = P.history.filter(entry => entry.id !== saved.id);
       if (S && S.answers) delete S.answers[saved.id];
       if (S && S.done) S = null;
@@ -773,11 +816,17 @@ async function submitQuestion(event) {
 
     Q.push(normalized);
     byId[normalized.id] = normalized;
+    const shouldAddToErrorBank = questionDraft.addToErrorBank;
+    const addedToErrorBank = !shouldAddToErrorBank || setErrorBankMembership(normalized.id, true, false);
     questionDraft = createQuestionDraft();
-    questionFeedback = { type: 'success', message: 'Questão adicionada com sucesso!', id: saved.id };
+    questionFeedback = addedToErrorBank
+      ? { type: 'success', message: 'Questão adicionada com sucesso!', id: saved.id }
+      : { type: 'error', message: 'A questão foi criada, mas não foi possível adicioná-la ao Banco de Erros. Você pode tentar novamente na visualização da questão.', id: saved.id };
     isSubmittingQuestion = false;
     renderStats();
     renderQuestionForm($('main'), { field: 'question' });
+    if (addedToErrorBank && shouldAddToErrorBank) toast('Questão adicionada ao Banco de Erros.');
+    else if (!addedToErrorBank) toast('A questão foi criada, mas não foi possível adicioná-la ao Banco de Erros.');
   } catch (error) {
     questionFeedback = { type: 'error', message: error.message || `Não foi possível ${editingQuestionId ? 'salvar as alterações' : 'adicionar a questão'}. Verifique os dados e tente novamente.` };
     isSubmittingQuestion = false;
@@ -804,6 +853,7 @@ $('main').addEventListener('input', e => {
   }
   const field = e.target.dataset.questionField;
   if (!field || currentView !== 'add') return;
+  if (field === 'addToErrorBank') return;
   if (field === 'option') {
     questionDraft.options[Number(e.target.dataset.index)] = e.target.value;
     refreshCorrectAnswerOptions();
@@ -835,6 +885,8 @@ $('main').addEventListener('change', e => {
     }
     questionDraft.multipleAnswers = e.target.checked;
     if (!e.target.checked) questionDraft.correctAnswers = [questionDraft.correctAnswers.find(Boolean) || ''];
+  } else if (field === 'addToErrorBank') {
+    questionDraft.addToErrorBank = e.target.checked;
   } else if (field === 'correctAnswer') {
     questionDraft.correctAnswers[Number(e.target.dataset.index)] = e.target.value;
   } else {
@@ -864,6 +916,11 @@ $('main').addEventListener('click', e => {
     else if (bankAction.dataset.bankAction === 'back') returnToQuestionBankList();
     else if (bankAction.dataset.bankAction === 'edit') startEditingQuestion(bankSelectedId);
     else if (bankAction.dataset.bankAction === 'delete') deleteQuestionFromBank(bankSelectedId);
+    else if (bankAction.dataset.bankAction === 'toggle-error-bank') {
+      if (setErrorBankMembership(bankSelectedId, !(P.questionProgress[bankSelectedId] && P.questionProgress[bankSelectedId].inErrorBank))) {
+        renderQuestionBankDetail($('main'));
+      }
+    }
     else if (bankAction.dataset.bankAction === 'retry') loadQuestionBank();
     else if (bankAction.dataset.bankAction === 'clear-filters') {
       bankFilters = { query: '', source: '', tag: '' };

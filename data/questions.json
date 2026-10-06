@@ -1559,5 +1559,370 @@
       "D"
     ],
     "explanation": "Detecting underutilized resources to save costs\n\nAWS Trusted Advisor provides recommendations for optimizing your AWS resources, including identifying underutilized resources. This can help you save costs by eliminating unnecessary or idle resources.\n\nImproving security by proactively monitoring the AWS environment\n\nAWS Trusted Advisor includes security checks that proactively monitor your AWS environment. It provides recommendations to help improve security by identifying potential security vulnerabilities and misconfigurations."
+  },
+  {
+    "id": "personal-111",
+    "source": "Cloudverse",
+    "tag": "Conceitos de nuvem",
+    "question": "The fact that the AWS Cloud is composed of multiple geographic Regions is an example of which concept?",
+    "options": [
+      "Global Infrastructure",
+      "Elasticity",
+      "Pay-as-you-go pricing",
+      "Agility"
+    ],
+    "correct_answer": "A",
+    "explanation": "Explanation (correct):\nAWS Regions, Availability Zones, and edge locations make up the AWS global infrastructure, allowing customers to deploy workloads around the world.\n\nWhy the others are incorrect\n• D. Agility refers to speed of provisioning and innovation, not the geographic structure of AWS.\n• B. Elasticity refers to scaling resources up and down based on demand.\n• C. Pay-as-you-go pricing is a billing model, not the geographic architecture of AWS."
+  },
+  {
+    "id": "personal-112",
+    "source": "Cloudverse",
+    "tag": "Faturamento e definição de preço",
+    "question": "A web server must run on Amazon EC2 for at least one year without interruptions. Which EC2 purchasing option is most cost-effective?",
+    "options": [
+      "Spot Instances",
+      "On-Demand Instances",
+      "Reserved Instances with No Upfront",
+      "Reserved Instances with Partial Upfront"
+    ],
+    "correct_answer": "D",
+    "explanation": "Explanation (correct):\nReserved Instances with a commitment and partial upfront payment provide significant discounts for steady, always-on workloads.\n\nWhy the others are incorrect\n• B. On-Demand offers flexibility but at higher cost for year-long steady usage.\n• A. Spot Instances are interruptible and not suitable for non-disruptable workloads.\n• C. No-upfront Rls offer savings but typically less than partial/full upfront."
+  },
+  {
+    "id": "personal-113",
+    "source": "Cloudverse",
+    "tag": "Segurança e conformidade",
+    "question": "A security engineer needs a single-tenant AWS solution to create, control, and manage cryptographic keys for regulatory requirements. Which service fits?",
+    "options": [
+      "AWS Key Management Service (AWS KMS)",
+      "AWS Certificate Manager (ACM)",
+      "AWS CloudHSM",
+      "AWS Systems Manager"
+    ],
+    "correct_answer": "C",
+    "explanation": "Explanation (correct):\nAWS CloudHSM provides dedicated, single-tenant hardware security modules that you control for key generation and storage.\n\nWhy the others are incorrect\n• A. KMS is a multi-tenant managed service; customer-managed keys are not hosted on dedicated HSMs you control.\n• B. ACM manages certificates, not general key stores under customer control.\n• D. Systems Manager handles operations and automation, not cryptographic key custody."
+  },
+  {
+    "id": "personal-114",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which AWS service provides a managed NoSQL database in the AWS Cloud?",
+    "options": [
+      "Amazon Redshift",
+      "Amazon RDS",
+      "Amazon DynamoDB",
+      "Amazon Aurora"
+    ],
+    "correct_answer": "C",
+    "explanation": "Explanation (correct):\nAmazon DynamoDB is a fully managed NoSQL key-value and document database with seamless scalability.\n\nWhy the others are incorrect\n• D. Aurora is a relational database.\n• B. RDS manages relational engines, not NoSQL.\n• A. Redshift is a columnar data warehouse."
+  },
+  {
+    "id": "personal-115",
+    "source": "Cloudverse",
+    "tag": "Segurança e conformidade",
+    "question": "A company is developing an application that uses multiple AWS services. The application needs temporary, limited-privilege credentials to authenticate to other AWS APIs. Which AWS service or feature should the company use?",
+    "options": [
+      "Amazon API Gateway",
+      "AWS Security Token Service (STS)",
+      "IAM Instance Profiles",
+      "IAM Users"
+    ],
+    "correct_answer": "B",
+    "explanation": "Explanation (correct):\nAWS Security Token Service (STS) is the service that generates temporary, limited-privilege credentials for authenticated users, roles, or applications that need to call AWS APIs securely.\n\nWhy the others are incorrect\n• A. Amazon API Gateway is used to publish and manage APIs, not to create temporary AWS credentials.\n• D. IAM users use long-term credentials, which does not meet the requirement for temporary credentials.\n• C. IAM instance profiles attach roles to EC2 instances, but STS is the service that actually issues the temporary credentials."
+  },
+  {
+    "id": "personal-116",
+    "source": "Cloudverse",
+    "tag": "Segurança e conformidade",
+    "question": "Under the AWS shared responsibility model, which tasks are AWS responsibilities? (Select TWO)",
+    "options": [
+      "Defining user password policies",
+      "Providing physical security for compute resources",
+      "Patching the OS of an Amazon EC2 instance",
+      "Patching AWS networking devices",
+      "Configuring security groups"
+    ],
+    "correct_answer": [
+      "B",
+      "D"
+    ],
+    "explanation": "Explanation (correct):\nAWS is responsible for the security 'of' the cloud, including physical security and maintenance of AWS-managed infrastructure devices.\n\nWhy the others are incorrect\n• A. Customers define IAM policies and password requirements.\n• E. Customers configure their own network controls like security groups.\n• C. OS-level patching on EC2 instances is a customer responsibility."
+  },
+  {
+    "id": "personal-117",
+    "source": "Cloudverse",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which factors affect AWS cloud costs? (Select TWO)",
+    "options": [
+      "Inbound data transfer without acceleration",
+      "The number of Amazon S3 buckets configured",
+      "Outbound data transfer without acceleration",
+      "The number of unused AWS Lambda functions",
+      "Compute resources currently in use"
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": "Explanation (correct):\nOutbound data transfer is billable, and actively consumed compute drives cost; unused functions or bucket count alone do not.\n\nWhy the others are incorrect\n• D. Having unused Lambda functions does not incur compute charges by itself.\n• B. You are not charged per bucket; costs relate to stored data, requests, and transfer.\n• A. Inbound data transfer is typically free for most services."
+  },
+  {
+    "id": "personal-118",
+    "source": "Cloudverse",
+    "tag": "Segurança e conformidade",
+    "question": "Apply AWS Well-Architected security best practices across all accounts in an organization. Which service helps most directly?",
+    "options": [
+      "AWS Secrets Manager",
+      "Amazon Detective",
+      "AWS Control Tower",
+      "Amazon Macie"
+    ],
+    "correct_answer": "C",
+    "explanation": "Explanation (correct):\nAWS Control Tower sets up and governs secure multi-account environments using prescriptive guardrails and blueprints.\n\nWhy the others are incorrect\n• D. Macie classifies S3 data; it is not multi-account governance.\n• B. Detective aids investigations, not governance baselines.\n• A. Secrets Manager manages secrets, not org-wide guardrails."
+  },
+  {
+    "id": "personal-119",
+    "source": "Cloudverse",
+    "tag": "Faturamento e definição de preço",
+    "question": "A solutions architect wants to deploy new infrastructure. Before the company approves the request, the architect needs to provide a cost estimate for the planned resources. Which tool should be used?",
+    "options": [
+      "AWS Cost Explorer",
+      "AWS Budgets",
+      "AWS Pricing Calculator",
+      "AWS Cost and Usage Report"
+    ],
+    "correct_answer": "C",
+    "explanation": "Explanation (correct):\nAWS Pricing Calculator is a planning tool that lets you model AWS architectures and estimate their expected cost before any resources are provisioned.\n\nWhy the others are incorrect\n• A. AWS Cost Explorer analyzes existing and historical cost data, not planned future architectures before deployment.\n• D. AWS Cost and Usage Report provides detailed historical billing data, not pre-deployment estimates.\n• B. AWS Budgets sets spending thresholds and alerts, but it is not the tool for building upfront cost estimates."
+  },
+  {
+    "id": "personal-120",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "Which components are necessary to configure an AWS Site-to-Site VPN connection successfully? (Choose TWO)",
+    "options": [
+      "Virtual Private Gateway (or Transit Gateway)",
+      "NAT Gateway",
+      "Customer Gateway",
+      "Internet Gateway"
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": "Explanation (correct):\nA Site-to-Site VPN requires a customer gateway device on the customer side and an AWS-side VPN endpoint such as a virtual private gateway or a transit gateway.\n\nWhy the others are incorrect\n• D. An internet gateway connects a VPC to the public internet. It does not fit this requirement as well as Customer Gateway / Virtual Private Gateway (or Transit Gateway). \n• B. A NAT gateway allows outbound internet access from private subnets. It does not fit this requirement as well as Customer Gateway / Virtual Private Gateway (or Transit Gateway). \n• E. AWS WAF filters HTTP and HTTPS requests to protect web applications from common web exploits. It does not fit this requirement as well as Customer Gateway / Virtual Private Gateway (or Transit Gateway)."
+  },
+  {
+    "id": "personal-121",
+    "source": "Cloudverse",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which AWS Support plan includes access to a designated Technical Account Manager (TAM), proactive architectural reviews, and 24×7 phone support from senior cloud support engineers?",
+    "options": [
+      "AWS Enterprise Support",
+      "AWS Developer Support",
+      "AWS Business Support",
+      "AWS Basic Support"
+    ],
+    "correct_answer": "A",
+    "explanation": "Explanation (correct):\nAWS Enterprise Support includes a designated Technical Account Manager and higher-touch guidance features that are not included in the lower support plans.\n\nWhy the others are incorrect\n• D. AWS Basic Support provides account and billing assistance, documentation, forums, and limited Trusted Advisor checks. It does not fit this requirement as well as AWS Enterprise Support.\n• B. AWS Developer Support is a legacy support plan aimed at development and testing workloads with business-hours technical guidance. It does not fit this requirement as well as AWS Enterprise Support.\n• C. AWS Business Support is a legacy higher-tier support plan with 24×7 technical support but no designated TAM. It does not fit this requirement as well as AWS Enterprise Support."
+  },
+  {
+    "id": "personal-122",
+    "source": "Cloudverse",
+    "tag": "Segurança e conformidade",
+    "question": "Which AWS service helps identify the user who deleted an Amazon EC2 instance yesterday?",
+    "options": [
+      "Amazon CloudWatch",
+      "AWS Trusted Advisor",
+      "Amazon Inspector",
+      "AWS Cloud Trail"
+    ],
+    "correct_answer": "D",
+    "explanation": "Explanation (correct):\nAWS CloudTrail records account activity and API calls, allowing you to see who performed actions such as terminating an EC2 instance and when.\n\nWhy the others are incorrect\n• A. CloudWatch monitors metrics and logs for performance and operational data, not user identity and API history.\n• B. Trusted Advisor provides best-practice checks and recommendations; it does not log who performed specific API actions.\n• C. Inspector assesses workloads for vulnerabilities and deviations, not API activity attribution."
+  },
+  {
+    "id": "personal-123",
+    "source": "Cloudverse",
+    "tag": "Conceitos de nuvem",
+    "question": "Which description best defines an AWS Region?",
+    "options": [
+      "A collection of databases accessible only from one geography",
+      "A set of data centers spanning multiple countries",
+      "A global view of a user's cloud environment",
+      "A specific geographic area containing multiple, isolated locations for high availability"
+    ],
+    "correct_answer": "D",
+    "explanation": "Explanation (correct):\nAn AWS Region is a geographic area composed of multiple, isolated Availability Zones connected by low-latency networks.\n\nWhy the others are incorrect\n• B. Regions do not span multiple countries by definition.\n• C. This describes account perspective, not a Region construct.\n• A. Regions are not defined as collections of databases."
+  },
+  {
+    "id": "personal-124",
+    "source": "Personal",
+    "tag": "Segurança e conformidade",
+    "question": "Using AWS Cloud Trail best aligns with which AWS design principle?",
+    "options": [
+      "Automatically recover from failure",
+      "Measure efficiency",
+      "Ensure traceability",
+      "Perform operations as code"
+    ],
+    "correct_answer": "C",
+    "explanation": "Explanation (correct):\nCloudTrail records API activity for your account, enabling auditing and traceability of actions.\n\nWhy the others are incorrect\n• A. CloudTrail does not perform recovery; it logs activity for audit.\n• D. Operations as code refers to automation, not logging API calls.\n• B. Measuring efficiency is a performance concern; Cloud Trail focuses on audit."
+  },
+  {
+    "id": "personal-125",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "Which AWS service is designed to orchestrate a workflow across a set of AWS Lambda functions?",
+    "options": [
+      "AWS Step Functions",
+      "AWS Batch",
+      "AWS CodePipeline",
+      "Amazon DynamoDB"
+    ],
+    "correct_answer": "A",
+    "explanation": "Explanation (correct):\nAWS Step Functions coordinates serverless workflows with visual state machines, chaining and branching Lambda executions.\n\nWhy the others are incorrect\n• D. DynamoDB is a database and does not orchestrate workflows.\n• C. CodePipeline orchestrates CI/CD, not general Lambda workflow logic.\n• B. AWS Batch schedules batch jobs, not event-driven Lambda workflows."
+  },
+  {
+    "id": "personal-126",
+    "source": "Examtopics",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which of the following is an advantage that users experience when they move on-premises workloads to the AWS Cloud?",
+    "options": [
+      "Elimination of expenses for running and maintaining data centers",
+      "Price discounts that are identical to discounts from hardware providers",
+      "Distribution of all operational controls to AWS",
+      "Elimination of operational expenses"
+    ],
+    "correct_answer": "A",
+    "explanation": "AWS removes the need for companies to invest in and maintain physical infrastructure."
+  },
+  {
+    "id": "personal-127",
+    "source": "Examtopics",
+    "tag": "Conceitos de nuvem",
+    "question": "A company wants to manage deployed IT services and govern its infrastructure as code (IaC) templates.\nWhich AWS service will meet this requirement?",
+    "options": [
+      "AWS Resource Explorer",
+      "AWS Service Catalog",
+      "AWS Organizations",
+      "AWS Systems Manager"
+    ],
+    "correct_answer": "B",
+    "explanation": "AWS Service Catalog allows organizations to create and manage catalog like VMs and enables them to govern, control and manage I and C template"
+  },
+  {
+    "id": "personal-128",
+    "source": "Examtopics",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which AWS service or tool helps users visualize, understand, and manage spending and usage over time?",
+    "options": [
+      "AWS Organizations",
+      "AWS Pricing Calculator",
+      "AWS Cost Explorer",
+      "AWS Service Catalog"
+    ],
+    "correct_answer": "C",
+    "explanation": "AWS Cost Explorer has an easy-to-use interface that lets you visualize, understand, and manage your AWS costs and usage over time. Get started quickly by creating custom reports that analyze cost and usage data. Analyze your data at a high level (for example, total costs and usage across all accounts), or dive deeper into your cost and usage data to identify trends, pinpoint cost drivers, and detect anomalies."
+  },
+  {
+    "id": "personal-129",
+    "source": "Examtopics",
+    "tag": "Tecnologia",
+    "question": "A company is using a central data platform to manage multiple types of data for its customers. The company wants to use AWS services to discover, transform, and visualize the data.\nWhich combination of AWS services should the company use to meet these requirements? (Choose two.)",
+    "options": [
+      "AWS Glue",
+      "Amazon Elastic File System (Amazon EFS)",
+      "Amazon Redshift",
+      "Amazon QuickSight",
+      "Amazon Quantum Ledger Database (Amazon QLDB)"
+    ],
+    "correct_answer": [
+      "A",
+      "D"
+    ],
+    "explanation": "AWS Glue is a serverless data integration service that makes it easier to discover, prepare, move, and integrate data from multiple sources for analytics, machine learning (ML), and application development.\nhttps://aws.amazon.com/glue/\n\nAmazon QuickSight powers data-driven organizations with unified business intelligence (BI) at hyperscale. With QuickSight, all users can meet varying analytic needs from the same source of truth through modern interactive dashboards, paginated reports, embedded analytics, and natural language queries."
+  },
+  {
+    "id": "personal-130",
+    "source": "Examtopics",
+    "tag": "Conceitos de nuvem",
+    "question": "A global company wants to migrate its third-party applications to the AWS Cloud. The company wants help from a global team of experts to complete the migration faster and more reliably in accordance with AWS internal best practices.\nWhich AWS service or resource will meet these requirements?",
+    "options": [
+      "AWS Support",
+      "AWS Professional Services",
+      "AWS Launch Wizard",
+      "AWS Managed Services (AMS)"
+    ],
+    "correct_answer": "B",
+    "explanation": "AWS Professional Services is the AWS consulting arm that provides expert guidance and assistance to help organizations plan, migrate, and optimize their workloads on AWS. AWS Professional Services consists of a global team of experts who have deep experience with AWS services and can help ensure a faster and more reliable migration in accordance with AWS best practices."
+  },
+  {
+    "id": "personal-131",
+    "source": "Examtopics",
+    "tag": "Tecnologia",
+    "question": "An e-learning platform needs to run an application for 2 months each year. The application will be deployed on Amazon EC2 instances. Any application downtime during those 2 months must be avoided.\nWhich EC2 purchasing option will meet these requirements MOST cost-effectively?",
+    "options": [
+      "Reserved Instances",
+      "Dedicated Hosts",
+      "Spot Instances",
+      "On-Demand Instances"
+    ],
+    "correct_answer": "D",
+    "explanation": "The most cost-effective EC2 purchasing option for a workload that requires zero downtime but runs only for 2 months each year is Reserved Instances (A). While On-Demand Instances provide high flexibility, purchasing 1-year or 3-year standard Reserved Instances offers significant discounts—up to 72% over on-demand prices—that still outweigh the costs of paying for unused months in this scenario."
+  },
+  {
+    "id": "personal-132",
+    "source": "Examtopics",
+    "tag": "Conceitos de nuvem",
+    "question": "A developer wants to deploy an application quickly on AWS without manually creating the required resources.\nWhich AWS service will meet these requirements?",
+    "options": [
+      "Amazon EC2",
+      "AWS Elastic Beanstalk",
+      "AWS CodeBuild",
+      "Amazon Personalize"
+    ],
+    "correct_answer": "B",
+    "explanation": "AWS Elastic Beanstalk is a Platform as a Service (PaaS) that allows developers to deploy applications quickly without manually provisioning and managing the underlying infrastructure. It automatically handles resource provisioning, scaling, load balancing, and monitoring."
+  },
+  {
+    "id": "personal-133",
+    "source": "Examtopics",
+    "tag": "Tecnologia",
+    "question": "A company is storing sensitive customer data in an Amazon S3 bucket. The company wants to protect the data from accidental deletion or overwriting.\nWhich S3 feature should the company use to meet these requirements?",
+    "options": [
+      "S3 Lifecycle rules",
+      "S3 Versioning",
+      "S3 bucket policies",
+      "S3 server-side encryption"
+    ],
+    "correct_answer": "B",
+    "explanation": "S3 Versioning is a feature that protects data in an S3 bucket from accidental deletion or overwriting by keeping multiple versions of each object. When enabled, you can preserve, retrieve, and restore every version of an object stored in your bucket, ensuring that previous versions of an object remain intact even if it is deleted or overwritten."
+  },
+  {
+    "id": "personal-134",
+    "source": "Examtopics",
+    "tag": "Conceitos de nuvem",
+    "question": "Which AWS service provides the ability to manage infrastructure as code?",
+    "options": [
+      "AWS CodePipeline",
+      "AWS CodeDeploy",
+      "AWS Direct Connect",
+      "AWS CloudFormation"
+    ],
+    "correct_answer": "D",
+    "explanation": "AWS CloudFormation allows you to manage and provision AWS resources as infrastructure as code (IaC). It uses templates to define the resources and configurations needed for your applications, enabling automated deployment and management of infrastructure."
+  },
+  {
+    "id": "personal-135",
+    "source": "Examtopics",
+    "tag": "Conceitos de nuvem",
+    "question": "An online gaming company needs to choose a purchasing option to run its Amazon EC2 instances for 1 year. The web traffic is consistent, and any increases in traffic are predictable. The EC2 instances must be online and available without any disruption.\nWhich EC2 instance purchasing option will meet these requirements MOST cost-effectively?",
+    "options": [
+      "On-Demand Instances",
+      "Reserved Instances",
+      "Spot Instances",
+      "Spot Fleet"
+    ],
+    "correct_answer": "B",
+    "explanation": "Reserved Instances are the most cost-effective purchasing option for workloads with predictable, steady usage patterns (like the online gaming company's consistent and predictable traffic). By committing to a one-year term, the company can save up to 75% compared to On-Demand pricing."
   }
 ]

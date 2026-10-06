@@ -30,7 +30,9 @@ Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servid
 
 ## Como adicionar questões
 
-Para editar o banco manualmente, inclua um objeto em `data/questions.json`. Também é possível cadastrar pela tela **Adicionar questão**: o formulário envia a questão à API, que gera o ID e grava no mesmo arquivo. A questão criada é incluída no simulador sem recarregar a página.
+Para editar o banco manualmente, inclua um objeto em `data/questions.json`. Também é possível cadastrar pela tela **Adicionar questão**: o formulário envia a questão à API, que gera o ID e grava no mesmo arquivo. A questão criada é incluída no simulador sem recarregar a página. No cadastro, marque **Adicionar ao Banco de Erros** para incluir também a referência da nova questão.
+
+Na visualização de uma questão em **Banco de Questões**, use **Adicionar ao Banco de Erros** ou **Remover do Banco de Erros** para alterar essa marcação a qualquer momento. O Banco de Erros continua sendo salvo no progresso do navegador, em `questionProgress`, e referencia as questões pelo ID; os dados da questão não são copiados. Excluir uma questão pela interface também remove seu progresso e sua referência ao Banco de Erros.
 
 ```json
 {

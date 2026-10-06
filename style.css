@@ -63,6 +63,7 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .question-multichoice-toggle input:checked + .toggle-track { border-color: var(--accent); background: var(--accent); }
 .question-multichoice-toggle input:checked + .toggle-track::after { transform: translateX(18px); }
 .question-multichoice-toggle input:focus-visible + .toggle-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+.error-bank-toggle { margin-top: 2px; }
 .form-control { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); color: var(--text); font: inherit; font-weight: 400; }
 .form-control:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .form-field textarea { resize: vertical; }
@@ -108,7 +109,9 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .bank-option-letter { font-weight: 700; }
 .bank-option-list li strong { color: var(--ok); font-size: .85rem; }
 .bank-correct-answer { margin: 0; font-weight: 700; color: var(--ok); overflow-wrap: anywhere; }
-.bank-detail-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
+.bank-detail-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.error-bank-status { margin-right: auto; color: var(--muted); font-size: .9rem; }
+.error-bank-status.in-bank { color: var(--ok); font-weight: 600; }
 footer { padding-bottom: 32px; display: flex; gap: 16px; flex-wrap: wrap; }
 #toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 6px; max-width: 90vw; }
 @media (max-width: 520px) {
