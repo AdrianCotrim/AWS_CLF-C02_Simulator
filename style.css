@@ -82,6 +82,13 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .form-feedback.success { background: var(--ok-bg); color: var(--ok); }
 .form-feedback.error { background: var(--bad-bg); color: var(--bad); }
 .form-feedback.pending { background: var(--warn-bg); }
+.duplicate-warning { padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--warn-bg); }
+.duplicate-warning h3 { margin: 0 0 10px; font-size: 1rem; }
+.duplicate-warning ol { display: grid; gap: 12px; margin: 0; padding-left: 22px; }
+.duplicate-warning li { padding-left: 4px; }
+.duplicate-warning li p { margin: 0 0 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.duplicate-warning .duplicate-meta { color: var(--muted); font-size: .9rem; }
+.duplicate-warning .actions { margin-top: 14px; }
 .question-bank { display: grid; gap: 16px; }
 .bank-heading h2 { margin: 0; font-size: 1.15rem; }
 .bank-filters { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(2, minmax(150px, 1fr)); gap: 12px; align-items: end; }

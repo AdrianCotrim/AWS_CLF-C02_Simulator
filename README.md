@@ -32,6 +32,8 @@ Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servid
 
 Para editar o banco manualmente, inclua um objeto em `data/questions.json`. Também é possível cadastrar pela tela **Adicionar questão**: o formulário envia a questão à API, que gera o ID e grava no mesmo arquivo. A questão criada é incluída no simulador sem recarregar a página. No cadastro, marque **Adicionar ao Banco de Erros** para incluir também a referência da nova questão.
 
+Ao salvar uma nova questão, o app compara o enunciado com os registros existentes após normalizar espaços, quebras de linha, HTML e maiúsculas/minúsculas. Se encontrar correspondências, permite cancelar, visualizar cada questão encontrada ou confirmar **Cadastrar mesmo assim**. A verificação ocorre apenas no envio e não altera o texto salvo.
+
 Na visualização de uma questão em **Banco de Questões**, use **Adicionar ao Banco de Erros** ou **Remover do Banco de Erros** para alterar essa marcação a qualquer momento. O Banco de Erros continua sendo salvo no progresso do navegador, em `questionProgress`, e referencia as questões pelo ID; os dados da questão não são copiados. Excluir uma questão pela interface também remove seu progresso e sua referência ao Banco de Erros.
 
 ```json

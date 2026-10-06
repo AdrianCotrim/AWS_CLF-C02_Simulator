@@ -15,6 +15,7 @@ let currentView = 'simulator';
 let questionDraft = createQuestionDraft();
 let questionFeedback = null;
 let isSubmittingQuestion = false;
+let duplicateMatches = null;
 let editingQuestionId = null;
 let bankQuestions = [];
 let bankStatus = 'idle';
@@ -114,6 +115,31 @@ function normalizeText(s) {
     .trim()
     .replace(/[.?!;:]+$/g, '')
     .replace(/\s+/g, ' ');
+}
+
+function normalizeQuestionText(text) {
+  const template = document.createElement('template');
+  const html = String(text ?? '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/(?:address|article|blockquote|div|dl|fieldset|figcaption|figure|footer|form|h[1-6]|header|li|main|nav|ol|p|pre|section|table|tr|ul)\s*>/gi, ' ');
+  template.innerHTML = html;
+  return (template.content.textContent || '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\r\n?/g, '\n')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLocaleLowerCase('pt-BR');
+}
+
+function findDuplicateQuestions(questionText, existingQuestions, ignoredId = null) {
+  const normalizedQuestion = normalizeQuestionText(questionText);
+  if (!normalizedQuestion) return [];
+  return existingQuestions.filter(question =>
+    question &&
+    question.id !== ignoredId &&
+    typeof question.question === 'string' &&
+    normalizeQuestionText(question.question) === normalizedQuestion
+  );
 }
 
 function normalizeQuestion(raw) {
@@ -411,6 +437,20 @@ function renderQuestionForm(main, focus) {
     role="${questionFeedback.type === 'error' ? 'alert' : 'status'}" aria-live="polite">
     <span>${esc(questionFeedback.message)}</span>${questionFeedback.id ? `<strong>ID: ${esc(questionFeedback.id)}</strong>` : ''}
   </div>` : '';
+  const duplicateWarning = duplicateMatches ? `<section id="duplicateWarning" class="duplicate-warning" role="alert" aria-labelledby="duplicate-warning-title">
+    <h3 id="duplicate-warning-title">⚠️ ${duplicateMatches.length === 1
+      ? 'Esta questão parece já existir no banco.'
+      : `Foram encontradas ${duplicateMatches.length} questões com o mesmo enunciado.`}</h3>
+    <ol>${duplicateMatches.map(question => `<li>
+      <p>${esc((question.question || '').slice(0, 240))}${question.question && question.question.length > 240 ? '…' : ''}</p>
+      <p class="duplicate-meta">Source: ${esc(question.source || 'Não informada')} · ID: ${esc(question.id)}</p>
+      <button type="button" data-form-action="view-duplicate" data-question-id="${esc(question.id)}">Ver questão</button>
+    </li>`).join('')}</ol>
+    <div class="actions">
+      <button type="button" data-form-action="cancel-duplicate">Cancelar</button>
+      <button type="button" class="primary" data-form-action="continue-duplicate">Cadastrar mesmo assim</button>
+    </div>
+  </section>` : '';
 
   main.innerHTML = `<section class="card question-form-card" aria-labelledby="question-form-title">
     <div class="form-heading">
@@ -419,6 +459,7 @@ function renderQuestionForm(main, focus) {
       <button type="button" data-form-action="${editingQuestionId ? 'cancel-edit' : 'return'}">${editingQuestionId ? 'Cancelar edição' : 'Voltar ao simulador'}</button>
     </div>
     ${feedback}
+    ${duplicateWarning}
     <form id="questionForm" class="question-form" novalidate>
       <div class="form-row">
         <label class="form-field"><span>Source</span>
@@ -742,8 +783,11 @@ function refreshCorrectAnswerOptions() {
 
 function clearQuestionFeedback() {
   questionFeedback = null;
+  duplicateMatches = null;
   const feedback = $('questionFeedback');
   if (feedback) feedback.remove();
+  const duplicateWarning = $('duplicateWarning');
+  if (duplicateWarning) duplicateWarning.remove();
 }
 
 function validateQuestionDraft() {
@@ -761,8 +805,8 @@ function validateQuestionDraft() {
   return '';
 }
 
-async function submitQuestion(event) {
-  event.preventDefault();
+async function submitQuestion(event, allowDuplicate = false) {
+  if (event) event.preventDefault();
   if (isSubmittingQuestion) return;
 
   const validationMessage = validateQuestionDraft();
@@ -771,6 +815,7 @@ async function submitQuestion(event) {
     return renderQuestionForm($('main'));
   }
 
+  duplicateMatches = null;
   const correctAnswers = questionDraft.correctAnswers.map(index => String.fromCharCode(65 + Number(index)));
   const payload = {
     source: questionDraft.source,
@@ -782,11 +827,22 @@ async function submitQuestion(event) {
   };
 
   isSubmittingQuestion = true;
-  questionFeedback = { type: 'pending', message: editingQuestionId ? 'Salvando alterações...' : 'Enviando questão...' };
+  questionFeedback = { type: 'pending', message: editingQuestionId ? 'Salvando alterações...' : 'Verificando possíveis duplicatas...' };
   renderQuestionForm($('main'));
 
   try {
     const wasEditing = Boolean(editingQuestionId);
+    if (!wasEditing && !allowDuplicate) {
+      const existingQuestions = await window.QuestionsApi.getQuestions();
+      duplicateMatches = findDuplicateQuestions(payload.question, existingQuestions);
+      if (duplicateMatches.length) {
+        questionFeedback = null;
+        isSubmittingQuestion = false;
+        renderQuestionForm($('main'));
+        return;
+      }
+    }
+
     const saved = wasEditing
       ? await window.QuestionsApi.updateQuestion(editingQuestionId, payload)
       : await window.QuestionsApi.createQuestion(payload);
@@ -804,6 +860,7 @@ async function submitQuestion(event) {
       else if (S && S.ids[S.idx] === saved.id) sel = [];
       bankSelectedId = saved.id;
       editingQuestionId = null;
+      duplicateMatches = null;
       currentView = 'bank';
       bankDeleteError = '';
       isSubmittingQuestion = false;
@@ -819,6 +876,7 @@ async function submitQuestion(event) {
     const shouldAddToErrorBank = questionDraft.addToErrorBank;
     const addedToErrorBank = !shouldAddToErrorBank || setErrorBankMembership(normalized.id, true, false);
     questionDraft = createQuestionDraft();
+    duplicateMatches = null;
     questionFeedback = addedToErrorBank
       ? { type: 'success', message: 'Questão adicionada com sucesso!', id: saved.id }
       : { type: 'error', message: 'A questão foi criada, mas não foi possível adicioná-la ao Banco de Erros. Você pode tentar novamente na visualização da questão.', id: saved.id };
@@ -959,6 +1017,23 @@ $('main').addEventListener('click', e => {
       renderQuestionForm($('main'));
     } else if (action === 'cancel-edit') {
       cancelQuestionEdit();
+    } else if (action === 'cancel-duplicate') {
+      duplicateMatches = null;
+      renderQuestionForm($('main'));
+      $('main').querySelector('[data-question-field="question"]').focus();
+    } else if (action === 'continue-duplicate') {
+      submitQuestion(null, true);
+    } else if (action === 'view-duplicate') {
+      const duplicateId = formAction.dataset.questionId;
+      if (duplicateMatches && duplicateMatches.some(question => question.id === duplicateId)) {
+        bankQuestions = duplicateMatches;
+        bankStatus = 'ready';
+        bankSelectedId = duplicateId;
+        duplicateMatches = null;
+        currentView = 'bank';
+        render();
+        window.scrollTo(0, 0);
+      }
     }
     return;
   }
