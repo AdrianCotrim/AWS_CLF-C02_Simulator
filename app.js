@@ -26,6 +26,8 @@ let bankRequestVersion = 0;
 let bankFilters = { query: '', source: '', tag: '' };
 let bankDeleteError = '';
 let isDeletingQuestion = false;
+let statisticsPeriod = '7';
+let statisticsSort = { topics: 'lowest', sources: 'name' };
 
 function createQuestionDraft() {
   return {
@@ -101,12 +103,22 @@ function setErrorBankMembership(id, shouldAdd, notify = true) {
 
 function record(q, ok) {
   const p = P.questionProgress[q.id] || (P.questionProgress[q.id] = { timesAnswered: 0, timesWrong: 0, inErrorBank: false });
+  const wasInErrorBank = Boolean(p.inErrorBank);
   p.timesAnswered++;
   p.lastAnswered = new Date().toISOString().slice(0, 10);
   p.lastCorrect = ok;
   if (!ok) { p.timesWrong++; p.inErrorBank = true; }
   else if (S.mode === 'errors') p.inErrorBank = false; // acertou na revisão: sai do banco
-  P.history.push({ id: q.id, ok, mode: S.mode, date: new Date().toISOString() });
+  P.history.push({
+    id: q.id,
+    ok,
+    mode: S.mode,
+    date: new Date().toISOString(),
+    tag: q.tag || '',
+    source: q.source || '',
+    wasInErrorBank,
+    ...(S.mode === 'exam' && S.sessionId ? { sessionId: S.sessionId } : {})
+  });
 }
 
 /* ---------- Carregamento e validação ---------- */
@@ -321,6 +333,10 @@ function shuffle(a) {
   return a;
 }
 
+function createExamSessionId() {
+  return `exam-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 function start(mode) {
   if (S && S.persist && !S.done && !confirm('Há um simulado em andamento. Descartá-lo e iniciar outra sessão?')) return;
   const pq = P.questionProgress;
@@ -330,7 +346,10 @@ function start(mode) {
   if (!pool.length) { toast(mode === 'new' ? 'Você já respondeu todas as questões.' : mode === 'errors' ? 'Seu Banco de Erros está vazio.' : 'Sem questões.'); return; }
   let ids = shuffle(pool.map(q => q.id));
   if (mode === 'exam') ids = ids.slice(0, Math.max(1, Math.min(parseInt($('examCount').value, 10) || 60, ids.length)));
-  S = { mode, ids, idx: 0, answers: {}, persist: mode === 'exam', done: false };
+  S = {
+    mode, ids, idx: 0, answers: {}, persist: mode === 'exam', done: false,
+    ...(mode === 'exam' ? { sessionId: createExamSessionId() } : {})
+  };
   save(); render();
 }
 
@@ -349,6 +368,7 @@ function renderStats() {
 function render() {
   renderStats();
   const m = $('main');
+  if (currentView === 'statistics') return renderStatistics(m);
   if (currentView === 'bank') return renderQuestionBank(m);
   if (currentView === 'add') return renderQuestionForm(m);
   if (!S) { m.innerHTML = '<p class="muted">Escolha um modo acima para começar.</p>'; return; }
@@ -386,6 +406,246 @@ function render() {
       ${a && a.ok ? `<button data-act="guess" ${inBank ? 'disabled' : ''}>Acertei por chute</button>` : ''}
       <button data-act="quit">Encerrar sessão</button>
     </div></div>`;
+}
+
+function percentage(correct, total) {
+  return total ? correct / total * 100 : null;
+}
+
+function formatPercentage(value) {
+  return value === null ? '—' : `${value.toFixed(1).replace('.', ',')}%`;
+}
+
+function responseHistory() {
+  return (Array.isArray(P.history) ? P.history : [])
+    .filter(entry => entry && typeof entry.id === 'string' && typeof entry.ok === 'boolean');
+}
+
+function dateKey(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function formatDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'Data indisponível' : date.toLocaleDateString('pt-BR');
+}
+
+function getStatisticsData() {
+  const responses = responseHistory();
+  const answered = responses.length;
+  const correct = responses.filter(entry => entry.ok).length;
+  const errorBankQuestions = Q.filter(question =>
+    P.questionProgress[question.id] && P.questionProgress[question.id].inErrorBank
+  );
+  const recoveredIds = new Set(responses
+    .filter(entry => entry.ok && entry.mode === 'errors' && entry.wasInErrorBank)
+    .map(entry => entry.id));
+  const topics = new Map();
+  const sources = new Map();
+  const daily = new Map();
+
+  function addGroup(groups, name, isCorrect) {
+    const groupName = name || 'Não informado';
+    const group = groups.get(groupName) || { name: groupName, answered: 0, correct: 0, errors: 0 };
+    group.answered++;
+    if (isCorrect) group.correct++;
+    else group.errors++;
+    groups.set(groupName, group);
+  }
+
+  for (const entry of responses) {
+    const question = byId[entry.id];
+    addGroup(topics, entry.tag || (question && question.tag), entry.ok);
+    addGroup(sources, entry.source || (question && question.source), entry.ok);
+
+    const key = dateKey(entry.date);
+    if (key) {
+      const day = daily.get(key) || { date: key, answered: 0, correct: 0 };
+      day.answered++;
+      if (entry.ok) day.correct++;
+      daily.set(key, day);
+    }
+  }
+
+  const errorTopics = new Map();
+  for (const question of errorBankQuestions) {
+    const tag = question.tag || 'Não informado';
+    errorTopics.set(tag, (errorTopics.get(tag) || 0) + 1);
+  }
+
+  const examAnswers = new Map();
+  const completedExams = new Map();
+  for (const entry of Array.isArray(P.history) ? P.history : []) {
+    if (!entry || typeof entry.sessionId !== 'string') continue;
+    if (entry.type === 'exam-completed') {
+      completedExams.set(entry.sessionId, entry.date);
+    } else if (entry.mode === 'exam' && typeof entry.id === 'string' && typeof entry.ok === 'boolean') {
+      const answers = examAnswers.get(entry.sessionId) || [];
+      answers.push(entry);
+      examAnswers.set(entry.sessionId, answers);
+    }
+  }
+
+  const exams = [...completedExams.entries()]
+    .map(([sessionId, completedAt]) => {
+      const answers = examAnswers.get(sessionId) || [];
+      const examCorrect = answers.filter(entry => entry.ok).length;
+      return {
+        sessionId,
+        date: completedAt,
+        answered: answers.length,
+        correct: examCorrect,
+        errors: answers.length - examCorrect,
+        percentage: percentage(examCorrect, answers.length)
+      };
+    })
+    .filter(exam => exam.answered > 0)
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .map((exam, index) => ({ ...exam, number: index + 1 }));
+
+  return {
+    answered,
+    correct,
+    errors: answered - correct,
+    unique: new Set(responses.map(entry => entry.id)).size,
+    percentage: percentage(correct, answered),
+    errorBankQuestions,
+    recoveredIds,
+    recoveryPercentage: percentage(recoveredIds.size, recoveredIds.size + errorBankQuestions.length),
+    topics: [...topics.values()],
+    sources: [...sources.values()],
+    errorTopics: [...errorTopics.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
+    daily: [...daily.values()].sort((a, b) => a.date.localeCompare(b.date)),
+    exams
+  };
+}
+
+function renderLineChart(points, label) {
+  if (!points.length) return '<p class="muted statistics-empty">Ainda não há respostas suficientes para gerar este gráfico.</p>';
+  const left = 42, right = 700, top = 20, bottom = 190;
+  const coords = points.map((point, index) => {
+    const x = points.length === 1 ? (left + right) / 2 : left + (right - left) * index / (points.length - 1);
+    const y = bottom - (point.percentage || 0) / 100 * (bottom - top);
+    return { x, y, point };
+  });
+  const line = coords.map(({ x, y }) => `${x},${y}`).join(' ');
+  const labels = coords.map(({ x, point }, index) =>
+    index === 0 || index === coords.length - 1 || index % Math.ceil(coords.length / 6) === 0
+      ? `<text x="${x}" y="218" text-anchor="middle">${esc(point.label)}</text>` : ''
+  ).join('');
+  return `<div class="statistics-chart"><svg viewBox="0 0 720 240" role="img" aria-label="${esc(label)}">
+    <line x1="${left}" y1="${top}" x2="${left}" y2="${bottom}" class="chart-axis"/>
+    <line x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}" class="chart-axis"/>
+    <line x1="${left}" y1="${top + (bottom - top) / 2}" x2="${right}" y2="${top + (bottom - top) / 2}" class="chart-grid"/>
+    <text x="4" y="${top + 4}">100%</text><text x="12" y="${(top + bottom) / 2 + 4}">50%</text><text x="26" y="${bottom + 4}">0%</text>
+    <polyline points="${line}" class="chart-line"/>
+    ${coords.map(({ x, y, point }) => `<circle cx="${x}" cy="${y}" r="4" class="chart-point"><title>${esc(point.label)}: ${formatPercentage(point.percentage)}</title></circle>`).join('')}
+    ${labels}
+  </svg></div>`;
+}
+
+function renderStatistics(main) {
+  const data = getStatisticsData();
+  const today = new Date();
+  let daily = data.daily;
+  if (statisticsPeriod !== 'all') {
+    const days = Number(statisticsPeriod);
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() - days + 1);
+    const cutoff = dateKey(firstDay);
+    daily = daily.filter(day => day.date >= cutoff);
+  }
+  const dailyPoints = daily.map(day => ({
+    label: day.date.slice(8) + '/' + day.date.slice(5, 7),
+    percentage: percentage(day.correct, day.answered)
+  }));
+  const topicRows = data.topics.slice();
+  if (statisticsSort.topics === 'highest') topicRows.sort((a, b) => percentage(b.correct, b.answered) - percentage(a.correct, a.answered));
+  else if (statisticsSort.topics === 'errors') topicRows.sort((a, b) => b.errors - a.errors);
+  else topicRows.sort((a, b) => percentage(a.correct, a.answered) - percentage(b.correct, b.answered));
+  const sourceRows = data.sources.slice();
+  if (statisticsSort.sources === 'accuracy') sourceRows.sort((a, b) => percentage(b.correct, b.answered) - percentage(a.correct, a.answered));
+  else sourceRows.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  const table = (rows, type) => rows.length ? `<div class="statistics-table-wrap"><table class="statistics-table">
+    <thead><tr><th>${type === 'topics' ? 'Tópico' : 'Source'}</th><th>Respondidas</th><th>Acertos</th><th>Erros</th><th>Aproveitamento</th></tr></thead>
+    <tbody>${rows.map(row => `<tr><th scope="row">${esc(row.name)}</th><td>${row.answered}</td><td>${row.correct}</td>
+      <td>${row.errors}</td><td>${formatPercentage(percentage(row.correct, row.answered))}</td></tr>`).join('')}</tbody>
+  </table></div>` : '<p class="muted statistics-empty">Ainda não há respostas suficientes para gerar esta estatística.</p>';
+
+  main.innerHTML = `<section class="statistics-page" aria-labelledby="statistics-title">
+    <h2 id="statistics-title">Estatísticas</h2>
+    <div class="statistics-summary">
+      <article class="card statistics-metric"><span>Respostas registradas</span><strong>${data.answered}</strong></article>
+      <article class="card statistics-metric"><span>Acertos</span><strong>${data.correct}</strong></article>
+      <article class="card statistics-metric"><span>Erros</span><strong>${data.errors}</strong></article>
+      <article class="card statistics-metric"><span>Taxa de acerto</span><strong>${formatPercentage(data.percentage)}</strong></article>
+      <article class="card statistics-metric"><span>Questões únicas respondidas</span><strong>${data.unique}</strong></article>
+    </div>
+    ${data.answered ? '' : '<p class="banner warn statistics-notice">Responda algumas questões para começar a visualizar seu desempenho.</p>'}
+    <section class="card statistics-section" aria-labelledby="daily-statistics-title">
+      <div class="statistics-section-heading"><h3 id="daily-statistics-title">Evolução da taxa de acerto</h3>
+        <label class="statistics-filter">Período
+          <select class="form-control" data-stat-filter="period">
+            <option value="7" ${statisticsPeriod === '7' ? 'selected' : ''}>Últimos 7 dias</option>
+            <option value="30" ${statisticsPeriod === '30' ? 'selected' : ''}>Últimos 30 dias</option>
+            <option value="all" ${statisticsPeriod === 'all' ? 'selected' : ''}>Todo o período</option>
+          </select>
+        </label>
+      </div>
+      ${renderLineChart(dailyPoints, 'Taxa de acerto por dia')}
+    </section>
+    <div class="statistics-columns">
+      <section class="card statistics-section" aria-labelledby="topic-statistics-title">
+        <div class="statistics-section-heading"><h3 id="topic-statistics-title">Desempenho por tópico</h3>
+          <label class="statistics-filter">Ordenar
+            <select class="form-control" data-stat-filter="topics">
+              <option value="lowest" ${statisticsSort.topics === 'lowest' ? 'selected' : ''}>Menor taxa de acerto</option>
+              <option value="highest" ${statisticsSort.topics === 'highest' ? 'selected' : ''}>Maior taxa de acerto</option>
+              <option value="errors" ${statisticsSort.topics === 'errors' ? 'selected' : ''}>Maior quantidade de erros</option>
+            </select>
+          </label>
+        </div>
+        ${table(topicRows, 'topics')}
+      </section>
+      <section class="card statistics-section" aria-labelledby="source-statistics-title">
+        <div class="statistics-section-heading"><h3 id="source-statistics-title">Desempenho por source</h3>
+          <label class="statistics-filter">Ordenar
+            <select class="form-control" data-stat-filter="sources">
+              <option value="name" ${statisticsSort.sources === 'name' ? 'selected' : ''}>Nome</option>
+              <option value="accuracy" ${statisticsSort.sources === 'accuracy' ? 'selected' : ''}>Maior taxa de acerto</option>
+            </select>
+          </label>
+        </div>
+        ${table(sourceRows, 'sources')}
+      </section>
+    </div>
+    <section class="card statistics-section" aria-labelledby="error-statistics-title">
+      <h3 id="error-statistics-title">Banco de Erros</h3>
+      <div class="statistics-summary error-statistics-summary">
+        <article class="statistics-metric"><span>No banco atualmente</span><strong>${data.errorBankQuestions.length}</strong></article>
+        <article class="statistics-metric"><span>Questões recuperadas</span><strong>${data.recoveredIds.size}</strong></article>
+        <article class="statistics-metric"><span>Pendentes</span><strong>${data.errorBankQuestions.length}</strong></article>
+        <article class="statistics-metric"><span>Taxa de recuperação</span><strong>${formatPercentage(data.recoveryPercentage)}</strong></article>
+      </div>
+      ${data.errorTopics.length ? `<h4>Tópicos com mais questões no Banco de Erros</h4><ul class="error-topic-list">
+        ${data.errorTopics.map(topic => `<li><span>${esc(topic.name)}</span><strong>${topic.count}</strong></li>`).join('')}
+      </ul>` : '<p class="muted statistics-empty">O Banco de Erros está vazio.</p>'}
+    </section>
+    <section class="card statistics-section" aria-labelledby="exam-statistics-title">
+      <h3 id="exam-statistics-title">Simulados</h3>
+      ${data.exams.length ? `<div class="statistics-columns exam-statistics">
+        <div><h4>Evolução do desempenho</h4>${renderLineChart(data.exams.map(exam => ({
+          label: `#${exam.number}`, percentage: exam.percentage
+        })), 'Taxa de acerto por simulado')}</div>
+        <div class="statistics-table-wrap"><table class="statistics-table">
+          <thead><tr><th>Simulado</th><th>Data</th><th>Questões</th><th>Acertos</th><th>Erros</th><th>Aproveitamento</th></tr></thead>
+          <tbody>${data.exams.slice().reverse().map(exam => `<tr><th scope="row">#${exam.number}</th><td>${formatDate(exam.date)}</td>
+            <td>${exam.answered}</td><td>${exam.correct}</td><td>${exam.errors}</td><td>${formatPercentage(exam.percentage)}</td></tr>`).join('')}</tbody>
+        </table></div>
+      </div>` : '<p class="muted statistics-empty">O histórico de simulados passa a ser registrado a partir desta versão. Conclua um simulado para visualizar o desempenho aqui.</p>'}
+    </section>
+  </section>`;
 }
 
 function renderQuestionForm(main, focus) {
@@ -854,7 +1114,6 @@ async function submitQuestion(event, allowDuplicate = false) {
       const wasInErrorBank = Boolean(P.questionProgress[saved.id] && P.questionProgress[saved.id].inErrorBank);
       delete P.questionProgress[saved.id];
       if (wasInErrorBank) P.questionProgress[saved.id] = { timesAnswered: 0, timesWrong: 0, inErrorBank: true };
-      if (Array.isArray(P.history)) P.history = P.history.filter(entry => entry.id !== saved.id);
       if (S && S.answers) delete S.answers[saved.id];
       if (S && S.done) S = null;
       else if (S && S.ids[S.idx] === saved.id) sel = [];
@@ -933,6 +1192,15 @@ $('main').addEventListener('change', e => {
     bankFilters[e.target.dataset.bankFilter] = e.target.value;
     renderQuestionBankResults($('bankResults'));
     return;
+  }
+  const statisticsFilter = e.target.dataset.statFilter;
+  if (statisticsFilter === 'period') {
+    statisticsPeriod = e.target.value;
+    return renderStatistics($('main'));
+  }
+  if (statisticsFilter === 'topics' || statisticsFilter === 'sources') {
+    statisticsSort[statisticsFilter] = e.target.value;
+    return renderStatistics($('main'));
   }
   const field = e.target.dataset.questionField;
   if (!field || currentView !== 'add') return;
@@ -1053,7 +1321,13 @@ $('main').addEventListener('click', e => {
     S.answers[q.id] = { sel: sel.slice(), ok };
     record(q, ok); save(); render();
   } else if (act === 'next') {
-    if (S.idx < S.ids.length - 1) S.idx++; else S.done = true;
+    if (S.idx < S.ids.length - 1) S.idx++;
+    else {
+      S.done = true;
+      if (S.mode === 'exam' && S.sessionId) {
+        P.history.push({ type: 'exam-completed', sessionId: S.sessionId, date: new Date().toISOString() });
+      }
+    }
     save(); render();
   } else if (act === 'prev') {
     S.idx--; save(); render();
@@ -1073,6 +1347,9 @@ document.querySelector('nav').addEventListener('click', e => {
     loadQuestionBank();
   } else if (button.dataset.view === 'add') {
     currentView = 'add';
+    render();
+  } else if (button.dataset.view === 'statistics') {
+    currentView = 'statistics';
     render();
   } else if (button.dataset.mode && Q.length) {
     currentView = 'simulator';

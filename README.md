@@ -36,6 +36,10 @@ Ao salvar uma nova questão, o app compara o enunciado com os registros existent
 
 Na visualização de uma questão em **Banco de Questões**, use **Adicionar ao Banco de Erros** ou **Remover do Banco de Erros** para alterar essa marcação a qualquer momento. O Banco de Erros continua sendo salvo no progresso do navegador, em `questionProgress`, e referencia as questões pelo ID; os dados da questão não são copiados. Excluir uma questão pela interface também remove seu progresso e sua referência ao Banco de Erros.
 
+## Estatísticas
+
+A seção **Estatísticas** calcula respostas, acertos, erros, questões únicas, evolução diária, tópicos e sources a partir de `history`. Novas respostas guardam data, tópico e source no próprio registro; respostas antigas sem esses campos usam os dados atuais da questão quando ela ainda existe. O histórico de simulados e a recuperação de questões no Banco de Erros são contabilizados a partir dos registros com informação suficiente, sem inferir sessões completas retroativamente.
+
 ```json
 {
   "id": "personal-001",
