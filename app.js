@@ -598,7 +598,7 @@ function renderStatistics(main) {
     <div class="statistics-columns">
       <section class="card statistics-section" aria-labelledby="topic-statistics-title">
         <div class="statistics-section-heading"><h3 id="topic-statistics-title">Desempenho por tópico</h3>
-          <label class="statistics-filter">Ordenar
+          <label class="statistics-filter topic-statistics-filter">Ordenar
             <select class="form-control" data-stat-filter="topics">
               <option value="lowest" ${statisticsSort.topics === 'lowest' ? 'selected' : ''}>Menor taxa de acerto</option>
               <option value="highest" ${statisticsSort.topics === 'highest' ? 'selected' : ''}>Maior taxa de acerto</option>
