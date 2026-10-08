@@ -29,6 +29,7 @@ nav button[data-view="add"] { margin-left: auto; }
 main { padding-top: 16px; padding-bottom: 16px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 20px; }
 .meta { color: var(--muted); font-size: .9rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.exam-timer { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
 .progress { height: 4px; background: var(--line); border-radius: 2px; margin: 8px 0 16px; }
 .progress div { height: 100%; background: var(--accent); border-radius: 2px; }
 .qtext { font-size: 1.1rem; white-space: pre-wrap; margin: 0 0 8px; }

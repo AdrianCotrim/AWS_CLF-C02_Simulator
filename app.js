@@ -7,8 +7,9 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 let Q = [];          // questões válidas (somente leitura)
 let byId = {};
 let P = loadProgress();   // progresso (LocalStorage)
-let S = null;        // sessão atual: { mode, ids, idx, answers, persist, done }
+let S = null;        // sessão atual: { mode, ids, idx, answers, persist, done, startedAt, elapsedMs }
 let sel = [];        // seleção atual na tela
+let examTimerInterval = null;
 const QUESTION_SOURCES = ['Personal', 'Cloudverse', 'Examtopics'];
 const QUESTION_TAGS = ['Conceitos de nuvem', 'Segurança e conformidade', 'Tecnologia', 'Faturamento e definição de preço'];
 let currentView = 'simulator';
@@ -337,6 +338,40 @@ function createExamSessionId() {
   return `exam-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function formatDuration(milliseconds) {
+  const totalSeconds = Math.floor(Math.max(0, milliseconds) / 1000);
+  const seconds = totalSeconds % 60;
+  const minutes = Math.floor(totalSeconds / 60) % 60;
+  const hours = Math.floor(totalSeconds / 3600);
+  const pad = value => String(value).padStart(2, '0');
+  return hours
+    ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+    : `${pad(Math.floor(totalSeconds / 60))}:${pad(seconds)}`;
+}
+
+function getExamElapsedMs(session, now = Date.now()) {
+  if (Number.isFinite(session.elapsedMs)) return session.elapsedMs;
+  return Math.max(0, now - session.startedAt);
+}
+
+function syncExamTimer() {
+  if (!S || S.mode !== 'exam' || S.done) {
+    if (examTimerInterval !== null) {
+      clearInterval(examTimerInterval);
+      examTimerInterval = null;
+    }
+    return;
+  }
+
+  if (!Number.isFinite(S.startedAt)) S.startedAt = Date.now();
+  const updateDisplay = () => {
+    const timer = $('examTimer');
+    if (timer) timer.textContent = formatDuration(getExamElapsedMs(S));
+  };
+  updateDisplay();
+  if (examTimerInterval === null) examTimerInterval = setInterval(updateDisplay, 1000);
+}
+
 function start(mode) {
   if (S && S.persist && !S.done && !confirm('Há um simulado em andamento. Descartá-lo e iniciar outra sessão?')) return;
   const pq = P.questionProgress;
@@ -348,7 +383,7 @@ function start(mode) {
   if (mode === 'exam') ids = ids.slice(0, Math.max(1, Math.min(parseInt($('examCount').value, 10) || 60, ids.length)));
   S = {
     mode, ids, idx: 0, answers: {}, persist: mode === 'exam', done: false,
-    ...(mode === 'exam' ? { sessionId: createExamSessionId() } : {})
+    ...(mode === 'exam' ? { sessionId: createExamSessionId(), startedAt: Date.now() } : {})
   };
   save(); render();
 }
@@ -366,6 +401,7 @@ function renderStats() {
 }
 
 function render() {
+  syncExamTimer();
   renderStats();
   const m = $('main');
   if (currentView === 'statistics') return renderStatistics(m);
@@ -394,7 +430,9 @@ function render() {
   }
   const inBank = P.questionProgress[q.id] && P.questionProgress[q.id].inErrorBank;
   m.innerHTML = `<div class="card">
-    <div class="meta"><span>Modo: ${MODES[S.mode]}</span><span>Questão ${S.idx + 1} / ${S.ids.length}</span></div>
+    <div class="meta"><span>Modo: ${MODES[S.mode]}</span><span>Questão ${S.idx + 1} / ${S.ids.length}</span>
+      ${S.mode === 'exam' ? `<span class="exam-timer" aria-label="Tempo decorrido">⏱ <time id="examTimer">${formatDuration(getExamElapsedMs(S))}</time></span>` : ''}
+    </div>
     <div class="progress"><div style="width:${(S.idx + (a ? 1 : 0)) / S.ids.length * 100}%"></div></div>
     <p class="qtext">${esc(q.question)}</p>
     ${multi ? `<p class="hint">Múltiplas respostas: selecione ${q.correct_answer.length}.</p>` : ''}
@@ -480,7 +518,7 @@ function getStatisticsData() {
   for (const entry of Array.isArray(P.history) ? P.history : []) {
     if (!entry || typeof entry.sessionId !== 'string') continue;
     if (entry.type === 'exam-completed') {
-      completedExams.set(entry.sessionId, entry.date);
+      completedExams.set(entry.sessionId, entry);
     } else if (entry.mode === 'exam' && typeof entry.id === 'string' && typeof entry.ok === 'boolean') {
       const answers = examAnswers.get(entry.sessionId) || [];
       answers.push(entry);
@@ -489,12 +527,13 @@ function getStatisticsData() {
   }
 
   const exams = [...completedExams.entries()]
-    .map(([sessionId, completedAt]) => {
+    .map(([sessionId, completion]) => {
       const answers = examAnswers.get(sessionId) || [];
       const examCorrect = answers.filter(entry => entry.ok).length;
       return {
         sessionId,
-        date: completedAt,
+        date: completion.date,
+        durationMs: Number.isFinite(completion.elapsedMs) ? completion.elapsedMs : null,
         answered: answers.length,
         correct: examCorrect,
         errors: answers.length - examCorrect,
@@ -639,9 +678,10 @@ function renderStatistics(main) {
           label: `#${exam.number}`, percentage: exam.percentage
         })), 'Taxa de acerto por simulado')}</div>
         <div class="statistics-table-wrap"><table class="statistics-table">
-          <thead><tr><th>Simulado</th><th>Data</th><th>Questões</th><th>Acertos</th><th>Erros</th><th>Aproveitamento</th></tr></thead>
+          <thead><tr><th>Simulado</th><th>Data</th><th>Questões</th><th>Acertos</th><th>Erros</th><th>Aproveitamento</th><th>Tempo</th></tr></thead>
           <tbody>${data.exams.slice().reverse().map(exam => `<tr><th scope="row">#${exam.number}</th><td>${formatDate(exam.date)}</td>
-            <td>${exam.answered}</td><td>${exam.correct}</td><td>${exam.errors}</td><td>${formatPercentage(exam.percentage)}</td></tr>`).join('')}</tbody>
+            <td>${exam.answered}</td><td>${exam.correct}</td><td>${exam.errors}</td><td>${formatPercentage(exam.percentage)}</td>
+            <td>${exam.durationMs === null ? '—' : formatDuration(exam.durationMs)}</td></tr>`).join('')}</tbody>
         </table></div>
       </div>` : '<p class="muted statistics-empty">O histórico de simulados passa a ser registrado a partir desta versão. Conclua um simulado para visualizar o desempenho aqui.</p>'}
     </section>
@@ -1167,6 +1207,7 @@ function renderResult(m) {
   const wrong = S.ids.filter(id => !(S.answers[id] && S.answers[id].ok));
   m.innerHTML = `<div class="card"><h2>Resultado — ${MODES[S.mode]}</h2>
     <p><b>${right} / ${n}</b> acertos (${String(Math.round(right / n * 1000) / 10).replace('.', ',')}%)</p>
+    ${S.mode === 'exam' && Number.isFinite(S.elapsedMs) ? `<p><b>Tempo:</b> ${formatDuration(S.elapsedMs)}</p>` : ''}
     ${wrong.length ? `<p>Questões erradas:</p><ol class="wrong-list">${wrong.map(id => `<li>${esc(byId[id].question.slice(0, 140))}</li>`).join('')}</ol>`
       : '<p>Nenhum erro. Ótimo!</p>'}
     <div class="actions"><button class="primary" data-act="quit">Voltar ao início</button></div></div>`;
@@ -1337,7 +1378,13 @@ $('main').addEventListener('click', e => {
     else {
       S.done = true;
       if (S.mode === 'exam' && S.sessionId) {
-        P.history.push({ type: 'exam-completed', sessionId: S.sessionId, date: new Date().toISOString() });
+        S.elapsedMs = getExamElapsedMs(S);
+        P.history.push({
+          type: 'exam-completed',
+          sessionId: S.sessionId,
+          date: new Date().toISOString(),
+          elapsedMs: S.elapsedMs
+        });
       }
     }
     save(); render();
