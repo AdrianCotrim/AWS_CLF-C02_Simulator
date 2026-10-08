@@ -139,7 +139,7 @@ Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/questions -Content
 
 Para executar os testes automatizados da API, rode `npm test` dentro de `backend/`.
 
-No simulador, **Banco de Questões** carrega a lista atual pela API e permite pesquisar por texto, Source e Tag, além de abrir os detalhes de cada questão. Ao entrar na área, os dados são atualizados do backend.
+No simulador, **Banco de Questões** carrega a lista atual pela API e permite pesquisar por texto, Source e Tag, filtrar questões dentro ou fora do **Banco de Erros**, além de abrir os detalhes de cada questão. Ao entrar na área, os dados são atualizados do backend.
 
 O POST altera o arquivo JSON persistente. Dados inválidos retornam HTTP 400 em JSON; erros de leitura, escrita ou arquivo corrompido retornam HTTP 500. CORS permite origens locais em `localhost` e `127.0.0.1` durante o desenvolvimento.
 

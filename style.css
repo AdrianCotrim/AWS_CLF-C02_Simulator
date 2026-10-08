@@ -123,7 +123,7 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .exam-statistics { align-items: start; }
 .question-bank { display: grid; gap: 16px; }
 .bank-heading h2 { margin: 0; font-size: 1.15rem; }
-.bank-filters { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(2, minmax(150px, 1fr)); gap: 12px; align-items: end; }
+.bank-filters { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(150px, 1fr)); gap: 12px; align-items: end; }
 .bank-results-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 12px; }
 .bank-results-heading p { margin: 0; color: var(--muted); font-size: .92rem; }
 .bank-list { display: grid; gap: 10px; }

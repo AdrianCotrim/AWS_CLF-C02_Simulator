@@ -23,7 +23,7 @@ let bankError = '';
 let bankSelectedId = null;
 let bankListScrollY = 0;
 let bankRequestVersion = 0;
-let bankFilters = { query: '', source: '', tag: '' };
+let bankFilters = { query: '', source: '', tag: '', errorBank: '' };
 let bankDeleteError = '';
 let isDeletingQuestion = false;
 let statisticsPeriod = '7';
@@ -812,6 +812,10 @@ function getFilteredBankQuestions() {
   return bankQuestions.filter(question => {
     if (bankFilters.source && question.source !== bankFilters.source) return false;
     if (!questionMatchesTag(question, bankFilters.tag)) return false;
+    const progress = P.questionProgress[question.id];
+    const inErrorBank = Boolean(progress && progress.inErrorBank);
+    if (bankFilters.errorBank === 'in' && !inErrorBank) return false;
+    if (bankFilters.errorBank === 'out' && inErrorBank) return false;
     if (!search) return true;
     const searchableText = [
       question.id,
@@ -843,6 +847,13 @@ function renderQuestionBank(main) {
       <label class="form-field"><span>Tag</span>
         <select class="form-control" data-bank-filter="tag">
           <option value="">Todas</option>${tagOptions.map(tag => `<option value="${esc(tag)}" ${bankFilters.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}
+        </select>
+      </label>
+      <label class="form-field"><span>Banco de erros</span>
+        <select class="form-control" data-bank-filter="errorBank">
+          <option value="" ${bankFilters.errorBank === '' ? 'selected' : ''}>Todas</option>
+          <option value="in" ${bankFilters.errorBank === 'in' ? 'selected' : ''}>Apenas no banco de erros</option>
+          <option value="out" ${bankFilters.errorBank === 'out' ? 'selected' : ''}>Fora do banco de erros</option>
         </select>
       </label>
     </div>
@@ -1249,10 +1260,11 @@ $('main').addEventListener('click', e => {
     }
     else if (bankAction.dataset.bankAction === 'retry') loadQuestionBank();
     else if (bankAction.dataset.bankAction === 'clear-filters') {
-      bankFilters = { query: '', source: '', tag: '' };
+      bankFilters = { query: '', source: '', tag: '', errorBank: '' };
       $('main').querySelector('[data-bank-filter="query"]').value = '';
       $('main').querySelector('[data-bank-filter="source"]').value = '';
       $('main').querySelector('[data-bank-filter="tag"]').value = '';
+      $('main').querySelector('[data-bank-filter="errorBank"]').value = '';
       renderQuestionBankResults($('bankResults'));
     }
     return;
