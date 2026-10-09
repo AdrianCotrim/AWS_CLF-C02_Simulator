@@ -8312,5 +8312,3052 @@
       "D"
     ],
     "explanation": ""
+  },
+  {
+    "id": "personal-560",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "Which AWS service or feature improves network performance by sending traffic through the AWS worldwide network infrastructure?",
+    "options": [
+      "AWS Transit Gateway",
+      "Route Table",
+      "Amazon VPC",
+      "AWS Global Accelerator"
+    ],
+    "correct_answer": "D",
+    "explanation": "Explanation (correct):\nAWS Global Accelerator improves application availability and performance by routing user traffic through the AWS global network and then to the optimal regional endpoint, reducing latency and internet path variability.\n\nWhy the others are incorrect\n• B. A route table controls traffic routing inside a VPC, not across the AWS global network.\n• A. AWS Transit Gateway connects VPCs and on-premises networks, but it does not provide global traffic acceleration for end users.\n• C. Amazon VPC is a regional networking service and does not itself accelerate traffic over the AWS worldwide infrastructure."
+  },
+  {
+    "id": "personal-561",
+    "source": "Cloudverse",
+    "tag": "Conceitos de nuvem",
+    "question": "Which Well-Architected pillar includes a design principle to measure overall workload efficiency in terms of business value?",
+    "options": [
+      "Security",
+      "Operational Excellence",
+      "Reliability",
+      "Cost Optimization"
+    ],
+    "correct_answer": "B",
+    "explanation": "Explanation (correct):\nOperational Excellence emphasizes measuring business outcomes and using feedback loops to improve processes.\n\nWhy the others are incorrect\n• A. Security focuses on risk management and protection mechanisms.\n• C. Reliability targets fault tolerance and recovery.\n• D. Cost Optimization focuses on spend efficiency, not operational KPIs."
+  },
+  {
+    "id": "personal-562",
+    "source": "Cloudverse",
+    "tag": "Conceitos de nuvem",
+    "question": "Which design principle belongs to the Operational Excellence pillar of the AWS Well-Architected Framework?",
+    "options": [
+      "Ensure performance efficiency",
+      "Optimize costs",
+      "Create annotated documentation",
+      "Anticipate failures"
+    ],
+    "correct_answer": "D",
+    "explanation": "Explanation (correct):\nAnticipate failure is a named design principle of the Operational Excellence pillar. Teams are expected to test failure scenarios, prepare responses, and learn from operational events before incidents happen in production.\n\nWhy the others are incorrect\n• C. Clear documentation helps operations, but it is not one of the named Operational Excellence design principles.\n• A. Performance Efficiency is a separate pillar focused on resource efficiency.\n• B. Cost Optimization is a distinct pillar focusing on spend and efficiency."
+  },
+  {
+    "id": "personal-563",
+    "source": "Cloudverse",
+    "tag": "Segurança e conformidade",
+    "question": "Which actions exemplify excellent security best practices for AWS IAM use? (Choose TWO)",
+    "options": [
+      "Configure a strong IAM password policy.",
+      "Rotate IAM access keys on a regular basis.",
+      "Use IAM access keys to log in to the AWS Management Console.",
+      "Share security credentials among users of AWS accounts who are in the same region."
+    ],
+    "correct_answer": [
+      "A",
+      "B"
+    ],
+    "explanation": "Explanation (correct):\nStrong password policies and regular rotation of long-term IAM access keys are standard IAM security best practices.\n\nWhy the others are incorrect\n• D. AWS credentials should never be shared between users. It does not fit this requirement as well as Configure a strong IAM password policy. / Rotate IAM access keys on a regular basis..\n• C. IAM access keys are for programmatic access, not for console sign-in. It does not fit this requirement as well as Configure a strong IAM password policy. / Rotate IAM access keys on a regular basis..\n• E. IAM roles are the recommended approach for temporary and cross-account access. It does not fit this requirement as well as Configure a strong IAM password policy. / Rotate IAM access keys on a regular basis."
+  },
+  {
+    "id": "personal-564",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "A company has an Amazon S3 bucket with scanned financial invoice images and needs an Al-based app to identify and read total balances. Which AWS service meets this requirement?",
+    "options": [
+      "Amazon Lex",
+      "Amazon Textract",
+      "Amazon Forecast",
+      "Amazon Rekognition"
+    ],
+    "correct_answer": "B",
+    "explanation": "Explanation (correct):\nAmazon Textract extracts text and structured data such as key-value pairs and tables from scanned documents.\n\nWhy the others are incorrect\n• C. Forecast is for time-series forecasting, not document OCR.\n• D. Rekognition specializes in image/video analysis, not document text extraction.\n• A. Lex builds conversational interfaces; it does not read invoices."
+  },
+  {
+    "id": "personal-565",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "A company wants to remove the need to manage underlying servers to run short-running background programs. Which AWS service would enable a serverless architecture for this need?",
+    "options": [
+      "Amazon DynamoDB",
+      "AWS Lambda",
+      "Amazon Elastic Compute Cloud (Amazon EC2)",
+      "AWS CodeCommit"
+    ],
+    "correct_answer": "B",
+    "explanation": "Explanation (correct):\nAWS Lambda is a serverless, event-driven compute service that lets customers run short-lived code without provisioning, scaling, or managing underlying servers.\n\nWhy the others are incorrect\n• C. Amazon EC2 requires provisioning and managing virtual servers.\n• A. Amazon DynamoDB is a database service, not a general code execution service.\n• D. AWS CodeCommit is a source control service."
+  },
+  {
+    "id": "personal-566",
+    "source": "Cloudverse",
+    "tag": "Conceitos de nuvem",
+    "question": "What is the AWS cloud benefit that improves time-to-market?",
+    "options": [
+      "Enhanced backup capabilities",
+      "Increased business agility",
+      "Reduced deployment speed",
+      "Increased application security"
+    ],
+    "correct_answer": "B",
+    "explanation": "Explanation (correct):\nOn-demand provisioning and managed services enable faster iteration and release, increasing business agility.\n\nWhy the others are incorrect\n• C. Cloud accelerates, not slows, deployments.\n• D. Security may improve but is not the primary driver of time-to-market.\n• A. Backups are a benefit but do not directly drive faster launches."
+  },
+  {
+    "id": "personal-567",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "Which of the following is a software development framework that a company can use to define cloud resources as code and provision the resources through AWS CloudFormation?",
+    "options": [
+      "AWS CLI",
+      "AWS CodeStar",
+      "AWS Cloud Development Kit (AWS CDK)",
+      "AWS Developer Center"
+    ],
+    "correct_answer": "C",
+    "explanation": "Explanation (correct):\nAWS CDK is a software development framework that lets developers define cloud infrastructure using languages such as TypeScript, Python, Java, and C#. It synthesizes those definitions into AWS CloudFormation templates for provisioning.\n\nWhy the others are incorrect\n• A. AWS CLI is a command-line management tool, not an infrastructure development framework.\n• D. AWS Developer Center is a learning and discovery resource, not an laC framework.\n• B. AWS CodeStar helps set up development workflows, but it is not the framework used to define CloudFormation resources as code."
+  },
+  {
+    "id": "personal-568",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "Students with low-cost laptops must access a hardware-intensive application. Which AWS service should deliver the application?",
+    "options": [
+      "AWS AppSync",
+      "Amazon AppStream 2.0",
+      "Amazon WorkLink",
+      "AWS Elastic Beanstalk"
+    ],
+    "correct_answer": "B",
+    "explanation": "Explanation (correct):\nAmazon AppStream 2.0 streams desktop applications from AWS to any device with a browser, offloading heavy compute to the cloud.\n\nWhy the others are incorrect\n• A. AppSync provides GraphQL APIs; it does not stream desktop apps.\n• C. WorkLink provided secure access to internal websites; it does not stream apps.\n• D. Elastic Beanstalk deploys web apps and services; it does not stream desktop apps."
+  },
+  {
+    "id": "personal-569",
+    "source": "Cloudverse",
+    "tag": "Segurança e conformidade",
+    "question": "Which AWS feature enables encryption at rest for Amazon S3 objects?",
+    "options": [
+      "Amazon GuardDuty",
+      "Client-side encryption",
+      "IAM policies",
+      "Server-side encryption"
+    ],
+    "correct_answer": "D",
+    "explanation": "Explanation (correct):\nAmazon S3 server-side encryption encrypts objects before storing them and decrypts on retrieval, using S3-managed or KMS-managed keys.\n\nWhy the others are incorrect\n• C. IAM policies control access but do not perform encryption.\n• A. GuardDuty is a threat detection service, unrelated to S3 encryption.\n• B. Client-side encryption is performed by the client, not by S3; the question asks for the S3 feature."
+  },
+  {
+    "id": "personal-570",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "A company wants to convert video and audio files from their source format into formats that will play seamlessly on smartphones, tablets, and web browsers. Which AWS service is designed to meet this requirement?",
+    "options": [
+      "AWS Glue",
+      "Amazon Comprehend",
+      "Amazon Rekognition",
+      "AWS Elemental MediaConvert"
+    ],
+    "correct_answer": "D",
+    "explanation": "Explanation (correct):\nAWS Elemental MediaConvert is a file-based media transcoding service that converts source video and audio into formats required by consumer playback devices such as smartphones, tablets, and web browsers.\n\nWhy the others are incorrect\n• B. Amazon Comprehend is a natural language processing service.\n• A. AWS Glue is a data integration and ETL service.\n• C. Amazon Rekognition is an image and video analysis service, not a transcoding service."
+  },
+  {
+    "id": "personal-571",
+    "source": "Cloudverse",
+    "tag": "Tecnologia",
+    "question": "A developer needs specific permissions to perform tasks, but an existing AWS managed IAM policy grants broader access than required. How should this be resolved to follow the principle of least privilege?",
+    "options": [
+      "Use a third-party web application firewall rule from AWS Marketplace.",
+      "Create a custom IAM policy with only the exact required permissions.",
+      "Use AWS Key Management Service (AWS KMS) to encrypt the user's sessions.",
+      "Enable AWS Shield Advanced."
+    ],
+    "correct_answer": "B",
+    "explanation": "Explanation (correct):\nIf an AWS managed policy is too broad, the best way to enforce least privilege is to create a custom IAM policy that includes only the exact actions and resources required for the user's tasks.\n\nWhy the others are incorrect\n• D. AWS Shield Advanced is for DDoS protection and does not control IAM permissions.\n• A. A WAF rule protects web applications, not IAM API permissions.\n• C. AWS KMS manages encryption keys, not permission scoping for IAM users."
+  },
+  {
+    "id": "personal-572",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "An administrator needs to rapidly deploy a popular IT solution and start using it immediately. Where can the administrator find assistance?",
+    "options": [
+      "AWS Well-Architected Framework documentation.",
+      "Amazon CloudFront.",
+      "AWS CodeCommit.",
+      "AWS Quick Start reference deployments."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-573",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What is one of the advantages of the Amazon Relational Database Service (Amazon RDS)?",
+    "options": [
+      "It simplifies relational database administration tasks.",
+      "It provides 99.99999999999% reliability and durability.",
+      "It automatically scales databases for loads.",
+      "It enables users to dynamically adjust CPU and RAM resources."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-574",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following AWS Cloud services can be used to run a customer-managed relational database?",
+    "options": [
+      "Amazon EC2.",
+      "Amazon Route 53.",
+      "Amazon ElastiCache.",
+      "Amazon DynamoDB."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-575",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "A user is planning to launch two additional Amazon EC2 instances to increase availability. Which action should the user take?",
+    "options": [
+      "Launch the instances across multiple Availability Zones in a single AWS Region.",
+      "Launch the instances as EC2 Reserved Instances in the same AWS Region and the same Availability Zone.",
+      "Launch the instances in multiple AWS Regions but in the same Availability Zone.",
+      "Launch the instances as EC2 Spot Instances in the same AWS Region but in different Availability Zones."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-576",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following can limit Amazon Simple Storage Service (Amazon S3) bucket access to specific users?",
+    "options": [
+      "A public and private key-pair.",
+      "Amazon Inspector.",
+      "AWS Identity and Access Management (IAM) policies.",
+      "Security Groups."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-577",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service allows companies to connect an Amazon VPC to an on-premises data center? (Select TWO)",
+    "options": [
+      "AWS VPN.",
+      "Amazon Redshift.",
+      "API Gateway.",
+      "Amazon Direct Connect."
+    ],
+    "correct_answer": [
+      "A",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-578",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service or feature can be used to monitor CPU usage?",
+    "options": [
+      "AWS CloudTrail.",
+      "VPC Flow Logs.",
+      "Amazon CloudWatch.",
+      "AWS Config."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-579",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which task is AWS responsible for in the shared responsibility model for security and compliance?",
+    "options": [
+      "Granting access to individuals and services.",
+      "Encrypting data in transit.",
+      "Updating Amazon EC2 host firmware.",
+      "Updating operating systems."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-580",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which of the following security-related actions are available at no cost?",
+    "options": [
+      "Calling AWS Support.",
+      "Contacting AWS Professional Services to request a workshop.",
+      "Accessing forums, blogs, and whitepapers.",
+      "Attending AWS classes at a local university."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-581",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which storage service can be used as a low-cost option for hosting static websites?",
+    "options": [
+      "Amazon Glacier.",
+      "Amazon DynamoDB.",
+      "Amazon Elastic File System (Amazon EFS).",
+      "Amazon Simple Storage Service (Amazon S3)."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-582",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "According to the AWS shared responsibility model what is the sole responsibility of AWS?",
+    "options": [
+      "Application security.",
+      "Edge location management.",
+      "Patch management.",
+      "Client-side data."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-583",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which of the following are pillars of the AWS Well-Architected Framework? (Select TWO)",
+    "options": [
+      "Multiple Availability Zones.",
+      "Performance efficiency.",
+      "Security.",
+      "Encryption usage.",
+      "High availability."
+    ],
+    "correct_answer": [
+      "B",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-584",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which AWS service identifies security groups that allow unrestricted access to a user’s AWS resources?",
+    "options": [
+      "AWS Trusted Advisor.",
+      "Amazon Inspector.",
+      "Amazon CloudWatch.",
+      "AWS CloudTrail."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-585",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which design principles for cloud architecture are recommended when re-architecting a large monolithic application? (Select TWO)",
+    "options": [
+      "Use manual monitoring.",
+      "Use fixed servers.",
+      "Implement loose coupling.",
+      "Rely on individual components.",
+      "Design for scalability."
+    ],
+    "correct_answer": [
+      "C",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-586",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "When architecting cloud applications, which of the following are a key design principle?",
+    "options": [
+      "Use the largest instance possible.",
+      "Provision capacity for peak load.",
+      "Use the Scrum development process.",
+      "Implement elasticity."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-587",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "A company has deployed several relational databases on Amazon EC2 instances. Every month the database software vendor releases new security patches that need to be applied to the databases. What is the MOST efficient way to apply the security patches?",
+    "options": [
+      "Connect to each database instance on a monthly basis and download and apply the necessary security patches from the vendor.",
+      "Enable automate patching for the instances using the Amazon RDS console.",
+      "In AWS Config. configure a rule for the instances and the required patch level.",
+      "Use AWS Systems Manager to automate database patching according to a schedule."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-588",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which mechanism allows developers to access AWS services from application code?",
+    "options": [
+      "AWS Software Development Kit.",
+      "AWS Management Console.",
+      "AWS CodePipeline.",
+      "AWS Config."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-589",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which AWS feature will reduce the customer’s total cost of ownership (TCO)?",
+    "options": [
+      "Shared responsibility security model.",
+      "Single tenancy.",
+      "Elastic computing.",
+      "Encryption."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-590",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which of the following is a benefit of using the AWS Cloud?",
+    "options": [
+      "Permissive security removes the administrative burden.",
+      "Ability to focus on revenue-generating activities.",
+      "Control over cloud network hardware.",
+      "Choice of specific cloud hardware vendors."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-591",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following are categories of AWS Trusted Advisor? (Select TWO)",
+    "options": [
+      "Fault Tolerance.",
+      "Instance Usage.",
+      "Infrastructure.",
+      "Performance.",
+      "Storage Capacity."
+    ],
+    "correct_answer": [
+      "A",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-592",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What is Amazon CloudWatch?",
+    "options": [
+      "A code repository with customizable build and team commit features.",
+      "A metrics repository with customizable notification thresholds and channels.",
+      "A security configuration repository with threat analytics.",
+      "A rule repository of a web application firewall with automated vulnerability prevention features."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-593",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Under the AWS shared responsibility model, which of the following activities are the customer’s responsibility? (Select TWO)",
+    "options": [
+      "Patching operating system components for Amazon Relational Database Server (Amazon RDS).",
+      "Encrypting data on the client-side.",
+      "Training the data center staff.",
+      "Configuring Network Access Control Lists (ACL).",
+      "Maintaining environmental controls within a data center."
+    ],
+    "correct_answer": [
+      "B",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-594",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Under the shared responsibility model, which of the following is a shared control between a customer and AWS?",
+    "options": [
+      "Physical controls.",
+      "Patch management.",
+      "Zone security.",
+      "Data center auditing."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-595",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which AWS service is used to pay AWS bills, and monitor usage and budget costs?",
+    "options": [
+      "AWS Billing and Cost Management.",
+      "Consolidated billing.",
+      "Amazon CloudWatch.",
+      "Amazon QuickSight."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-596",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "How do customers benefit from Amazon’s massive economies of scale?",
+    "options": [
+      "Periodic price reductions as the result of Amazon’s operational efficiencies.",
+      "New Amazon EC2 instance types providing the latest hardware.",
+      "The ability to scale up and down when needed.",
+      "Increased reliability in the underlying hardware of Amazon EC2 instances."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-597",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS feature allows a company to take advantage of usage tiers for services across multiple member accounts?",
+    "options": [
+      "Service control policies (SCPs).",
+      "Consolidated billing.",
+      "All Upfront Reserved Instances.",
+      "AWS Cost Explorer."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-598",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS services provide a way to extend an on-premises architecture to the aws cloud? (Select TWO)",
+    "options": [
+      "Amazon EBS.",
+      "Amazon Connect.",
+      "AWS Storage Gateway.",
+      "Amazon CloudFront.",
+      "AWS Direct Connect."
+    ],
+    "correct_answer": [
+      "C",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-599",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following services will automatically scale with an expected increase in web traffic?",
+    "options": [
+      "AWS CodePipeline.",
+      "Elastic Load Balancing.",
+      "Amazon EBS.",
+      "AWS Direct Connect."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-600",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which service provides a virtually unlimited amount of online highly durable object storage?",
+    "options": [
+      "Amazon Redshift.",
+      "Amazon Elastic File System (Amazon EFS).",
+      "Amazon Elastic Container Service (Amazon ECS).",
+      "Amazon S3."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-601",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS feature should a customer leverage to achieve high availability of an application?",
+    "options": [
+      "AWS Direct Connect.",
+      "Availability Zones.",
+      "Data centers.",
+      "Amazon Virtual Private Cloud (Amazon VPC)."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-602",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which AWS service or feature can enhance network security by blocking requests from a particular network for a web application on AWS? (Select TWO)",
+    "options": [
+      "AWS WAF.",
+      "AWS Trusted Advisor.",
+      "AWS Direct Connect.",
+      "AWS Organizations.",
+      "Network ACLs."
+    ],
+    "correct_answer": [
+      "A",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-603",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following is a cloud architectural design principle?",
+    "options": [
+      "Scale up not out.",
+      "Loosely couple components.",
+      "Build monolithic systems.",
+      "Use commercial database software."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-604",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which service enables risk auditing by continuously monitoring and logging account activity, including user actions in the AWS Management Console and AWS SDKs?",
+    "options": [
+      "Amazon CloudWatch.",
+      "AWS CloudTrail.",
+      "AWS Config.",
+      "AWS Health."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-605",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which AWS service provides on-demand access to AWS security and compliance documentation?",
+    "options": [
+      "AWS Certificate Manager.",
+      "AWS Trusted Advisor.",
+      "AWS Artifact.",
+      "AWS Organizations."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-606",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "The financial benefits of using AWS are: (Select TWO)",
+    "options": [
+      "Reduced Total Cost of Ownership (TCO).",
+      "Increased capital expenditure (capex).",
+      "Reduced operational expenditure ( opex ).",
+      "Deferred payment plans for startups.",
+      "Business credit lines for startups."
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-607",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service can serve a static website?",
+    "options": [
+      "Amazon S3.",
+      "Amazon Route 53.",
+      "Amazon QuickSight.",
+      "AWS X-Ray."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-608",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "What are the benefits of using the AWS Cloud for companies with customers in many countries around the world (Select TWO)",
+    "options": [
+      "Companies can deploy applications in multiple AWS Regions to reduce latency.",
+      "Amazon Translate automatically translates third-party website interfaces into multiple languages.",
+      "Amazon CloudFront has multiple edge locations around the world to reduce latency.",
+      "Amazon Comprehend allows users to build applications that can respond to user requests in many languages.",
+      "Elastic Load Balancing can distribute application web traffic to multiple AWS Regions around the world which reduces latency."
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-609",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which of the following are main components of the AWS global infrastructure? (Select TWO)",
+    "options": [
+      "Resource groups.",
+      "Availability Zones.",
+      "Security groups.",
+      "Regions.",
+      "Amazon Machine Images (AMIS)."
+    ],
+    "correct_answer": [
+      "B",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-610",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "What is the AWS customer responsible for according to the AWS shared responsibility model?",
+    "options": [
+      "Physical access controls.",
+      "Data encryption.",
+      "Secure disposal of storage devices.",
+      "Environmental risk management."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-611",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "If each department within a company has its own AWS account, what is one way to enable consolidated billing?",
+    "options": [
+      "Use AWS Budgets on each account to pay only to budget.",
+      "Contact AWS Support for a monthly bill.",
+      "Create an AWS Organization from the payer account and invite the other accounts to join.",
+      "Put all invoices into one Amazon Simple Storage Service (Amazon S3) bucket, load data into Amazon Redshift, and then run a billing report."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-612",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "What costs are included when comparing AWS Total Cost of Ownership (TCO) with on-premises TCO?",
+    "options": [
+      "Project management.",
+      "Antivirus software licensing.",
+      "Data center security.",
+      "Software development."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-613",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "What is the benefit of using AWS managed services, such as Amazon ElastiCache and Amazon Relational Database Service (Amazon RDS)?",
+    "options": [
+      "They require the customer to monitor and replace failing instances.",
+      "They have better performance than customer-managed services.",
+      "They simplify patching and updating underlying OSs.",
+      "They do not require the customer to optimize instance type or size selections."
+    ],
+    "correct_answer": "C",
+    "explanation": "- AWS Managed Services takes care of all of your patching and backup activities to help keep your resources current and secure. When updates or patches are released by OS vendors, AWS Managed Services applies them in a timely and consistent manner to minimize the impact on your business\n- Critical security patches are applied immediately, while others are applied based on the patch schedule you request. Backups of Stacks are automated using Amazon Elastic Block Store (EBS) and RDS snapshots, and can be restored in the event of a failure or outage, ensuring business continuity"
+  },
+  {
+    "id": "personal-614",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which services can be used across hybrid AWS Cloud architectures? (Select TWO)",
+    "options": [
+      "Amazon Route 53.",
+      "Virtual Private Gateway.",
+      "Classic Load Balancer.",
+      "Auto Scaling.",
+      "Amazon CloudWatch default metrics."
+    ],
+    "correct_answer": [
+      "A",
+      "B"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-615",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which statement best describes Elastic Load Balancing?",
+    "options": [
+      "It translates a domain name into an IP address using DNC.",
+      "It distributes incoming application traffic across one or more Amazon EC2 instances.",
+      "It collects metrics on connected Amazon EC2 instances.",
+      "It automatically adjusts the number of Amazon EC2 instances to support incoming traffic."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-616",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following is a fast and reliable NoSQL database service?",
+    "options": [
+      "Amazon Redshift.",
+      "Amazon RDS.",
+      "Amazon DynamoDB.",
+      "Amazon S3."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-617",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which AWS service would you use to obtain compliance reports and certificates?",
+    "options": [
+      "AWS Artifact.",
+      "AWS Lambda.",
+      "Amazon Inspector.",
+      "AWS Certificate Manager."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-618",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS services are defined as global instead of regional? (Select TWO)",
+    "options": [
+      "Amazon Route 53.",
+      "Amazon EC2.",
+      "Amazon S3.",
+      "Amazon CloudFront.",
+      "Amazon DynamoDB."
+    ],
+    "correct_answer": [
+      "A",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-619",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "How would an AWS customer easily apply common access controls to a large set of users?",
+    "options": [
+      "Apply an IAM policy to an IAM group.",
+      "Apply an IAM policy to an IAM role.",
+      "Apply the same IAM policy to all IAM users with access to the same workload.",
+      "Apply an IAM policy to an Amazon Cognito user pool."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-620",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following is an important architectural design principle when designing cloud applications?",
+    "options": [
+      "Use multiple Availability Zones.",
+      "Use tightly coupled components.",
+      "Use open source software.",
+      "Provision extra capacity."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-621",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which service allows a company with multiple AWS accounts to combine its usage to obtain volume discounts?",
+    "options": [
+      "AWS Server Migration Service.",
+      "AWS Organizations.",
+      "AWS Budgets.",
+      "AWS Trusted Advisor."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-622",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following can an AWS customer use to launch a new Amazon Relational Database Service (Amazon RDS) cluster? (Select TWO)",
+    "options": [
+      "AWS Concierge.",
+      "AWS CloudFormation.",
+      "Amazon Simple Storage Service (Amazon S3).",
+      "Amazon EC2 Auto Scaling.",
+      "AWS Management Console."
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-623",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which of the following Reserved Instance (RI) pricing models provides the highest average savings compared to On-Demand pricing?",
+    "options": [
+      "One-year, No Upfront, Standard RI pricing.",
+      "One-year, All Upfront, Convertible RI pricing.",
+      "Three-year, All Upfront, Standard RI pricing.",
+      "Three-year, No Upfront, Convertible RI pricing."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-624",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following are features of Amazon CloudWatch Logs? (Select TWO)",
+    "options": [
+      "Summaries by Amazon Simple Notification Service (Amazon SNS).",
+      "Free Amazon Elasticsearch Service analytics.",
+      "Provided at no charge.",
+      "Real-time monitoring.",
+      "Adjustable retention."
+    ],
+    "correct_answer": [
+      "D",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-625",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following is an AWS-managed compute service?",
+    "options": [
+      "Amazon SWF.",
+      "Amazon EC2.",
+      "AWS Lambda.",
+      "Amazon Aurora."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-626",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "A company wants to reduce the physical compute footprint that developers use to run code. Which service would meet that need by enabling serverless architectures?",
+    "options": [
+      "Amazon Elastic Compute Cloud (Amazon EC2).",
+      "AWS Lambda.",
+      "Amazon DynamoDB.",
+      "AWS CodeCommit."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-627",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which of the following is the customer’s responsibility under the AWS shared responsibility model?",
+    "options": [
+      "Patching underlying infrastructure",
+      "Physical security",
+      "Patching Amazon EC2 instances",
+      "Patching network infrastructure"
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-628",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "According to the AWS shared responsibility model who is responsible for configuration management?",
+    "options": [
+      "It is solely the responsibility of the customer.",
+      "It is solely the responsibility of AWS.",
+      "It is shared between AWS and the customer.",
+      "It is not part of the AWS shared responsibility model."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-629",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which security service automatically recognizes and classifies sensitive data or intellectual property on AWS?",
+    "options": [
+      "Amazon GuardDuty.",
+      "Amazon Macie.",
+      "Amazon Inspector.",
+      "AWS Shield."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-630",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which of the following BEST describe the AWS pricing model? (Select TWO)",
+    "options": [
+      "Fixed-term.",
+      "Pay-as-you-go.",
+      "Colocation.",
+      "Planned.",
+      "Variable cost."
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-631",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Under the shared responsibility model, which of the following tasks are the responsibility of the AWS customer? (Select TWO)",
+    "options": [
+      "Ensuring that application data is encrypted at rest.",
+      "Ensuring that AWS NTP servers are set to the correct time.",
+      "Ensuring that users have received security training in the use of AWS services.",
+      "Ensuring that access to data centers is restricted.",
+      "Ensuring that hardware is disposed of properly."
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-632",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "A customer is using multiple AWS accounts with separate billing. How can the customer take advantage of volume discounts with minimal impact to the AWS resources?",
+    "options": [
+      "Create one global AWS account and move all AWS resources to that account.",
+      "Sign up for three years of Reserved Instance pricing up front.",
+      "Use the consolidated billing feature from AWS Organizations.",
+      "Sign up for the AWS Enterprise support plan to get volume discounts."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-633",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which Amazon EC2 pricing model offers the MOST significant discount when compared to OnDemand Instances?",
+    "options": [
+      "A Partial Upfront Reserved Instances for a 1-year term.",
+      "All Upfront Reserved instances for a 1 year form.",
+      "All Upfront Reserved Instances for a 3 year term.",
+      "No Upfront Reserved Instances for a 3 year term."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-634",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS services should be used for read/write of constantly changing data? (Select TWO)",
+    "options": [
+      "Amazon Glacier.",
+      "Amazon RDS.",
+      "AWS Snowball.",
+      "Amazon Redshift.",
+      "Amazon EFS."
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-635",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service allows users to identify the changes made to a resource over time?",
+    "options": [
+      "Amazon Inspector.",
+      "AWS Config.",
+      "AWS Service Catalog.",
+      "AWS IAM."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-636",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "According to best practices, how should an application be designed to run in the AWS Cloud?",
+    "options": [
+      "Use tightly coupled components.",
+      "Use loosely coupled components.",
+      "Use infrequently coupled components.",
+      "Use frequently coupled components."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-637",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which benefits are included with the AWS Business Support plan? (Select TWO)",
+    "options": [
+      "24/7 assistance by way of live chat or a telephone call.",
+      "Support from a dedicated AWS Technical Account Manager.",
+      "An unlimited number of cases and contacts.",
+      "15-minute response time for production system interruption cases.",
+      "Annual operational reviews with AWS Solutions Architects."
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-638",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following is an AWS managed Domain Name System (DNS) web service?",
+    "options": [
+      "Amazon Route 53.",
+      "Amazon Neptune.",
+      "Amazon SageMaker.",
+      "Amazon Lightsail."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-639",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "A user must meet compliance and software licensing requirements that state a workload must be hosted on a physical server. When Amazon EC2 instance pricing option will meet these requirements?",
+    "options": [
+      "Dedicated Hosts.",
+      "Dedicated Instances.",
+      "Spot Instances.",
+      "Reserved Instances."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-640",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which of the Reserved Instance (RI) pricing models can change the attributes of the RI as long as the exchange results in the creation of RIs of equal or greater value?",
+    "options": [
+      "Dedicated RIs.",
+      "Scheduled RIs.",
+      "Convertible RIs.",
+      "Standard RIs."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-641",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which service is best for storing common database query results, which helps to alleviate database access load?",
+    "options": [
+      "Amazon Machine Learning.",
+      "Amazon SQS.",
+      "Amazon ElastiCache.",
+      "Amazon EC2 Instance Store."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-642",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "When should a company consider using Amazon EC2 Spot Instances? (Select TWO)",
+    "options": [
+      "For non-production applications.",
+      "For stateful workloads.",
+      "For applications that cannot have interruptions.",
+      "For fault-tolerant flexible applications.",
+      "For sensitive database applications."
+    ],
+    "correct_answer": [
+      "A",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-643",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which AWS tools assist with estimating costs? (Select three)",
+    "options": [
+      "Detailed billing report.",
+      "Cost allocation tags.",
+      "AWS Simple Monthly Calculator.",
+      "AWS Total Cost of Ownership (TCO) Calculator.",
+      "Cost Estimator."
+    ],
+    "correct_answer": [
+      "B",
+      "C",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-644",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "A company wants to focus on business activities instead of managing compute and capacity. Which AWS service can be used to automatically add or remove Amazon EC2 instances based on demand?",
+    "options": [
+      "Elastic Load Balancer.",
+      "Amazon EC2 Auto Scaling.",
+      "Amazon Route 53.",
+      "Amazon CloudFront."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-645",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which is the minimum AWS Support plan that includes Infrastructure Event Management without additional costs?",
+    "options": [
+      "Enterprise.",
+      "Business.",
+      "Developer.",
+      "Basic."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-646",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Access keys in AWS Identity and Access Management (IM1) are used to:",
+    "options": [
+      "Log in to the AWS Management Console.",
+      "Make programmatic calls to AWS from AWS APIs.",
+      "Log in to Amazon EC2 instances.",
+      "Authenticate to AWS CodeCommit repositories."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-647",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service can be used to query stored datasets directly from Amazon S3 using standard SQL?",
+    "options": [
+      "AWS Glue.",
+      "AWS Data Pipeline.",
+      "Amazon CloudSearch.",
+      "Amazon Athena."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-648",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "How does AWS shorten the time to provision IT resources?",
+    "options": [
+      "It supplies an online IT ticketing platform for resource requests.",
+      "It supports automatic code validation services.",
+      "It provides the ability to programmatically provision existing resources.",
+      "It automates the resource request process from a company’s IT vendor list."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-649",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS services can be used to gather information about AWS account activity? (Select TWO)",
+    "options": [
+      "Amazon CloudFront.",
+      "AWS Cloud9.",
+      "AWS CloudTrail.",
+      "AWS CloudHSM.",
+      "Amazon CloudWatch."
+    ],
+    "correct_answer": [
+      "C",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-650",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following are characteristics of Amazon S3? (Select TWO)",
+    "options": [
+      "A global file system.",
+      "An object store.",
+      "A local file store.",
+      "A network file system.",
+      "A durable storage system."
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-651",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "A user wants guidance on possible savings when migrating from on-premises to AWS. Which tool is suitable for this scenario?",
+    "options": [
+      "AWS Budgets.",
+      "Cost Explorer.",
+      "AWS Total Cost of Ownership (TCO) Calculator.",
+      "AWS Well-Architected Tool."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-652",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following services is in the category of AWS serverless platform?",
+    "options": [
+      "Amazon EMR.",
+      "Elastic Load Balancing.",
+      "AWS Lambda.",
+      "AWS Mobile Hub."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-653",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "The use of what AWS feature or service allows companies to track and categorize spending on a detailed level?",
+    "options": [
+      "Cost allocation tags.",
+      "Consolidated billing.",
+      "AWS Budgets.",
+      "AWS Marketplace."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-654",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following inspects AWS environments to find opportunities that can save money for users and also improve system performance?",
+    "options": [
+      "AWS Cost Explorer.",
+      "AWS Trusted Advisor.",
+      "Consolidated billing.",
+      "Detailed billing."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-655",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Web servers running on Amazon EC2 access a legacy application running in a corporate data center. What term would describe this model?",
+    "options": [
+      "Cloud-native.",
+      "Partner network.",
+      "Hybrid architecture.",
+      "Infrastructure as a service."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-656",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What technology enables compute capacity to adjust as loads change?",
+    "options": [
+      "Load balancing.",
+      "Automatic failover.",
+      "Round robin.",
+      "Auto Scaling."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-657",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service is a managed NoSQL database?",
+    "options": [
+      "Amazon Redshift.",
+      "Amazon DynamoDB.",
+      "Amazon Aurora.",
+      "Amazon RDS for ManaDB."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-658",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which of the following is a correct relationship between regions, Availability Zones, and edge locations?",
+    "options": [
+      "Data centers contain regions.",
+      "Regions contain Availability Zones.",
+      "Availability Zones contain edge locations.",
+      "Edge locations contain regions."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-659",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What approach to transcoding a large number of individual video files adheres to AWS architecture principles?",
+    "options": [
+      "Using many instances in parallel.",
+      "Using a single large instance during off-peak hours.",
+      "Using dedicated hardware.",
+      "Using a large GPU instance type."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-660",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS services can host a Microsoft SQL Server database? (Select TWO)",
+    "options": [
+      "Amazon EC2.",
+      "Amazon Relational Database Service (Amazon RDS).",
+      "Amazon Aurora.",
+      "Amazon Redshift.",
+      "Amazon S3."
+    ],
+    "correct_answer": [
+      "A",
+      "B"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-661",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which AWS IAM feature allows developers to access AWS services through the AWS CLI?",
+    "options": [
+      "API keys.",
+      "Access keys.",
+      "User names/Passwords.",
+      "SSH keys."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-662",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "The user is fully responsible for which action when running workloads on AWS?",
+    "options": [
+      "Patching the infrastructure components.",
+      "Maintaining the underlying infrastructure components.",
+      "Maintaining physical and environmental controls.",
+      "Implementing controls to route application traffic."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-663",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS support plan includes a dedicated Technical Account Manager?",
+    "options": [
+      "Developer.",
+      "Enterprise.",
+      "Business.",
+      "Basic."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-664",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "What time-savings advantage is offered with the use of Amazon Rekognition?",
+    "options": [
+      "Amazon Rekognition provides automatic watermarking of images.",
+      "Amazon Rekognition provides automatic detection of objects appearing in pictures.",
+      "Amazon Recognition provides the ability to resize millions of images automatically.",
+      "Amazon Rekognition uses Amazon Mechanical Turk to allow humans to bid on object detection jobs."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-665",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service can be used to automatically scale an application up and down without making capacity planning decisions?",
+    "options": [
+      "Amazon AutoScaling.",
+      "Amazon Redshift.",
+      "AWS CloudTrail.",
+      "AWS Lambda."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-666",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Amazon Relational Database Service (Amazon RDS) offers which of the following benefits over traditional database management?",
+    "options": [
+      "AWS manages the data stored in Amazon RDS tables.",
+      "AWS manages the maintenance of the operating system.",
+      "AWS automatically scales up instance types on demand.",
+      "AWS manages the database type."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-667",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "A company’s web application currently has light dependencies on underlying components so when one component fails the entire web application fails. Applying which AWS Cloud design principle will address the current design issue?",
+    "options": [
+      "Implementing elasticity enabling the application to scale up or scale down as demand changes.",
+      "Enabling several EC2 instances to run in parallel to achieve better performance.",
+      "Focusing on decoupling components by isolating them and ensuring individual components can function when other components.",
+      "Doubling EC2 computing resources to increase system fault tolerance."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-668",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "A customer would like to design and build a new workload on AWS Cloud but does not have the AWS-related software technical expertise in-house. Which of the following AWS programs can a customer take advantage of to achieve that outcome?",
+    "options": [
+      "AWS Partner Network Technology Partners.",
+      "AWS Marketplace.",
+      "AWS Partner Network Consulting Partners.",
+      "AWS Service Catalog."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-669",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which service stores objects, provides real-time access to those objects, and offers versioning and lifecycle capabilities?",
+    "options": [
+      "Amazon Glacier.",
+      "AWS Storage Gateway.",
+      "Amazon S3.",
+      "Amazon EBS."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-670",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Distributing workloads across multiple Availability Zones supports which cloud architecture design principle?",
+    "options": [
+      "Implement automation.",
+      "Design for agility.",
+      "Design for failure.",
+      "Implement elasticity."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-671",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which service should a customer use to consolidate and centrally manage multiple AWS accounts?",
+    "options": [
+      "AWS IAM.",
+      "AWS Organizations.",
+      "AWS Schema Conversion Tool.",
+      "AWS Config."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-672",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "How can a company reduce its Total Cost of Ownership (TCO) using AWS?",
+    "options": [
+      "By minimizing large capital expenditures.",
+      "By having no responsibility for third-party license costs.",
+      "By having no operational expenditures.",
+      "By having AWS manage applications."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-673",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which options does AWS make available for customers who want to learn about security in the cloud in an instructor-led setting? (Select TWO)",
+    "options": [
+      "AWS Trusted Advisor.",
+      "AWS Online Tech Talks.",
+      "AWS Blog.",
+      "AWS Forums.",
+      "AWS Classroom Training."
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-674",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which of the following will enhance the security of access to the AWS Management Console’? (Select TWO)",
+    "options": [
+      "AWS Secrets Manager.",
+      "AWS Certificate Manager.",
+      "AWS Multi-Factor Authentication (AWS MFA).",
+      "Security groups.",
+      "Password policies."
+    ],
+    "correct_answer": [
+      "C",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-675",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following features can be configured through the Amazon Virtual Private Cloud (Amazon VPC) Dashboard? (Select TWO)",
+    "options": [
+      "Amazon CloudFront distributions.",
+      "Amazon Route 53.",
+      "Security Groups.",
+      "Subnets.",
+      "Elastic Load Balancing."
+    ],
+    "correct_answer": [
+      "C",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-676",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "For which auditing process does AWS have sole responsibility?",
+    "options": [
+      "AWS IAM policies.",
+      "Physical security.",
+      "Amazon S3 bucket policies.",
+      "AWS CloudTrail Logs."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-677",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which of the following are advantages of AWS consolidated billing? (Select TWO)",
+    "options": [
+      "The ability to receive one bill for multiple accounts.",
+      "Service limits increasing by default in all accounts.",
+      "A fixed discount on the monthly bill.",
+      "Potential volume discounts, as usage in all accounts is combined.",
+      "The automatic extension of the master account’s AWS support plan to all accounts."
+    ],
+    "correct_answer": [
+      "A",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-678",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following common IT tasks can AWS cover to free up company IT resources? (Select TWO)",
+    "options": [
+      "Patching databases software.",
+      "Testing application releases.",
+      "Backing up databases.",
+      "Creating database schema.",
+      "Running penetration tests."
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-679",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "A company wants to expand from one AWS Region into a second AWS Region. What does the company need to do to start supporting the new Region?",
+    "options": [
+      "Contact an AWS Account Manager to sign a new contract.",
+      "Move an Availability Zone to the new Region.",
+      "Begin deploying resources in the second Region.",
+      "Download the AWS Management Console for the new Region."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-680",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Why is it beneficial to use Elastic Load Balancers with applications?",
+    "options": [
+      "They allow for the conversion from Application Load.",
+      "Balancers to Classic Load Balancers.",
+      "They are capable of handling constant changes in network traffic patterns.",
+      "They automatically adjust capacity. They are provided at no charge to users."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-681",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which is the MINIMUM AWS Support plan that allows for one-hour target response time for support cases?",
+    "options": [
+      "Enterprise.",
+      "Business.",
+      "Developer",
+      "Basic"
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-682",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "What is the lowest-cost, durable storage option for retaining database backups for immediate retrieval?",
+    "options": [
+      "Amazon S3.",
+      "Amazon Glacier.",
+      "Amazon EBS.",
+      "Amazon EC2 Instance Store."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-683",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What AWS team assists customers with accelerating cloud adoption through paid engagements in any of several specialty practice areas?",
+    "options": [
+      "AWS Enterprise Support.",
+      "AWS Solutions Architects.",
+      "AWS Professional Services.",
+      "AWS Account Managers."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-684",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "A company needs 24/7 phone email and chat access with a response time of less than 1 hour if a production system has a service interruption Which AWS Support plan meets these requirements at the LOWEST cost?",
+    "options": [
+      "Basic.",
+      "Developer.",
+      "Business.",
+      "Enterprise."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-685",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "If a customer needs to audit the change management of AWS resources, which of the following AWS services should the customer use?",
+    "options": [
+      "AWS Config.",
+      "AWS Trusted Advisor.",
+      "Amazon CloudWatch.",
+      "Amazon Inspector."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-686",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "How does AWS Trusted Advisor provide guidance to users of the AWS Cloud? (Select TWO)",
+    "options": [
+      "It identifies software vulnerabilities in applications running on AWS.",
+      "It provides a list of cost optimization recommendations based on current AWS usage.",
+      "It detects potential security vulnerabilities caused by permissions settings on account resources.",
+      "It automatically corrects potential security issues caused by permissions settings on account resources.",
+      "It provides proactive alerting whenever an Amazon EC2 instance has been compromised."
+    ],
+    "correct_answer": [
+      "B",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-687",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS managed service is used to host databases?",
+    "options": [
+      "AWS Batch.",
+      "AWS Artifact.",
+      "AWS Data Pipeline.",
+      "Amazon RDS."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-688",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which of the following Identity and Access Management (IAM) entities is associated with an access key ID and secret access key when using AWS Command Line Interface (AWS CLI)?",
+    "options": [
+      "IAM group.",
+      "IAM user.",
+      "IAM role.",
+      "IAM policy."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-689",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Under the shared responsibility model, which of the following is the customer responsible for?",
+    "options": [
+      "Ensuring that disk drives are wiped after use.",
+      "Ensuring that firmware is updated on hardware devices.",
+      "Ensuring that data is encrypted at rest.",
+      "Ensuring that network cables are category six or higher."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-690",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service provides a simple and scalable shared file storage solution for use with Linux-based AWS and on-premises servers?",
+    "options": [
+      "Amazon S3.",
+      "Amazon Glacier.",
+      "Amazon EBS.",
+      "Amazon EFS."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-691",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What credential components are required to gain programmatic access to an AWS account? (Select TWO)",
+    "options": [
+      "An access key ID.",
+      "A primary key.",
+      "A secret access key.",
+      "A user ID.",
+      "A secondary key."
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-692",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following is a shared control between the customer and AWS?",
+    "options": [
+      "Providing a key for Amazon S3 client-side encryption.",
+      "Configuration of an Amazon EC2 instance.",
+      "Environmental controls of physical AWS data centers.",
+      "Awareness."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-693",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which type of AWS storage is ephemeral and is deleted when an instance is stopped Of terminated?",
+    "options": [
+      "Amazon EBS.",
+      "Amazon EC2 instance store.",
+      "Amazon EFS.",
+      "Amazon S3."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-694",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which of the following is an advantage of consolidated billing on AWS?",
+    "options": [
+      "Volume pricing qualification.",
+      "Shared access permissions.",
+      "Multiple bills per account.",
+      "Eliminates the need for tagging."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-695",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which services are parts of the AWS serverless platform?",
+    "options": [
+      "Amazon EC2, Amazon S3, Amazon Athena.",
+      "Amazon Kinesis, Amazon SQS, Amazon EMR.",
+      "AWS Step Functions, Amazon DynamoDB, Amazon SNS.",
+      "Amazon Athena, Amazon Cognito, Amazon EC2."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-696",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which of the following Amazon EC2 pricing models allow customers to use existing server-bound software licenses?",
+    "options": [
+      "Spot Instances.",
+      "Reserved Instances.",
+      "Dedicated Hosts.",
+      "On-Demand Instances."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-697",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which of the following security measures protect access to an AWS account? (Select TWO)",
+    "options": [
+      "Enable AWS CloudTrail.",
+      "Grant least privilege access to IAM users.",
+      "Create one IAM user and share with many developers and users.",
+      "Enable Amazon CloudFront.",
+      "Activate multi-factor authentication (MFA) for privileged users."
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-698",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service provides the ability to manage infrastructure as code?",
+    "options": [
+      "AWS CodePipeline.",
+      "AWS CodeDeploy.",
+      "AWS Direct Connect.",
+      "AWS CloudFormation."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-699",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "What is an advantage of deploying an application across multiple Availability Zones?",
+    "options": [
+      "There is a lower risk of service failure if a natural disaster causes a service disruption in a given AWS Region.",
+      "The application will have higher availability because it can withstand a service disruption in one Availability Zone.",
+      "There will be better coverage as Availability Zones are geographical^ distant and can serve a wider area.",
+      "There will be decreased application latency that will improve the user experience."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-700",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "A customer needs to run a MySQL database that easily scales. Which AWS service should they use?",
+    "options": [
+      "Amazon Aurora.",
+      "Amazon Redshift.",
+      "Amazon DynamoDB.",
+      "Amazon ElastiCache."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-701",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which of the following is an AWS Cloud architecture design principle?",
+    "options": [
+      "Implement single points of failure.",
+      "Implement loose coupling.",
+      "Implement monolithic design.",
+      "Implement vertical scaling."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-702",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "AWS Enterprise Support users have access to which service or feature that is not available to users with other AWS Support plans?",
+    "options": [
+      "AWS Trusted Advisor.",
+      "AWS Support case.",
+      "Concierge team.",
+      "Amazon Connect."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-703",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "A company will be moving from an on-premises data center to the AWS Cloud. What would be one financial difference after the move?",
+    "options": [
+      "Moving from variable operational expense ( opex ) to upfront capital expense (capex).",
+      "Moving from upfront capital expense (capex) to variable capital expense (capex).",
+      "Moving from upfront capital expense (capex) to variable operational expense ( opex ).",
+      "Elimination of upfront capital expense (capex) and elimination of variable operational expense ( opex )."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-704",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "When performing a cost analysis that supports physical isolation of a customer workload, which compute hosting model should be accounted for in the Total Cost of Ownership (TCO)?",
+    "options": [
+      "Dedicated Hosts",
+      "Reserved Instances",
+      "On-Demand Instances",
+      "No Upfront Reserved Instances"
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-705",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which AWS service should be used for long-term, low-cost storage of data backups?",
+    "options": [
+      "Amazon RDS.",
+      "Amazon Glacier.",
+      "AWS Snowball.",
+      "AWS EBS."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-706",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which is the MINIMUM AWS Support plan that provides technical support through phone calls?",
+    "options": [
+      "Enterprise.",
+      "Business.",
+      "Developer.",
+      "Basic."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-707",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which Amazon EC2 instance pricing model can provide discounts of up to 90%?",
+    "options": [
+      "Reserved Instances.",
+      "On-Demand.",
+      "Dedicated Hosts.",
+      "Spot Instances."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-708",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following AWS services can be used to serve large amounts of online video content with the lowest possible latency? (Select TWO)",
+    "options": [
+      "appGateway.",
+      "Amazon S3.",
+      "Amazon Elastic File System (EFS).",
+      "Amazon Glacier.",
+      "Amazom CloudFront."
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-709",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "What can AWS edge locations be used for? (Select TWO)",
+    "options": [
+      "Hosting applications.",
+      "Delivering content closer to users.",
+      "Running NoSQL database caching services.",
+      "Reducing traffic on the server by caching responses.",
+      "Sending notification messages to end users."
+    ],
+    "correct_answer": [
+      "B",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-710",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "A company is planning to migrate from on-premises to the AWS Cloud. When AWS tool or service provides detailed reports on estimated cost savings after migration?",
+    "options": [
+      "AWS Total Cost of Ownership (TCO) Calculator.",
+      "Cost Explorer.",
+      "AWS Budgets.",
+      "AWS Migration Hub."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-711",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service provides a customized view of the health of specific AWS services that power a customer’s workloads running on AWS?",
+    "options": [
+      "AWS Service Health Dashboard.",
+      "AWS X-Ray.",
+      "AWS Personal Health Dashboard.",
+      "Amazon CloudWatch."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-712",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "One of the advantages to moving infrastructure from an on-premises data center to the AWS Cloud is:",
+    "options": [
+      "It allows the business to eliminate IT bills.",
+      "It allows the business to put a server in each customer’s data center.",
+      "It allows the business to focus on business activities.",
+      "It allows the business to leave servers unpatched."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-713",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "How can an AWS user with an AWS Basic Support plan obtain technical assistance from AWS?",
+    "options": [
+      "AWS Senior Support Engineers.",
+      "AWS Technical Account Managers.",
+      "AWS Trusted Advisor.",
+      "AWS Discussion Forums."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-714",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "How can a user protect against AWS service disruptions if a natural disaster affects an entire geographic area?",
+    "options": [
+      "Deploy applications across multiple Availability Zones within an AWS Region.",
+      "Use a hybrid cloud computing deployment model within the geographic area.",
+      "Deploy applications across multiple AWS Regions.",
+      "Store application artifacts using AWS Artifact and replicate them across multiple AWS Regions."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-715",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which activity is a customer responsibility in the AWS Cloud according to the AWS shared responsibility model?",
+    "options": [
+      "Ensuring network connectivity from AWS to the internet.",
+      "Patching and fixing flaws within the AWS Cloud infrastructure.",
+      "Ensuring the physical security of cloud data centers.",
+      "Ensuring Amazon EBS volumes are backed up."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-716",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "In which scenario should Amazon EC2 Spot Instances be used?",
+    "options": [
+      "A company wants to move its main website to AWS from an on-premises web server.",
+      "A company has a number of application services whose Service Level Agreement (SLA) requires 99.999% uptime.",
+      "A company’s heavily used legacy database is currently running on-premises.",
+      "A company has a number of infrequent, interruptible jobs that are currently using On-Demand Instances."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-717",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "A customer is deploying a new application and needs to choose an AWS Region. Which of the following factors could influence the customer’s decision? (Select TWO)",
+    "options": [
+      "Reduced latency to users.",
+      "The application’s presentation in the local language.",
+      "Data sovereignty compliance.",
+      "Cooling costs in hotter climates.",
+      "Proximity to the customer’s office for on-site visits."
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-718",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service provides alerts when an AWS event may impact a company’s AWS resources?",
+    "options": [
+      "AWS Personal Health Dashboard.",
+      "AWS Service Health Dashboard.",
+      "AWS Trusted Advisor.",
+      "AWS Infrastructure Event Management."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-719",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which disaster recovery scenario offers the lowest probability of down time?",
+    "options": [
+      "Backup and restore.",
+      "Pilot light.",
+      "Warm standby.",
+      "Multi-site active-active."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-720",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which service’s PRIMARY purpose is software version control?",
+    "options": [
+      "Amazon CodeStar.",
+      "AWS Command Line Interface (AWS CLI).",
+      "Amazon Cognito.",
+      "AWS CodeCommit."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-721",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "How can a customer increase security to AWS account logons? (Select TWO)",
+    "options": [
+      "Configure AWS Certificate Manager",
+      "Enable Multi-Factor Authentication (MFA)",
+      "Use Amazon Cognito to manage access",
+      "Configure a strong password policy",
+      "Enable AWS Organizations"
+    ],
+    "correct_answer": [
+      "B",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-722",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which of the following components of the AWS Global Infrastructure consists of one or more discrete data centers interconnected through low latency links?",
+    "options": [
+      "Availability Zone",
+      "Edge location",
+      "Region",
+      "Private networking"
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-723",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "One benefit of On-Demand Amazon Elastic Compute Cloud (Amazon EC2) pricing is:",
+    "options": [
+      "The ability to bid for a lower hourly cost.",
+      "Paying a daily rate regardless of time used.",
+      "Paying only for time used.",
+      "Pre-paying for instances and paying a lower hourly rate."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-724",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What can assist in evaluating an application for migration to the cloud? (Select TWO)",
+    "options": [
+      "AWS Trusted Advisor.",
+      "AWS Professional Services.",
+      "AWS Systems Manager.",
+      "AWS Partner Network (APN).",
+      "AWS Secrets Manager."
+    ],
+    "correct_answer": [
+      "B",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-725",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "A characteristic of edge locations is that they:",
+    "options": [
+      "Host Amazon EC2 instances closer to users.",
+      "Help lower latency and improve performance for users.",
+      "Cache frequently changing data without reaching the origin server.",
+      "Refresh data changes daily."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-726",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following are valid ways for a customer to interact with AWS services? (Select TWO)",
+    "options": [
+      "Command line interface.",
+      "On-premises.",
+      "Software Development Kits.",
+      "Software-as-a-service.",
+      "Hybrid."
+    ],
+    "correct_answer": [
+      "A",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-727",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "What is a value proposition of the AWS Cloud?",
+    "options": [
+      "AWS is responsible for security in the AWS Cloud.",
+      "No long-term contract is required.",
+      "Provision new servers in days.",
+      "AWS manages user applications in the AWS Cloud."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-728",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "A company is migrating an application that is running non-interruptible workloads for a three-year time frame. Which pricing construct would provide the MOST cost-effective solution?",
+    "options": [
+      "Amazon EC2 Spot Instances.",
+      "Amazon EC2 Dedicated Instances.",
+      "Amazon EC2 On-Demand Instances.",
+      "Amazon EC2 Reserved Instances."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-729",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service is used to track record, and audit configuration changes made to AWS resources?",
+    "options": [
+      "AWS Shield.",
+      "AWS Config.",
+      "AWS IAM.",
+      "Amazon Inspector."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-730",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which feature of the AWS Cloud will support an international company’s requirement for low latency to all of its customers?",
+    "options": [
+      "Fault tolerance.",
+      "Global reach.",
+      "Pay-as-you-go pricing.",
+      "High availability."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-731",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "How can one AWS account use Reserved Instances from another AWS account?",
+    "options": [
+      "By using Amazon EC2 Dedicated Instances.",
+      "By using AWS Organizations consolidated billing.",
+      "By using the AWS Cost Explorer tool.",
+      "By using AWS Budgets."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-732",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "What are the benefits of developing and running a new application in the AWS Cloud compared to on-premises? (Select TWO)",
+    "options": [
+      "AWS automatically distributes the data globally for higher durability.",
+      "AWS will take care of operating the application.",
+      "AWS makes it easy to architect for high availability.",
+      "AWS can easily accommodate application demand changes.",
+      "AWS takes care of application security patching."
+    ],
+    "correct_answer": [
+      "C",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-733",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which of the following services falls under the responsibility of the customer to maintain operating system configuration, security patching, and networking?",
+    "options": [
+      "Amazon RDS.",
+      "Amazon EC2.",
+      "Amazon ElastiCache.",
+      "AWS Fargate."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-734",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "AWS supports which of the following methods to add security to Identity and Access Management (IAM) users? (Select TWO)",
+    "options": [
+      "Implementing Amazon Rekognition.",
+      "Using AWS Shield-protected resources.",
+      "Blocking access with Security Groups.",
+      "Using Multi-Factor Authentication (MFA).",
+      "Enforcing password strength and expiration."
+    ],
+    "correct_answer": [
+      "D",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-735",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which service provides a hybrid storage service that enables on-premises applications to seamlessly use cloud storage?",
+    "options": [
+      "Amazon Glacier",
+      "AWS Snowball",
+      "AWS Storage Gateway",
+      "Amazon Elastic Block Storage (Amazon EBS)"
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-736",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Where should a company go to search software listings from independent software vendors to find, test, buy and deploy software that runs on AWS?",
+    "options": [
+      "AWS Marketplace.",
+      "Amazon Lumberyard.",
+      "AWS Artifact.",
+      "Amazon CloudSearch."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-737",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which of the following is a component of the AWS Global Infrastructure?",
+    "options": [
+      "Amazon Alexa.",
+      "AWS Regions.",
+      "Amazon Lightsail.",
+      "AWS Organizations."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-738",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which Amazon EC2 pricing model adjusts based on supply and demand of EC2 instances?",
+    "options": [
+      "On-Demand Instances.",
+      "Reserved Instances.",
+      "Spot Instances.",
+      "Convertible Reserved Instances."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-739",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "A company wants to migrate its applications to a VPC on AWS These applications will need to access on-premises resources. What combination of actions will enable the company to accomplish this goals? (Select TWO)",
+    "options": [
+      "Use the AWS Service Catalog to identify a list of on-premises resources that can be migrated",
+      "Build a VPN connection between an on-premises device and a virtual private gateway in the new VPC",
+      "Use Amazon Athena to query data from the on-premises database servers",
+      "Connect the company’s on-premises data center to AWS using AWS Direct Connect",
+      "Leverage Amazon CloudFront to restrict access to static web content provided through the company’s on-premises web servers"
+    ],
+    "correct_answer": [
+      "B",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-740",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "A Cloud Practitioner must determine if any security groups in an AWS account have been provisioned to allow unrestricted access for specific ports. What is the SIMPLEST way to do this?",
+    "options": [
+      "Review the inbound rules for each security group in the Amazon EC2 management console to check for port 0.0.0.0/0.",
+      "Run AWS Trusted Advisor and review the findings.",
+      "Open the AWS IAM console and check the inbound rule filters for open access.",
+      "In AWS Config, create a custom rule that invokes an AWS Lambda function to review firewall rules for inbound access."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-741",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which of the following security-related services does AWS offer? (Select TWO)",
+    "options": [
+      "Multi-factor authentication physical tokens.",
+      "AWS Trusted Advisor security checks.",
+      "Data encryption.",
+      "Automated penetration testing.",
+      "Amazon S3 copyrighted content detection."
+    ],
+    "correct_answer": [
+      "B",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-742",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following services have Distributed Denial of Service (DDoS) mitigation features? (Select TWO)",
+    "options": [
+      "AWS WAF.",
+      "Amazon DynamoDB.",
+      "Amazon EC2.",
+      "Amazon CloudFront.",
+      "Amazon Inspector."
+    ],
+    "correct_answer": [
+      "A",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-743",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following AWS features enables a user to launch a pre-configured Amazon Elastic Compute Cloud (Amazon EC2) instance?",
+    "options": [
+      "Amazon Elastic Block Store (Amazon EBS).",
+      "Amazon Machine Image.",
+      "Amazon EC2 Systems Manager.",
+      "Amazon AppStream 2.0."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-744",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "A solution that is able to support growth in users, traffic, or data size with no drop in performance aligns with which cloud architecture principle?",
+    "options": [
+      "Think parallel.",
+      "Implement elasticity.",
+      "Decouple your components.",
+      "Design for failure."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-745",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "Which AWS Cloud benefit eliminates the need for users to try estimating future infrastructure usage?",
+    "options": [
+      "Easy and fast deployment of applications in multiple Regions around the world.",
+      "Security of the AWS Cloud.",
+      "Elasticity of the AWS Cloud.",
+      "Lower variable costs due to massive economies of scale."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-746",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What can users access from AWS Artifact?",
+    "options": [
+      "AWS security and compliance documents.",
+      "A download of configuration management details for all AWS resources.",
+      "Training materials for AWS services.",
+      "A security assessment of the applications deployed in the AWS Cloud."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-747",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Compared with costs in traditional and virtualized data centers, AWS has:",
+    "options": [
+      "Greater variable costs and greater upfront costs.",
+      "Fixed usage costs and lower upfront costs.",
+      "Lower variable costs and greater upfront costs.",
+      "Lower variable costs and lower upfront costs."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-748",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS service would a customer use with a static website to achieve tower latency and high transfer speeds?",
+    "options": [
+      "AWS Lambda.",
+      "Amazon DynamoDB Accelerator.",
+      "Amazon Route 53.",
+      "Amazon CloudFront."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-749",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "How do Amazon EC2 Auto Scaling groups help achieve high availability for a web application?",
+    "options": [
+      "They automatically add more instances across multiple AWS Regions based on global demand of the application.",
+      "They automatically add or replace instances across multiple Availability Zones when the application needs it.",
+      "They enable the application’s stalk: content to reside closer to end users.",
+      "They are able to distribute incoming requests across a tier of web server instances."
+    ],
+    "correct_answer": "B",
+    "explanation": ""
+  },
+  {
+    "id": "personal-750",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following can limit Amazon Simple Storage Service (Amazon S3) bucket access to specific users?",
+    "options": [
+      "A public and private key-pair.",
+      "Amazon Inspector.",
+      "AWS Identity and Access Management (IAM) policies.",
+      "Security Groups."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-751",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "How should a customer forecast the future costs for running a new web application?",
+    "options": [
+      "Amazon Aurora Backtrack.",
+      "Amazon CloudWatch Billing Alarms.",
+      "AWS Simple Monthly Calculator.",
+      "AWS Cost and Usage report."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-752",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Where are AWS compliance documents, such as an SOC 1 report, located?",
+    "options": [
+      "Amazon Inspector.",
+      "AWS CloudTrail.",
+      "AWS Artifact.",
+      "AWS Certificate Manager."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-753",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following tasks is the responsibility of AWS?",
+    "options": [
+      "Encrypting client-side data.",
+      "Configuring AWS Identity and Access Management (IAM) roles.",
+      "Securing the Amazon EC2 hypervisor.",
+      "Setting user password policies."
+    ],
+    "correct_answer": "C",
+    "explanation": ""
+  },
+  {
+    "id": "personal-754",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Under the shared responsibility model which of the following areas are the customer’s responsibility? (Select TWO)",
+    "options": [
+      "Firmware upgrades of network infrastructure.",
+      "Patching of operating systems.",
+      "Patching of the underlying hypervisor.",
+      "Physical security of data centers.",
+      "Configuration of the security group."
+    ],
+    "correct_answer": [
+      "B",
+      "E"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-755",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "A company is looking for a scalable data warehouse solution. Which of the following AWS solutions would meet the company’s needs?",
+    "options": [
+      "Amazon Simple Storage Service (Amazon S3).",
+      "Amazon DynamoDB.",
+      "Amazon Kinesis.",
+      "Amazon Redshift."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-756",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which AWS services provide a way to extend an on-premises architecture to the AWS Cloud? (Select TWO)",
+    "options": [
+      "Amazon EBS.",
+      "AWS Direct Connect.",
+      "Amazon CloudFront.",
+      "AWS Storage Gateway.",
+      "Amazon Connect."
+    ],
+    "correct_answer": [
+      "B",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-757",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "What are the advantages of the AWS Cloud (Select TWO)",
+    "options": [
+      "Fixed rate monthly cost.",
+      "No need to guess capacity requirements.",
+      "Increased speed to market.",
+      "Increased upfront capital expenditure.",
+      "Physical access to cloud data centers."
+    ],
+    "correct_answer": [
+      "B",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-758",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "How can the AWS Cloud increase user workforce productivity after migration from an on-premises data center?",
+    "options": [
+      "Users do not have to wait for infrastructure provisioning.",
+      "The AWS Cloud infrastructure is much faster than an on-premises data center infrastructure.",
+      "AWS takes over application configuration management on behalf of users.",
+      "Users do not need to address security and compliance issues."
+    ],
+    "correct_answer": "A",
+    "explanation": ""
+  },
+  {
+    "id": "personal-759",
+    "source": "Personal",
+    "tag": "Tecnologia",
+    "question": "Which of the following services could be used to deploy an application to servers running on-premises? (Select TWO)",
+    "options": [
+      "AWS Elastic Beanstalk.",
+      "AWS OpsWorks.",
+      "AWS CodeDeploy.",
+      "AWS Batch.",
+      "AWS X-Ray."
+    ],
+    "correct_answer": [
+      "B",
+      "C"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-760",
+    "source": "Personal",
+    "tag": "Conceitos de nuvem",
+    "question": "What is an example of agility in the AWS Cloud?",
+    "options": [
+      "Access to multiple instance types.",
+      "Access to managed services.",
+      "Using Consolidated Billing to produce one bill.",
+      "Decreased acquisition time for new compute resources."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-761",
+    "source": "Personal",
+    "tag": "Segurança e Conformidade",
+    "question": "Which AWS security service protects applications from distributed denial of service attacks with always-on detection and automatic inline mitigations?",
+    "options": [
+      "Amazon Inspector.",
+      "AWS Web Application Firewall (AWS WAF).",
+      "Elastic Load Balancing (ELB).",
+      "AWS Shield."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
+  },
+  {
+    "id": "personal-762",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "Which of the following are advantages of AWS consolidated billing? (Choose two)",
+    "options": [
+      "The ability to receive one bill for multiple accounts.",
+      "Service limits increasing by default in all accounts.",
+      "A fixed discount on the monthly bill.",
+      "Potential volume discounts, as usage in all accounts is combined.",
+      "The automatic extension of the master account’s AWS support plan to all accounts."
+    ],
+    "correct_answer": [
+      "A",
+      "D"
+    ],
+    "explanation": ""
+  },
+  {
+    "id": "personal-763",
+    "source": "Personal",
+    "tag": "Faturamento e definição de preço",
+    "question": "A company is considering using AWS for a self-hosted database that requires a nightly shutdown for maintenance and cost-saving purposes. Which service should the company use?",
+    "options": [
+      "Amazon Redshift.",
+      "Amazon DynamoDB.",
+      "Amazon Elastic Compute Cloud (Amazon EC2) with Amazon EC2 instance store.",
+      "Amazon EC2 with Amazon Elastic Block Store (Amazon EBS)."
+    ],
+    "correct_answer": "D",
+    "explanation": ""
   }
 ]

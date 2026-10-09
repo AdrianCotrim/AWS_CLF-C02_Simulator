@@ -354,25 +354,104 @@ function getExamElapsedMs(session, now = Date.now()) {
   return Math.max(0, now - session.startedAt);
 }
 
+function getExamRemainingMs(session, now = Date.now()) {
+  return Math.max(0, session.deadlineAt - now);
+}
+
+function formatExamRemaining(milliseconds) {
+  const totalSeconds = Math.ceil(Math.max(0, milliseconds) / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  if (hours) {
+    const minutes = Math.floor(totalSeconds / 60) % 60;
+    const seconds = totalSeconds % 60;
+    const pad = value => String(value).padStart(2, '0');
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+  return formatDuration(totalSeconds * 1000);
+}
+
+function isExamExpired(session, now = Date.now()) {
+  return Number.isFinite(session.deadlineAt) && getExamRemainingMs(session, now) === 0;
+}
+
+function getExamTimerClass(session, now = Date.now()) {
+  if (!Number.isFinite(session.deadlineAt)) return '';
+  const remainingMs = getExamRemainingMs(session, now);
+  if (remainingMs <= 60 * 1000) return 'critical';
+  if (remainingMs <= 10 * 60 * 1000) return 'attention';
+  return '';
+}
+
+function clearExamTimer() {
+  if (examTimerInterval !== null) {
+    clearInterval(examTimerInterval);
+    examTimerInterval = null;
+  }
+}
+
+function finishExam(completionReason) {
+  if (!S || S.mode !== 'exam' || S.done) return false;
+  S.done = true;
+  S.completionReason = completionReason;
+  const elapsedMs = getExamElapsedMs(S);
+  S.elapsedMs = Number.isFinite(S.durationMs) ? Math.min(elapsedMs, S.durationMs) : elapsedMs;
+  if (S.sessionId) {
+    P.history.push({
+      type: 'exam-completed',
+      sessionId: S.sessionId,
+      date: new Date().toISOString(),
+      elapsedMs: S.elapsedMs,
+      completionReason
+    });
+  }
+  clearExamTimer();
+  save();
+  render();
+  return true;
+}
+
 function syncExamTimer() {
   if (!S || S.mode !== 'exam' || S.done) {
-    if (examTimerInterval !== null) {
-      clearInterval(examTimerInterval);
-      examTimerInterval = null;
-    }
+    clearExamTimer();
     return;
   }
 
   if (!Number.isFinite(S.startedAt)) S.startedAt = Date.now();
   const updateDisplay = () => {
+    if (isExamExpired(S)) {
+      finishExam('time-expired');
+      return;
+    }
     const timer = $('examTimer');
-    if (timer) timer.textContent = formatDuration(getExamElapsedMs(S));
+    if (!timer) return;
+    if (Number.isFinite(S.deadlineAt)) {
+      const remainingMs = getExamRemainingMs(S);
+      timer.textContent = formatExamRemaining(remainingMs);
+      const timerClass = getExamTimerClass(S);
+      timer.classList.toggle('attention', timerClass === 'attention');
+      timer.classList.toggle('critical', timerClass === 'critical');
+      timer.setAttribute('aria-label', `Tempo restante: ${timer.textContent}`);
+    } else {
+      timer.textContent = formatDuration(getExamElapsedMs(S));
+    }
   };
   updateDisplay();
-  if (examTimerInterval === null) examTimerInterval = setInterval(updateDisplay, 1000);
+  if (examTimerInterval === null) examTimerInterval = setInterval(updateDisplay, 250);
 }
 
 function start(mode) {
+  let durationMs;
+  if (mode === 'exam' && $('examTimeLimitEnabled').checked) {
+    const minutes = Number($('examTimeLimitMinutes').value);
+    const requestedDurationMs = minutes * 60 * 1000;
+    if (!Number.isSafeInteger(minutes) || minutes <= 0 || !Number.isSafeInteger(requestedDurationMs)
+      || !Number.isSafeInteger(Date.now() + requestedDurationMs)) {
+      toast('Informe um limite de tempo válido em minutos.');
+      $('examTimeLimitMinutes').focus();
+      return;
+    }
+    durationMs = requestedDurationMs;
+  }
   if (S && S.persist && !S.done && !confirm('Há um simulado em andamento. Descartá-lo e iniciar outra sessão?')) return;
   const pq = P.questionProgress;
   let pool = Q;
@@ -381,9 +460,15 @@ function start(mode) {
   if (!pool.length) { toast(mode === 'new' ? 'Você já respondeu todas as questões.' : mode === 'errors' ? 'Seu Banco de Erros está vazio.' : 'Sem questões.'); return; }
   let ids = shuffle(pool.map(q => q.id));
   if (mode === 'exam') ids = ids.slice(0, Math.max(1, Math.min(parseInt($('examCount').value, 10) || 60, ids.length)));
+  clearExamTimer();
+  const startedAt = Date.now();
   S = {
     mode, ids, idx: 0, answers: {}, persist: mode === 'exam', done: false,
-    ...(mode === 'exam' ? { sessionId: createExamSessionId(), startedAt: Date.now() } : {})
+    ...(mode === 'exam' ? {
+      sessionId: createExamSessionId(),
+      startedAt,
+      ...(Number.isFinite(durationMs) ? { durationMs, deadlineAt: startedAt + durationMs } : {})
+    } : {})
   };
   save(); render();
 }
@@ -431,7 +516,7 @@ function render() {
   const inBank = P.questionProgress[q.id] && P.questionProgress[q.id].inErrorBank;
   m.innerHTML = `<div class="card">
     <div class="meta"><span>Modo: ${MODES[S.mode]}</span><span>Questão ${S.idx + 1} / ${S.ids.length}</span>
-      ${S.mode === 'exam' ? `<span class="exam-timer" aria-label="Tempo decorrido">⏱ <time id="examTimer">${formatDuration(getExamElapsedMs(S))}</time></span>` : ''}
+      ${S.mode === 'exam' ? `<span class="exam-timer ${getExamTimerClass(S)}" aria-label="${Number.isFinite(S.deadlineAt) ? 'Tempo restante' : 'Tempo decorrido'}">⏱ <time id="examTimer">${Number.isFinite(S.deadlineAt) ? formatExamRemaining(getExamRemainingMs(S)) : formatDuration(getExamElapsedMs(S))}</time></span>` : ''}
     </div>
     <div class="progress"><div style="width:${(S.idx + (a ? 1 : 0)) / S.ids.length * 100}%"></div></div>
     <p class="qtext">${esc(q.question)}</p>
@@ -534,13 +619,13 @@ function getStatisticsData() {
         sessionId,
         date: completion.date,
         durationMs: Number.isFinite(completion.elapsedMs) ? completion.elapsedMs : null,
+        completionReason: completion.completionReason,
         answered: answers.length,
         correct: examCorrect,
         errors: answers.length - examCorrect,
         percentage: percentage(examCorrect, answers.length)
       };
     })
-    .filter(exam => exam.answered > 0)
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .map((exam, index) => ({ ...exam, number: index + 1 }));
 
@@ -678,10 +763,11 @@ function renderStatistics(main) {
           label: `#${exam.number}`, percentage: exam.percentage
         })), 'Taxa de acerto por simulado')}</div>
         <div class="statistics-table-wrap"><table class="statistics-table">
-          <thead><tr><th>Simulado</th><th>Data</th><th>Questões</th><th>Acertos</th><th>Erros</th><th>Aproveitamento</th><th>Tempo</th></tr></thead>
+          <thead><tr><th>Simulado</th><th>Data</th><th>Questões</th><th>Acertos</th><th>Erros</th><th>Aproveitamento</th><th>Tempo</th><th>Encerramento</th></tr></thead>
           <tbody>${data.exams.slice().reverse().map(exam => `<tr><th scope="row">#${exam.number}</th><td>${formatDate(exam.date)}</td>
             <td>${exam.answered}</td><td>${exam.correct}</td><td>${exam.errors}</td><td>${formatPercentage(exam.percentage)}</td>
-            <td>${exam.durationMs === null ? '—' : formatDuration(exam.durationMs)}</td></tr>`).join('')}</tbody>
+            <td>${exam.durationMs === null ? '—' : formatDuration(exam.durationMs)}</td>
+            <td>${exam.completionReason === 'time-expired' ? 'Tempo esgotado' : 'Concluído'}</td></tr>`).join('')}</tbody>
         </table></div>
       </div>` : '<p class="muted statistics-empty">O histórico de simulados passa a ser registrado a partir desta versão. Conclua um simulado para visualizar o desempenho aqui.</p>'}
     </section>
@@ -1204,12 +1290,15 @@ async function submitQuestion(event, allowDuplicate = false) {
 
 function renderResult(m) {
   const n = S.ids.length, right = S.ids.filter(id => S.answers[id] && S.answers[id].ok).length;
-  const wrong = S.ids.filter(id => !(S.answers[id] && S.answers[id].ok));
+  const wrong = S.ids.filter(id => S.answers[id] && !S.answers[id].ok);
+  const unanswered = S.ids.filter(id => !S.answers[id]);
   m.innerHTML = `<div class="card"><h2>Resultado — ${MODES[S.mode]}</h2>
     <p><b>${right} / ${n}</b> acertos (${String(Math.round(right / n * 1000) / 10).replace('.', ',')}%)</p>
+    ${S.completionReason === 'time-expired' ? '<p class="result bad"><b>Tempo esgotado.</b> O simulado foi finalizado automaticamente.</p>' : ''}
     ${S.mode === 'exam' && Number.isFinite(S.elapsedMs) ? `<p><b>Tempo:</b> ${formatDuration(S.elapsedMs)}</p>` : ''}
     ${wrong.length ? `<p>Questões erradas:</p><ol class="wrong-list">${wrong.map(id => `<li>${esc(byId[id].question.slice(0, 140))}</li>`).join('')}</ol>`
-      : '<p>Nenhum erro. Ótimo!</p>'}
+      : unanswered.length ? '<p>Nenhuma resposta incorreta.</p>' : '<p>Nenhum erro. Ótimo!</p>'}
+    ${unanswered.length ? `<p>Questões não respondidas: ${unanswered.length}</p>` : ''}
     <div class="actions"><button class="primary" data-act="quit">Voltar ao início</button></div></div>`;
 }
 
@@ -1281,6 +1370,10 @@ $('main').addEventListener('submit', e => {
 /* ---------- Eventos ---------- */
 $('main').addEventListener('change', e => {
   if (e.target.name !== 'opt') return;
+  if (S && !S.done && isExamExpired(S)) {
+    finishExam('time-expired');
+    return;
+  }
   const q = byId[S.ids[S.idx]];
   if (q.type === 'single_choice') sel = [e.target.value];
   else sel = [...document.querySelectorAll('#opts input:checked')].map(i => i.value);
@@ -1367,6 +1460,10 @@ $('main').addEventListener('click', e => {
     return;
   }
   if (!S) return;
+  if (!S.done && isExamExpired(S)) {
+    finishExam('time-expired');
+    return;
+  }
   const q = S.done ? null : byId[S.ids[S.idx]];
   if (act === 'submit') {
     if (!sel.length) return toast('Selecione uma alternativa.');
@@ -1376,16 +1473,8 @@ $('main').addEventListener('click', e => {
   } else if (act === 'next') {
     if (S.idx < S.ids.length - 1) S.idx++;
     else {
+      if (S.mode === 'exam') return finishExam('completed');
       S.done = true;
-      if (S.mode === 'exam' && S.sessionId) {
-        S.elapsedMs = getExamElapsedMs(S);
-        P.history.push({
-          type: 'exam-completed',
-          sessionId: S.sessionId,
-          date: new Date().toISOString(),
-          elapsedMs: S.elapsedMs
-        });
-      }
     }
     save(); render();
   } else if (act === 'prev') {
@@ -1414,6 +1503,14 @@ document.querySelector('nav').addEventListener('click', e => {
     currentView = 'simulator';
     start(button.dataset.mode);
   }
+});
+
+$('examTimeLimitEnabled').addEventListener('change', e => {
+  $('examTimeLimitMinutes').disabled = !e.target.checked;
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && S && S.mode === 'exam' && !S.done) syncExamTimer();
 });
 
 /* ---------- Backup, restauração e reset ---------- */

@@ -26,7 +26,7 @@ Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servid
 - **Todas**: questões do banco em ordem aleatória.
 - **Questões novas**: só as que você nunca respondeu.
 - **Banco de Erros**: questões erradas (ou marcadas como "Acertei por chute"). Acertar uma questão neste modo a remove do banco.
-- **Simulado**: quantidade configurável (padrão 60), com botão "Anterior", cronômetro crescente e resultado final com o tempo utilizado. Se você atualizar a página, o simulado em andamento é retomado com o cronômetro preservado.
+- **Simulado**: quantidade configurável (padrão 60), com botão "Anterior", cronômetro crescente e resultado final com o tempo utilizado. Opcionalmente, ative **Limite de tempo** e informe a duração em minutos (sugestão inicial: 90); ao esgotar o prazo, o simulado é finalizado automaticamente e o resultado identifica esse encerramento. O tempo restante é recuperado corretamente se você atualizar a página. Sem limite, o comportamento continua sendo o cronômetro crescente.
 
 ## Como adicionar questões
 
@@ -38,7 +38,7 @@ Na visualização de uma questão em **Banco de Questões**, use **Adicionar ao 
 
 ## Estatísticas
 
-A seção **Estatísticas** calcula respostas, acertos, erros, questões únicas, evolução diária, tópicos e sources a partir de `history`. Novas respostas guardam data, tópico e source no próprio registro; respostas antigas sem esses campos usam os dados atuais da questão quando ela ainda existe. O histórico de simulados e a recuperação de questões no Banco de Erros são contabilizados a partir dos registros com informação suficiente, sem inferir sessões completas retroativamente. Simulados concluídos também guardam o tempo decorrido; registros antigos sem essa informação continuam válidos e exibem o tempo como não disponível.
+A seção **Estatísticas** calcula respostas, acertos, erros, questões únicas, evolução diária, tópicos e sources a partir de `history`. Novas respostas guardam data, tópico e source no próprio registro; respostas antigas sem esses campos usam os dados atuais da questão quando ela ainda existe. O histórico de simulados e a recuperação de questões no Banco de Erros são contabilizados a partir dos registros com informação suficiente, sem inferir sessões completas retroativamente. Simulados concluídos também guardam o tempo decorrido e se foram encerrados por conclusão normal ou esgotamento do tempo; registros antigos sem essa informação continuam válidos e exibem o tempo como não disponível.
 
 ```json
 {

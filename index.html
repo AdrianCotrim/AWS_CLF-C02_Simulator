@@ -17,6 +17,12 @@
         <button data-mode="exam">Simulado</button>
         <input id="examCount" type="number" min="1" value="60" aria-label="Quantidade de questões do simulado">
       </span>
+      <label class="exam-limit">
+        <input id="examTimeLimitEnabled" type="checkbox">
+        Limite de tempo
+        <input id="examTimeLimitMinutes" type="number" min="1" step="1" value="90" aria-label="Limite de tempo em minutos" disabled>
+        min
+      </label>
       <button data-view="statistics">Estatísticas</button>
       <button data-view="bank">Banco de Questões</button>
       <button data-view="add">Adicionar questão</button>
