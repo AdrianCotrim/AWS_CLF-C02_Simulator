@@ -34,10 +34,14 @@
   <main id="main"></main>
 
   <footer>
+    <button id="fullBackupBtn" class="link">Criar backup completo</button>
+    <button id="fullRestoreBtn" class="link">Validar e restaurar backup</button>
     <button id="exportBtn" class="link">Exportar progresso</button>
     <button id="importBtn" class="link">Importar progresso</button>
     <button id="resetBtn" class="link danger">Apagar progresso</button>
     <input id="importFile" type="file" accept="application/json" hidden>
+    <input id="fullBackupFile" type="file" accept="application/json,.json" hidden>
+    <input id="bankImportFile" type="file" accept="application/json" hidden>
   </footer>
 
   <div id="toast" role="status" hidden></div>

@@ -101,6 +101,18 @@ Limite: o LocalStorage pertence ao navegador e ao endereço usado (`localhost:80
 
 Faça backups periódicos.
 
+## Backup completo e restauração
+
+Use **Criar backup completo** para baixar um arquivo JSON versionado com o banco atual de questões, a sequência de IDs, `user-data.json`, `history.json` e o progresso enviado explicitamente pelo frontend. Esse progresso inclui `questionProgress`, histórico de respostas e a sessão de simulado em andamento, quando existente. O backend não acessa o LocalStorage diretamente; o frontend envia esses dados à API apenas para montar o arquivo.
+
+Use **Validar e restaurar backup** para selecionar um arquivo completo. A aplicação valida formato, versão, estrutura e checksums antes de mostrar o resumo e pedir confirmação. Um arquivo válido contém `format: "aws-clf-c02-backup"`, `version: 1` e todos os componentes listados no manifesto. Os checksums SHA-256 detectam corrupção acidental; não autenticam o arquivo nem provam que seu conteúdo é confiável.
+
+Antes de substituir os dados, o backend cria um backup de segurança com os arquivos JSON atuais e o progresso atual recebido do frontend, em `data/backups/`. Os quatro arquivos JSON são preparados em temporários e substituídos individualmente; se uma substituição falhar, o backend tenta reverter os arquivos já substituídos. O LocalStorage é atualizado pelo frontend, que preserva seu valor anterior se a requisição de restauração falhar.
+
+A troca entre vários arquivos no disco e LocalStorage não é uma transação única: uma queda abrupta do processo entre a gravação do LocalStorage e a conclusão do backend, ou uma falha durante o rollback, ainda pode exigir recuperação manual usando o backup de segurança. Guarde também o arquivo baixado em outro local. A API requer os arquivos atuais `questions.json`, `user-data.json` e `history.json` para criar o backup e a cópia de segurança; se algum estiver ausente ou corrompido, a operação é recusada em vez de substituir silenciosamente por valores vazios. O arquivo de sequência pode estar ausente, pois nesse caso o próximo ID é derivado do maior ID atual.
+
+O backup completo não inclui `node_modules`, caches ou logs, nem modifica a fonte oficial de persistência. O backend continua lendo e gravando os caminhos JSON atuais. O diretório `data/backups/` é a localização adequada ao projeto local atual; em uma futura distribuição Electron, os backups e demais dados graváveis devem ser movidos para o diretório de dados do usuário do aplicativo. O servidor do backend escuta somente em `127.0.0.1`, sem expor a API às interfaces de rede externas.
+
 ## API local de questões
 
 O simulador carrega o banco inicial de `data/questions.json`; a tela de cadastro usa a API local. Para instalar e iniciar a API, use Node.js 18 ou superior:
@@ -111,13 +123,17 @@ npm install
 npm run server
 ```
 
-A API fica em `http://localhost:3000`; a porta pode ser alterada pela variável de ambiente `PORT`. O armazenamento continua sendo `data/questions.json`, na raiz do projeto. O backend não cria o arquivo automaticamente: se ele estiver ausente, a API responde com erro e não substitui o banco.
+A API fica em `http://127.0.0.1:3000`; a porta pode ser alterada pela variável de ambiente `PORT`. O armazenamento continua sendo `data/questions.json`, na raiz do projeto. O backend não cria o arquivo automaticamente: se ele estiver ausente, a API responde com erro e não substitui o banco.
 
 Endpoints disponíveis:
 
+- `POST /api/backup/create`: cria um backup versionado. Envie `{ progress: ... }` com o estado atual do LocalStorage obtido pelo frontend.
+- `POST /api/backup/validate`: valida um bundle completo enviado em `{ backup: ... }`, sem gravar dados.
+- `POST /api/backup/restore`: restaura um bundle validado enviado em `{ backup: ..., currentProgress: ... }`. Cria primeiro uma cópia de segurança dos dados atuais.
 - `GET /api/questions`: retorna a lista completa.
 - `GET /api/questions/:id`: retorna uma questão ou HTTP 404.
 - `POST /api/questions`: valida e adiciona uma questão, retornando HTTP 201. O servidor gera o ID `personal-NNN`; não envie `id`.
+- `POST /api/questions/import`: faz pré-visualização ou confirma a importação em lote. Envie `{ questions: [...] }` e use `confirm: true` somente na confirmação final. A rota responde com resumo de itens válidos, duplicados e inválidos antes de gravar qualquer dado.
 - `PUT /api/questions/:id`: valida e atualiza os campos da questão sem alterar o ID; responde HTTP 404 se não existir.
 - `DELETE /api/questions/:id`: exclui a questão e retorna seu ID; responde HTTP 404 se não existir.
 
@@ -138,13 +154,13 @@ Exemplo de questão para criação (o campo `correct_answer` pode ser a letra da
 Teste os endpoints no PowerShell enquanto o servidor estiver em execução:
 
 ```powershell
-Invoke-RestMethod http://localhost:3000/api/questions
-Invoke-RestMethod http://localhost:3000/api/questions/personal-001
+Invoke-RestMethod http://127.0.0.1:3000/api/questions
+Invoke-RestMethod http://127.0.0.1:3000/api/questions/personal-001
 $body = @{ source = 'Personal'; tag = 'Conceitos de nuvem'; question = 'Enunciado atualizado?'; options = @('Alternativa A', 'Alternativa B'); correct_answer = 'A'; explanation = '' } | ConvertTo-Json
-Invoke-RestMethod -Method Put -Uri http://localhost:3000/api/questions/personal-001 -ContentType 'application/json' -Body $body
-Invoke-RestMethod -Method Delete -Uri http://localhost:3000/api/questions/personal-001
+Invoke-RestMethod -Method Put -Uri http://127.0.0.1:3000/api/questions/personal-001 -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Method Delete -Uri http://127.0.0.1:3000/api/questions/personal-001
 $body = @{ source = 'Personal'; tag = 'Conceitos de nuvem'; question = 'Exemplo de pergunta?'; options = @('Alternativa A', 'Alternativa B'); correct_answer = 'A'; explanation = 'A alternativa A está correta.' } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/questions -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3000/api/questions -ContentType 'application/json' -Body $body
 ```
 
 Para executar os testes automatizados da API, rode `npm test` dentro de `backend/`.

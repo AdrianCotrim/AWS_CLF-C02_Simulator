@@ -162,4 +162,15 @@ function updateQuestion(id, question) {
   return operation;
 }
 
-module.exports = { readQuestions, writeQuestions, getQuestionById, addQuestion, deleteQuestion, updateQuestion };
+module.exports = {
+  defaultFile,
+  questionsFile,
+  idSequenceFile,
+  readQuestions,
+  readIdHighWaterMark,
+  writeQuestions,
+  getQuestionById,
+  addQuestion,
+  deleteQuestion,
+  updateQuestion
+};

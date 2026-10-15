@@ -6,7 +6,13 @@ const storeMessages = {
   QUESTIONS_READ_FAILED: 'Não foi possível ler o banco de questões.',
   QUESTIONS_WRITE_FAILED: 'Não foi possível salvar o banco de questões.',
   QUESTION_ID_SEQUENCE_INVALID: 'A sequência de IDs está inválida.',
-  DUPLICATE_QUESTION_ID: 'O ID gerado já existe no banco de questões.'
+  DUPLICATE_QUESTION_ID: 'O ID gerado já existe no banco de questões.',
+  BACKUP_SOURCE_MISSING: 'Um ou mais arquivos necessários para o backup ou a restauração estão ausentes.',
+  BACKUP_SOURCE_INVALID: 'Um ou mais arquivos atuais contêm JSON inválido.',
+  BACKUP_FILE_WRITE_FAILED: 'Não foi possível gravar o backup de segurança antes da restauração.',
+  BACKUP_RESTORE_STAGE_FAILED: 'Não foi possível preparar os arquivos para restauração.',
+  BACKUP_RESTORE_FAILED: 'Não foi possível restaurar o backup; os arquivos anteriores foram recuperados.',
+  BACKUP_RESTORE_ROLLBACK_FAILED: 'A restauração e a recuperação automática falharam parcialmente. Use o backup de segurança para recuperar os dados.'
 };
 
 function errorHandler(error, req, res, next) {
@@ -21,7 +27,7 @@ function errorHandler(error, req, res, next) {
 
   const status = error.status || (error.code === 'DUPLICATE_QUESTION_ID' ? 409 : 500);
   const code = error.code || 'INTERNAL_ERROR';
-  const message = error.message && status < 500
+  const message = error.message && (status < 500 || error.expose === true)
     ? error.message
     : storeMessages[code] || 'Ocorreu um erro interno inesperado.';
 

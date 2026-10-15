@@ -13,6 +13,7 @@ let examTimerInterval = null;
 const QUESTION_SOURCES = ['Personal', 'Cloudverse', 'Examtopics'];
 const QUESTION_TAGS = ['Conceitos de nuvem', 'Segurança e conformidade', 'Tecnologia', 'Faturamento e definição de preço'];
 let currentView = 'simulator';
+let questionMapVisible = false;
 let questionDraft = createQuestionDraft();
 let questionFeedback = null;
 let isSubmittingQuestion = false;
@@ -358,6 +359,31 @@ function getExamRemainingMs(session, now = Date.now()) {
   return Math.max(0, session.deadlineAt - now);
 }
 
+function getExamSummary(session = S) {
+  if (!session || !Array.isArray(session.ids)) return { total: 0, answered: 0, unanswered: 0, reviewed: 0, correct: 0, errors: 0, percent: 0 };
+
+  const total = session.ids.length;
+  let answered = 0;
+  let reviewed = 0;
+  let correct = 0;
+  let errors = 0;
+
+  for (const id of session.ids) {
+    const answer = session.answers[id];
+    if (answer && Array.isArray(answer.sel) && answer.sel.length) {
+      answered++;
+    }
+    if (answer && answer.reviewed) reviewed++;
+    if (answer && answer.ok) correct++;
+    else if (answer && answer.hasOwnProperty('ok') && !answer.ok) errors++;
+  }
+
+  const unanswered = total - answered;
+  const percent = answered ? (correct / answered) * 100 : 0;
+
+  return { total, answered, unanswered, reviewed, correct, errors, percent };
+}
+
 function formatExamRemaining(milliseconds) {
   const totalSeconds = Math.ceil(Math.max(0, milliseconds) / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -395,13 +421,21 @@ function finishExam(completionReason) {
   S.completionReason = completionReason;
   const elapsedMs = getExamElapsedMs(S);
   S.elapsedMs = Number.isFinite(S.durationMs) ? Math.min(elapsedMs, S.durationMs) : elapsedMs;
+  const summary = getExamSummary(S);
   if (S.sessionId) {
     P.history.push({
       type: 'exam-completed',
       sessionId: S.sessionId,
       date: new Date().toISOString(),
       elapsedMs: S.elapsedMs,
-      completionReason
+      completionReason,
+      total: summary.total,
+      answered: summary.answered,
+      unanswered: summary.unanswered,
+      reviewed: summary.reviewed,
+      correct: summary.correct,
+      errors: summary.errors,
+      percent: summary.percent
     });
   }
   clearExamTimer();
@@ -459,8 +493,23 @@ function start(mode) {
   if (mode === 'errors') pool = Q.filter(q => pq[q.id] && pq[q.id].inErrorBank);
   if (!pool.length) { toast(mode === 'new' ? 'Você já respondeu todas as questões.' : mode === 'errors' ? 'Seu Banco de Erros está vazio.' : 'Sem questões.'); return; }
   let ids = shuffle(pool.map(q => q.id));
-  if (mode === 'exam') ids = ids.slice(0, Math.max(1, Math.min(parseInt($('examCount').value, 10) || 60, ids.length)));
+  if (mode === 'exam') {
+    const requestedCount = parseInt($('examCount').value, 10);
+    const safeCount = Number.isInteger(requestedCount) && requestedCount > 0 ? requestedCount : ids.length;
+    const count = Math.min(safeCount, ids.length);
+    if (count < 1) {
+      toast('Não há questões elegíveis suficientes para iniciar um simulado.');
+      return;
+    }
+    ids = ids.slice(0, count);
+    const modeLabel = Number.isFinite(durationMs) ? `${formatDuration(durationMs)} de tempo` : 'sem limite de tempo';
+    if (!confirm(`Iniciar simulado:
+- ${count} questões
+- ${modeLabel}
+- Ordem aleatória definida no início`)) return;
+  }
   clearExamTimer();
+  questionMapVisible = false;
   const startedAt = Date.now();
   S = {
     mode, ids, idx: 0, answers: {}, persist: mode === 'exam', done: false,
@@ -498,6 +547,18 @@ function render() {
   const q = byId[S.ids[S.idx]], a = S.answers[q.id], multi = q.type === 'multiple_choice';
   sel = a ? a.sel : [];
   const last = S.idx === S.ids.length - 1;
+  const questionSummary = getExamSummary(S);
+  const questionMap = `<div class="question-map-shell">
+    <div class="question-map-toolbar">
+      <button type="button" data-act="toggle-question-map">${questionMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}</button>
+    </div>
+    ${questionMapVisible ? `<div class="question-map" aria-label="Mapa das questões">${S.ids.map((id, index) => {
+      const answer = S.answers[id];
+      const state = !answer ? 'pending' : answer.reviewed ? 'review' : 'answered';
+      const current = index === S.idx ? 'current' : '';
+      return `<button type="button" data-act="jump" data-question-index="${index}" class="exam-chip ${state} ${current}" aria-label="Ir para a questão ${index + 1}">${index + 1}</button>`;
+    }).join('')}</div>` : ''}
+  </div>`;
   const opts = Object.entries(q.options).map(([k, t]) => {
     let cls = 'opt';
     if (a) cls += ' locked' + (q.correct_answer.includes(k) ? ' ok' : sel.includes(k) ? ' bad' : '');
@@ -514,19 +575,24 @@ function render() {
       ${q.explanation ? `<div class="expl"><b>Explicação:</b><br>${esc(q.explanation)}</div>` : ''}`;
   }
   const inBank = P.questionProgress[q.id] && P.questionProgress[q.id].inErrorBank;
+  const reviewLabel = a && a.reviewed ? 'Desmarcar revisão' : 'Marcar para revisão';
   m.innerHTML = `<div class="card">
     <div class="meta"><span>Modo: ${MODES[S.mode]}</span><span>Questão ${S.idx + 1} / ${S.ids.length}</span>
       ${S.mode === 'exam' ? `<span class="exam-timer ${getExamTimerClass(S)}" aria-label="${Number.isFinite(S.deadlineAt) ? 'Tempo restante' : 'Tempo decorrido'}">⏱ <time id="examTimer">${Number.isFinite(S.deadlineAt) ? formatExamRemaining(getExamRemainingMs(S)) : formatDuration(getExamElapsedMs(S))}</time></span>` : ''}
     </div>
+    <div class="meta"><span>Respondidas: ${questionSummary.answered}/${questionSummary.total}</span><span>Sem resposta: ${questionSummary.unanswered}</span><span>Em revisão: ${questionSummary.reviewed}</span></div>
+    ${questionMap}
     <div class="progress"><div style="width:${(S.idx + (a ? 1 : 0)) / S.ids.length * 100}%"></div></div>
     <p class="qtext">${esc(q.question)}</p>
     ${multi ? `<p class="hint">Múltiplas respostas: selecione ${q.correct_answer.length}.</p>` : ''}
     <div id="opts">${opts}</div>${feedback}
     <div class="actions">
       ${S.mode === 'exam' && S.idx > 0 ? '<button data-act="prev">Anterior</button>' : ''}
+      ${S.mode === 'exam' ? `<button data-act="toggle-review">${reviewLabel}</button>` : ''}
       ${a ? '' : '<button class="primary" data-act="submit">Responder</button>'}
       ${a ? `<button class="primary" data-act="next">${last ? 'Ver resultado' : 'Próxima'}</button>` : ''}
       ${a && a.ok ? `<button data-act="guess" ${inBank ? 'disabled' : ''}>Acertei por chute</button>` : ''}
+      ${S.mode === 'exam' ? '<button class="primary" data-act="finish">Finalizar simulado</button>' : ''}
       <button data-act="quit">Encerrar sessão</button>
     </div></div>`;
 }
@@ -921,6 +987,50 @@ function loadQuestionBank() {
   });
 }
 
+async function importQuestionsFromFile(file) {
+  if (!file) return;
+
+  let payload;
+  try {
+    payload = JSON.parse(await file.text());
+  } catch (error) {
+    toast('Arquivo de questões inválido. Envie um JSON em formato de lista ou com a propriedade "questions".');
+    return;
+  }
+
+  const questions = Array.isArray(payload) ? payload : Array.isArray(payload && payload.questions) ? payload.questions : null;
+  if (!questions) {
+    toast('Arquivo de questões inválido. Envie um JSON em formato de lista ou com a propriedade "questions".');
+    return;
+  }
+
+  try {
+    const summary = await window.QuestionsApi.importQuestions({ questions, confirm: false });
+    const total = Number(summary.total ?? questions.length);
+    const addable = Number(summary.addable ?? summary.importable ?? 0);
+    const duplicates = Number(summary.duplicates ?? 0);
+    const invalid = Number(summary.invalid ?? 0);
+
+    const proceed = window.confirm(
+      `Resumo da importação:\n\n- Total: ${total}\n- Novas: ${addable}\n- Duplicadas: ${duplicates}\n- Inválidas: ${invalid}\n\nDeseja importar as questões válidas?`
+    );
+    if (!proceed) return;
+
+    const imported = await window.QuestionsApi.importQuestions({ questions, confirm: true });
+    const refreshed = await window.QuestionsApi.getQuestions();
+    Q = refreshed.map(question => normalizeQuestion(question));
+    byId = Object.fromEntries(Q.map(question => [question.id, question]));
+    bankQuestions = refreshed;
+    bankStatus = bankQuestions.length ? 'ready' : 'empty';
+    currentView = 'bank';
+    save();
+    render();
+    toast(imported.message || `Importadas ${Number(imported.imported ?? addable)} questões.`);
+  } catch (error) {
+    toast(error.message || 'Não foi possível importar as questões. Verifique o arquivo e tente novamente.');
+  }
+}
+
 function questionOptions(question) {
   if (Array.isArray(question.options)) return question.options.map(option => String(option));
   if (question.options && typeof question.options === 'object') return Object.values(question.options).map(option => String(option));
@@ -960,7 +1070,10 @@ function renderQuestionBank(main) {
   const sourceOptions = ['Personal', 'Cloudverse', 'Examtopics'];
   const tagOptions = QUESTION_TAGS;
   main.innerHTML = `<section class="question-bank" aria-labelledby="question-bank-title">
-    <div class="bank-heading"><h2 id="question-bank-title">Banco de Questões</h2></div>
+    <div class="bank-heading">
+      <h2 id="question-bank-title">Banco de Questões</h2>
+      <button type="button" class="primary" data-bank-action="import">Importar questões</button>
+    </div>
     <div class="bank-filters">
       <label class="form-field bank-search"><span>Pesquisar questões</span>
         <input class="form-control" type="search" data-bank-filter="query" value="${esc(bankFilters.query)}" placeholder="ID, enunciado, alternativa..." autocomplete="off">
@@ -1289,17 +1402,29 @@ async function submitQuestion(event, allowDuplicate = false) {
 }
 
 function renderResult(m) {
-  const n = S.ids.length, right = S.ids.filter(id => S.answers[id] && S.answers[id].ok).length;
-  const wrong = S.ids.filter(id => S.answers[id] && !S.answers[id].ok);
-  const unanswered = S.ids.filter(id => !S.answers[id]);
+  const summary = getExamSummary(S);
+  const n = summary.total;
+  const right = summary.correct;
+  const wrong = summary.errors;
+  const unanswered = summary.unanswered;
+  const reviewed = S.ids.filter(id => S.answers[id] && S.answers[id].reviewed);
+  const completionLabel = S.completionReason === 'time-expired' ? 'Tempo esgotado' : 'Finalização manual';
   m.innerHTML = `<div class="card"><h2>Resultado — ${MODES[S.mode]}</h2>
-    <p><b>${right} / ${n}</b> acertos (${String(Math.round(right / n * 1000) / 10).replace('.', ',')}%)</p>
+    <p><b>${right} / ${n}</b> acertos (${String((summary.percent || 0)).replace('.', ',')}%)</p>
+    <p><b>Data:</b> ${Number.isFinite(S.startedAt) ? new Date(S.startedAt).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR')}</p>
+    <p><b>Duração:</b> ${S.mode === 'exam' && Number.isFinite(S.elapsedMs) ? formatDuration(S.elapsedMs) : 'Não disponível'}</p>
+    <p><b>Limite:</b> ${Number.isFinite(S.durationMs) ? formatDuration(S.durationMs) : 'Sem limite'}</p>
+    <p><b>Motivo:</b> ${completionLabel}</p>
+    <p><b>Respondidas:</b> ${summary.answered} / ${n} &nbsp; | &nbsp; <b>Não respondidas:</b> ${unanswered} &nbsp; | &nbsp; <b>Marcadas para revisão:</b> ${reviewed.length}</p>
     ${S.completionReason === 'time-expired' ? '<p class="result bad"><b>Tempo esgotado.</b> O simulado foi finalizado automaticamente.</p>' : ''}
-    ${S.mode === 'exam' && Number.isFinite(S.elapsedMs) ? `<p><b>Tempo:</b> ${formatDuration(S.elapsedMs)}</p>` : ''}
-    ${wrong.length ? `<p>Questões erradas:</p><ol class="wrong-list">${wrong.map(id => `<li>${esc(byId[id].question.slice(0, 140))}</li>`).join('')}</ol>`
-      : unanswered.length ? '<p>Nenhuma resposta incorreta.</p>' : '<p>Nenhum erro. Ótimo!</p>'}
-    ${unanswered.length ? `<p>Questões não respondidas: ${unanswered.length}</p>` : ''}
-    <div class="actions"><button class="primary" data-act="quit">Voltar ao início</button></div></div>`;
+    ${wrong ? `<p>Questões erradas:</p><ol class="wrong-list">${S.ids.filter(id => S.answers[id] && !S.answers[id].ok).map(id => `<li>${esc(byId[id].question.slice(0, 140))}</li>`).join('')}</ol>`
+      : unanswered ? '<p>Nenhuma resposta incorreta.</p>' : '<p>Nenhum erro. Ótimo!</p>'}
+    ${reviewed.length ? `<p>Questões marcadas para revisão:</p><ul class="wrong-list">${reviewed.map(id => `<li>${esc(byId[id].question.slice(0, 140))}</li>`).join('')}</ul>` : ''}
+    <div class="actions">
+      <button data-act="review">Revisar questões</button>
+      <button class="primary" data-act="quit">Voltar ao início</button>
+      <button data-act="start-another">Iniciar outro simulado</button>
+    </div></div>`;
 }
 
 /* ---------- Cadastro de questões ---------- */
@@ -1378,6 +1503,12 @@ $('main').addEventListener('change', e => {
   if (q.type === 'single_choice') sel = [e.target.value];
   else sel = [...document.querySelectorAll('#opts input:checked')].map(i => i.value);
   document.querySelectorAll('#opts .opt').forEach(l => l.classList.toggle('picked', sel.includes(l.querySelector('input').value)));
+
+  if (S && !S.done) {
+    const current = S.answers[q.id] || { sel: [], ok: false, reviewed: false };
+    S.answers[q.id] = { ...current, sel: sel.slice(), reviewed: Boolean(current.reviewed) };
+    save();
+  }
 });
 
 $('main').addEventListener('click', e => {
@@ -1393,6 +1524,9 @@ $('main').addEventListener('click', e => {
       }
     }
     else if (bankAction.dataset.bankAction === 'retry') loadQuestionBank();
+    else if (bankAction.dataset.bankAction === 'import') {
+      $('bankImportFile').click();
+    }
     else if (bankAction.dataset.bankAction === 'clear-filters') {
       bankFilters = { query: '', source: '', tag: '', errorBank: '' };
       $('main').querySelector('[data-bank-filter="query"]').value = '';
@@ -1468,7 +1602,7 @@ $('main').addEventListener('click', e => {
   if (act === 'submit') {
     if (!sel.length) return toast('Selecione uma alternativa.');
     const ok = sameSet(sel, q.correct_answer);
-    S.answers[q.id] = { sel: sel.slice(), ok };
+    S.answers[q.id] = { ...(S.answers[q.id] || {}), sel: sel.slice(), ok, reviewed: Boolean(S.answers[q.id]?.reviewed) };
     record(q, ok); save(); render();
   } else if (act === 'next') {
     if (S.idx < S.ids.length - 1) S.idx++;
@@ -1479,12 +1613,40 @@ $('main').addEventListener('click', e => {
     save(); render();
   } else if (act === 'prev') {
     S.idx--; save(); render();
+  } else if (act === 'jump') {
+    const index = Number(e.target.closest('[data-act="jump"]').dataset.questionIndex);
+    if (Number.isInteger(index) && index >= 0 && index < S.ids.length) {
+      S.idx = index;
+      save(); render();
+    }
+  } else if (act === 'toggle-question-map') {
+    questionMapVisible = !questionMapVisible;
+    render();
+  } else if (act === 'toggle-review') {
+    const current = S.answers[q.id] || { sel: [], ok: false, reviewed: false };
+    current.reviewed = !current.reviewed;
+    S.answers[q.id] = current;
+    save(); render();
+    toast(current.reviewed ? 'Questão marcada para revisão.' : 'Marca de revisão removida.');
+  } else if (act === 'finish') {
+    const summary = getExamSummary(S);
+    const confirmed = confirm(`Finalizar simulado?\n\nRespondidas: ${summary.answered}/${summary.total}\nSem resposta: ${summary.unanswered}\nEm revisão: ${summary.reviewed}\n\nQuestões não respondidas serão consideradas incorretas.`);
+    if (!confirmed) return;
+    finishExam('manual');
+  } else if (act === 'review') {
+    const reviewedIds = S.ids.filter(id => S.answers[id] && S.answers[id].reviewed);
+    if (!reviewedIds.length) return toast('Nenhuma questão foi marcada para revisão.');
+    const id = reviewedIds[0];
+    S.idx = S.ids.indexOf(id);
+    save(); render();
   } else if (act === 'guess') {
     P.questionProgress[q.id].inErrorBank = true; save(); render();
     toast('Questão adicionada ao Banco de Erros.');
   } else if (act === 'quit') {
     if (!S.done && !confirm('Encerrar a sessão atual? As respostas já enviadas continuam salvas.')) return;
     S = null; save(); render();
+  } else if (act === 'start-another') {
+    S = null; save(); currentView = 'simulator'; render();
   }
 });
 
@@ -1514,6 +1676,82 @@ document.addEventListener('visibilitychange', () => {
 });
 
 /* ---------- Backup, restauração e reset ---------- */
+$('fullBackupBtn').onclick = async () => {
+  try {
+    const backup = await window.QuestionsApi.createBackup(P);
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const uniqueSuffix = Math.random().toString(36).slice(2, 8);
+    link.download = `aws-clf-c02-backup-${backup.exportedAt.replace(/[:.]/g, '-')}-${uniqueSuffix}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast('Backup completo criado e baixado.');
+  } catch (error) {
+    toast(error.message || 'Não foi possível criar o backup completo.');
+  }
+};
+
+$('fullRestoreBtn').onclick = () => $('fullBackupFile').click();
+$('fullBackupFile').onchange = async event => {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+
+  let backup;
+  try {
+    backup = JSON.parse(await file.text());
+    const validation = await window.QuestionsApi.validateBackup(backup);
+    const summary = validation.summary;
+    const confirmed = confirm(
+      `Backup válido. Será restaurado:\n\n` +
+      `- Questões: ${summary.questions}\n` +
+      `- Progresso por questão: ${summary.progressEntries}\n` +
+      `- Respostas no histórico: ${summary.responseHistory}\n` +
+      `- Tentativas em arquivo: ${summary.storedAttempts}\n` +
+      `- Sessão em andamento: ${summary.hasActiveSession ? 'sim' : 'não'}\n\n` +
+      'A restauração substituirá os arquivos locais de questões, sequência de IDs, dados do usuário, histórico e o progresso deste navegador. Um backup de segurança será criado antes da alteração. Continuar?'
+    );
+    if (!confirmed) return;
+
+    const previousProgress = P;
+    const previousLocalStorage = localStorage.getItem(KEY);
+    const restoredProgress = backup.data.progress;
+    try {
+      localStorage.setItem(KEY, JSON.stringify(restoredProgress));
+    } catch {
+      throw new Error('Não foi possível preparar o progresso restaurado neste navegador. Nenhum arquivo do aplicativo foi alterado.');
+    }
+
+    let result;
+    try {
+      result = await window.QuestionsApi.restoreBackup({ backup, currentProgress: previousProgress });
+    } catch (error) {
+      try {
+        if (previousLocalStorage === null) localStorage.removeItem(KEY);
+        else localStorage.setItem(KEY, previousLocalStorage);
+      } catch {
+        throw new Error(`${error.message} Não foi possível recuperar automaticamente o LocalStorage anterior; não feche a aplicação e use o backup de segurança se ele foi criado.`);
+      }
+      throw error;
+    }
+
+    Q = backup.data.questions.map(question => normalizeQuestion(question));
+    byId = Object.fromEntries(Q.map(question => [question.id, question]));
+    bankQuestions = backup.data.questions;
+    bankStatus = bankQuestions.length ? 'ready' : 'empty';
+    P = restoredProgress;
+    S = P.session && P.session.ids.every(id => byId[id]) ? P.session : null;
+    questionMapVisible = false;
+    currentView = 'simulator';
+    render();
+    toast(`Backup restaurado. Cópia de segurança: ${result.safetyBackup}`);
+  } catch (error) {
+    toast(error.message || 'Não foi possível validar ou restaurar o backup.');
+  }
+};
+
 $('exportBtn').onclick = () => {
   const out = {
     version: 1, exportedAt: new Date().toISOString(), statistics: stats(),
@@ -1540,6 +1778,13 @@ $('importFile').onchange = async e => {
     P = { version: 1, questionProgress: d.questionProgress, history: Array.isArray(d.history) ? d.history : [], session: null };
     S = null; save(); render(); toast('Progresso restaurado.');
   } catch (err) { toast('Arquivo de progresso inválido.'); }
+};
+
+$('bankImportFile').onchange = async e => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if (!file) return;
+  await importQuestionsFromFile(file);
 };
 
 $('resetBtn').onclick = () => {

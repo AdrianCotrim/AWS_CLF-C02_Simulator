@@ -10,6 +10,7 @@ let directory;
 let questionsFile;
 let userDataFile;
 let historyFile;
+let backupDirectory;
 let server;
 let baseUrl;
 
@@ -48,6 +49,7 @@ before(async () => {
   questionsFile = path.join(directory, 'questions.json');
   userDataFile = path.join(directory, 'user-data.json');
   historyFile = path.join(directory, 'history.json');
+  backupDirectory = path.join(directory, 'backups');
 
   await fs.writeFile(questionsFile, JSON.stringify(initialQuestions));
   await fs.writeFile(userDataFile, JSON.stringify({ version: 1, personalQuestions: [], errorBank: [], preferences: {}, updatedAt: null, createdAt: null }));
@@ -56,6 +58,7 @@ before(async () => {
   process.env.QUESTIONS_FILE = questionsFile;
   process.env.USER_DATA_FILE = userDataFile;
   process.env.HISTORY_FILE = historyFile;
+  process.env.BACKUP_DIRECTORY = backupDirectory;
 
   const app = require('../src/app');
   server = app.listen(0);
@@ -69,6 +72,7 @@ after(async () => {
   delete process.env.QUESTIONS_FILE;
   delete process.env.USER_DATA_FILE;
   delete process.env.HISTORY_FILE;
+  delete process.env.BACKUP_DIRECTORY;
 });
 
 test('GET retorna o banco e a questão pelo ID', async () => {
@@ -294,4 +298,288 @@ test('POST em histórico registra tentativas em arquivo separado', async () => {
   assert.equal(response.status, 201);
   assert.equal(created.attempts[0].id, 'attempt-001');
   assert.equal(created.attempts[0].score, 8);
+});
+
+test('POST /api/questions/import faz pré-visualização e importa apenas itens válidos após confirmação', async () => {
+  const beforeImport = JSON.parse(await fs.readFile(questionsFile, 'utf8'));
+
+  const importPayload = [
+    {
+      source: 'Personal',
+      tag: 'Conceitos de nuvem',
+      question: 'Questão importada de teste?',
+      options: ['Opção A', 'Opção B', 'Opção C'],
+      correct_answer: 'Opção A',
+      explanation: 'Explicação da importação.'
+    },
+    {
+      source: 'Personal',
+      tag: 'Conceitos de nuvem',
+      question: 'Questão existente 2?',
+      options: ['Opção A', 'Opção B'],
+      correct_answer: 'Opção A'
+    },
+    {
+      source: 'Personal',
+      tag: 'Conceitos de nuvem',
+      question: '',
+      options: ['A'],
+      correct_answer: 'A'
+    }
+  ];
+
+  const previewResponse = await fetch(`${baseUrl}/api/questions/import`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questions: importPayload })
+  });
+  const preview = await previewResponse.json();
+
+  assert.equal(previewResponse.status, 200);
+  assert.equal(preview.total, 3);
+  assert.equal(preview.addable, 1);
+  assert.equal(preview.invalid, 1);
+  assert.equal(preview.duplicates, 1);
+
+  const confirmResponse = await fetch(`${baseUrl}/api/questions/import`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questions: importPayload, confirm: true })
+  });
+  const imported = await confirmResponse.json();
+
+  assert.equal(confirmResponse.status, 201);
+  assert.equal(imported.imported, 1);
+
+  const persisted = JSON.parse(await fs.readFile(questionsFile, 'utf8'));
+  assert.equal(persisted.length, beforeImport.length + 1);
+  assert.equal(persisted[persisted.length - 1].question, 'Questão importada de teste?');
+});
+
+const backupProgress = {
+  version: 1,
+  questionProgress: {
+    'personal-002': { timesAnswered: 3, timesWrong: 1, inErrorBank: true, lastCorrect: false }
+  },
+  history: [{ id: 'personal-002', ok: false, mode: 'exam', date: '2026-10-15T10:00:00.000Z' }],
+  session: {
+    mode: 'exam',
+    ids: ['personal-002'],
+    idx: 0,
+    answers: {},
+    persist: true,
+    done: false
+  }
+};
+
+test('POST /api/backup/create inclui os JSONs do backend e o progresso enviado pelo frontend', async () => {
+  const response = await fetch(`${baseUrl}/api/backup/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ progress: backupProgress })
+  });
+  const backup = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(backup.format, 'aws-clf-c02-backup');
+  assert.equal(backup.version, 1);
+  assert.deepEqual(backup.includes, ['questions', 'questionSequence', 'userData', 'history', 'progress']);
+  assert.ok(backup.data.questions.length > 0);
+  assert.ok(backup.data.questionSequence.lastIssued >= 90);
+  assert.equal(backup.data.progress.session.ids[0], 'personal-002');
+  assert.equal(backup.data.userData.version, 1);
+  assert.equal(backup.data.history.version, 1);
+  assert.ok(backup.data.history.attempts.length > 0);
+
+  const validationResponse = await fetch(`${baseUrl}/api/backup/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ backup })
+  });
+  const validation = await validationResponse.json();
+  assert.equal(validationResponse.status, 200);
+  assert.equal(validation.valid, true);
+  assert.equal(validation.summary.hasActiveSession, true);
+  assert.equal(validation.summary.responseHistory, 1);
+});
+
+test('POST /api/backup/validate rejeita backup corrompido sem alterar os dados atuais', async () => {
+  const backupResponse = await fetch(`${baseUrl}/api/backup/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ progress: backupProgress })
+  });
+  const backup = await backupResponse.json();
+  backup.data.questions[0].question = 'Conteúdo adulterado sem atualizar checksum';
+
+  const sourceFiles = [questionsFile, `${questionsFile}.sequence.json`, userDataFile, historyFile];
+  const beforeFiles = await Promise.all(sourceFiles.map(filePath => fs.readFile(filePath, 'utf8')));
+  const response = await fetch(`${baseUrl}/api/backup/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ backup })
+  });
+  const result = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(result.error.code, 'BACKUP_CHECKSUM_MISMATCH');
+
+  const restoreResponse = await fetch(`${baseUrl}/api/backup/restore`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ backup, currentProgress: backupProgress })
+  });
+  assert.equal(restoreResponse.status, 400);
+  assert.equal((await restoreResponse.json()).error.code, 'BACKUP_CHECKSUM_MISMATCH');
+  const afterFiles = await Promise.all(sourceFiles.map(filePath => fs.readFile(filePath, 'utf8')));
+  assert.deepEqual(afterFiles, beforeFiles);
+});
+
+test('POST /api/backup/validate rejeita versão incompatível e componentes obrigatórios ausentes', async () => {
+  const createResponse = await fetch(`${baseUrl}/api/backup/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ progress: backupProgress })
+  });
+  const backup = await createResponse.json();
+
+  const incompatibleResponse = await fetch(`${baseUrl}/api/backup/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ backup: { ...backup, version: 2 } })
+  });
+  assert.equal(incompatibleResponse.status, 400);
+  assert.equal((await incompatibleResponse.json()).error.code, 'UNSUPPORTED_BACKUP_VERSION');
+
+  const missingHistoryBackup = structuredClone(backup);
+  delete missingHistoryBackup.data.history;
+  const missingResponse = await fetch(`${baseUrl}/api/backup/validate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ backup: missingHistoryBackup })
+  });
+  assert.equal(missingResponse.status, 400);
+  assert.equal((await missingResponse.json()).error.code, 'INVALID_BACKUP_HISTORY');
+});
+
+test('POST /api/backup/create distingue arquivo fonte obrigatório ausente', async () => {
+  const missingFile = `${historyFile}.missing`;
+  await fs.rename(historyFile, missingFile);
+  try {
+    const response = await fetch(`${baseUrl}/api/backup/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ progress: backupProgress })
+    });
+    const result = await response.json();
+    assert.equal(response.status, 500);
+    assert.equal(result.error.code, 'BACKUP_SOURCE_MISSING');
+  } finally {
+    await fs.rename(missingFile, historyFile);
+  }
+});
+
+test('POST /api/backup/create rejeita arquivo fonte corrompido sem substituí-lo', async () => {
+  const originalHistory = await fs.readFile(historyFile, 'utf8');
+  await fs.writeFile(historyFile, '{ JSON inválido');
+  try {
+    const response = await fetch(`${baseUrl}/api/backup/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ progress: backupProgress })
+    });
+    const result = await response.json();
+    assert.equal(response.status, 500);
+    assert.equal(result.error.code, 'BACKUP_SOURCE_INVALID');
+    assert.equal(await fs.readFile(historyFile, 'utf8'), '{ JSON inválido');
+  } finally {
+    await fs.writeFile(historyFile, originalHistory);
+  }
+});
+
+test('backup aceita arquivos JSON válidos com listas vazias', async () => {
+  const originalFiles = await Promise.all([questionsFile, userDataFile, historyFile].map(filePath => fs.readFile(filePath, 'utf8')));
+  const emptyProgress = { version: 1, questionProgress: {}, history: [], session: null };
+  try {
+    await fs.writeFile(questionsFile, '[]');
+    await fs.writeFile(userDataFile, JSON.stringify({ version: 1, personalQuestions: [], errorBank: [], preferences: {}, updatedAt: null, createdAt: null }));
+    await fs.writeFile(historyFile, JSON.stringify({ version: 1, attempts: [], updatedAt: null, createdAt: null }));
+    const response = await fetch(`${baseUrl}/api/backup/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ progress: emptyProgress })
+    });
+    const backup = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(backup.data.questions.length, 0);
+    assert.equal(backup.data.history.attempts.length, 0);
+  } finally {
+    await Promise.all([questionsFile, userDataFile, historyFile].map((filePath, index) => fs.writeFile(filePath, originalFiles[index])));
+  }
+});
+
+test('POST /api/backup/restore cria backup de segurança e restaura os arquivos e a sequência', async () => {
+  const createResponse = await fetch(`${baseUrl}/api/backup/create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ progress: backupProgress })
+  });
+  const backup = await createResponse.json();
+  const savedQuestions = JSON.stringify(backup.data.questions);
+  const savedUserData = JSON.stringify(backup.data.userData);
+  const savedHistory = JSON.stringify(backup.data.history);
+
+  await fs.writeFile(questionsFile, JSON.stringify([{ ...initialQuestions[0], question: 'Estado temporário?' }]));
+  await fs.writeFile(userDataFile, JSON.stringify({ version: 1, personalQuestions: [], errorBank: [], preferences: { changed: true } }));
+  await fs.writeFile(historyFile, JSON.stringify({ version: 1, attempts: [{ id: 'temporary' }] }));
+
+  const response = await fetch(`${baseUrl}/api/backup/restore`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ backup, currentProgress: backupProgress })
+  });
+  const result = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(result.restored.questions, backup.data.questions.length);
+  assert.match(result.safetyBackup, /^safety-/);
+  assert.equal(JSON.stringify(JSON.parse(await fs.readFile(questionsFile, 'utf8'))), savedQuestions);
+  assert.equal(JSON.stringify(JSON.parse(await fs.readFile(userDataFile, 'utf8'))), savedUserData);
+  assert.equal(JSON.stringify(JSON.parse(await fs.readFile(historyFile, 'utf8'))), savedHistory);
+  assert.equal(JSON.parse(await fs.readFile(`${questionsFile}.sequence.json`, 'utf8')).lastIssued, backup.data.questionSequence.lastIssued);
+
+  const safetyBundle = JSON.parse(await fs.readFile(path.join(backupDirectory, result.safetyBackup), 'utf8'));
+  assert.equal(safetyBundle.format, 'aws-clf-c02-backup');
+  assert.deepEqual(safetyBundle.data.progress, backupProgress);
+});
+
+test('falha na substituição de um dos arquivos reverte os anteriores', async () => {
+  const backupStore = require('../src/data/backupStore');
+  const backup = await backupStore.createBackup(backupProgress);
+  const targetPaths = [questionsFile, `${questionsFile}.sequence.json`, userDataFile, historyFile];
+  const originalContents = await Promise.all(targetPaths.map(filePath => fs.readFile(filePath, 'utf8')));
+  const originalRename = fs.rename;
+  let injectedFailure = false;
+
+  fs.rename = async (source, destination) => {
+    if (!injectedFailure && destination === `${questionsFile}.sequence.json` && source.endsWith('.restore')) {
+      injectedFailure = true;
+      const error = new Error('falha de escrita simulada');
+      error.code = 'EIO';
+      throw error;
+    }
+    return originalRename(source, destination);
+  };
+
+  try {
+    await assert.rejects(
+      backupStore.restoreBackup(backup, backupProgress),
+      error => error.code === 'BACKUP_RESTORE_FAILED' && error.message.includes('arquivos anteriores foram recuperados')
+    );
+  } finally {
+    fs.rename = originalRename;
+  }
+
+  const restoredContents = await Promise.all(targetPaths.map(filePath => fs.readFile(filePath, 'utf8')));
+  assert.deepEqual(restoredContents, originalContents);
 });

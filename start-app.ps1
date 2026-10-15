@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $backend = Join-Path $root 'backend'
 $frontendUrl = 'http://localhost:8000'
-$apiUrl = 'http://localhost:3000/api/questions'
+$apiUrl = 'http://127.0.0.1:3000/api/questions'
 
 function Test-ApiRunning {
   try {
@@ -34,9 +34,9 @@ if (-not (Test-ApiRunning)) {
     }
   }
   Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoExit', '-NoProfile', '-Command', 'npm run server') -WorkingDirectory $backend
-  Write-Host 'API started at http://localhost:3000'
+  Write-Host 'API started at http://127.0.0.1:3000'
 } else {
-  Write-Host 'API already running at http://localhost:3000'
+  Write-Host 'API already running at http://127.0.0.1:3000'
 }
 
 if (-not (Test-FrontendRunning)) {

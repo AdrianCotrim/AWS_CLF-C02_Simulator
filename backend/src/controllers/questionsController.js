@@ -8,6 +8,28 @@ const {
   updateQuestion: saveQuestion
 } = require('../data/questionsStore');
 
+function normalizeQuestionText(text) {
+  return String(text ?? '')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\u00a0/g, ' ')
+    .replace(/\r\n?/g, '\n')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLocaleLowerCase('pt-BR');
+}
+
+function findDuplicateQuestions(questionText, existingQuestions, ignoredId = null) {
+  const normalizedQuestion = normalizeQuestionText(questionText);
+  if (!normalizedQuestion) return [];
+  return existingQuestions.filter(question =>
+    question &&
+    question.id !== ignoredId &&
+    typeof question.question === 'string' &&
+    normalizeQuestionText(question.question) === normalizedQuestion
+  );
+}
+
 const allowedFields = new Set([
   'source',
   'tag',
@@ -86,6 +108,56 @@ function normalizeCorrectAnswer(options, correctAnswer) {
   return isMultipleAnswer ? normalizedAnswers : normalizedAnswers[0];
 }
 
+function sanitizeImportedQuestion(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
+  return Object.fromEntries(Object.entries(raw).filter(([field]) => allowedFields.has(field)));
+}
+
+function summarizeImportQuestions(rawQuestions, existingQuestions = []) {
+  const questions = Array.isArray(rawQuestions) ? rawQuestions : [];
+  const addable = [];
+  const duplicateRecords = [];
+  const invalidRecords = [];
+
+  for (let index = 0; index < questions.length; index += 1) {
+    const rawQuestion = questions[index];
+    try {
+      const sanitized = sanitizeImportedQuestion(rawQuestion);
+      const question = validateQuestion(sanitized);
+      const duplicates = findDuplicateQuestions(question.question, existingQuestions)
+        .concat(addable.filter(item => normalizeQuestionText(item.question) === normalizeQuestionText(question.question)));
+
+      if (duplicates.length) {
+        duplicateRecords.push({
+          index,
+          question: question.question,
+          duplicateIds: duplicates.map(item => item.id || 'unknown')
+        });
+        continue;
+      }
+
+      addable.push(question);
+    } catch (error) {
+      invalidRecords.push({
+        index,
+        reason: error && error.message ? error.message : 'Item inválido.'
+      });
+    }
+  }
+
+  return {
+    total: questions.length,
+    addable: addable.length,
+    duplicates: duplicateRecords.length,
+    invalid: invalidRecords.length,
+    importable: addable.length,
+    valid: addable.length,
+    questions: addable,
+    duplicateRecords,
+    invalidRecords
+  };
+}
+
 function validateQuestion(body, { allowPartial = false } = {}) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     throw new ApiError(400, 'INVALID_QUESTION', 'O corpo deve ser um objeto JSON de questão.');
@@ -137,6 +209,52 @@ function validateQuestion(body, { allowPartial = false } = {}) {
   return normalized;
 }
 
+async function importQuestions(req, res) {
+  const rawQuestions = Array.isArray(req.body)
+    ? req.body
+    : Array.isArray(req.body && req.body.questions)
+      ? req.body.questions
+      : null;
+
+  if (!rawQuestions) {
+    throw new ApiError(400, 'INVALID_IMPORT', 'O corpo deve conter um array de questões ou { questions: [...] }');
+  }
+
+  const existingQuestions = await readQuestions();
+  const summary = summarizeImportQuestions(rawQuestions, existingQuestions);
+
+  if (req.body && req.body.confirm !== true) {
+    return res.json({
+      ...summary,
+      imported: 0,
+      confirm: false,
+      message: summary.addable ? 'Pré-visualização gerada. Revise os itens duplicados e inválidos antes de confirmar a importação.' : 'Nenhuma questão válida foi encontrada para importação.'
+    });
+  }
+
+  if (!summary.questions.length) {
+    return res.status(200).json({
+      ...summary,
+      imported: 0,
+      confirm: true,
+      message: 'Nenhuma questão válida foi encontrada para importar.'
+    });
+  }
+
+  const importedQuestions = [];
+  for (const question of summary.questions) {
+    importedQuestions.push(await addQuestion(question));
+  }
+
+  return res.status(201).json({
+    ...summary,
+    imported: importedQuestions.length,
+    confirm: true,
+    questions: importedQuestions,
+    message: `${importedQuestions.length} questão(ões) importada(s) com sucesso.`
+  });
+}
+
 async function getQuestions(req, res) {
   res.json(await readQuestions());
 }
@@ -181,4 +299,13 @@ async function updateQuestion(req, res) {
   res.json(updated);
 }
 
-module.exports = { getQuestions, getQuestion, createQuestion, deleteQuestion, updateQuestion, ApiError };
+module.exports = {
+  getQuestions,
+  getQuestion,
+  createQuestion,
+  deleteQuestion,
+  updateQuestion,
+  importQuestions,
+  summarizeImportQuestions,
+  ApiError
+};

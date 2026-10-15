@@ -37,6 +37,14 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .exam-timer.critical { color: var(--bad); }
 .progress { height: 4px; background: var(--line); border-radius: 2px; margin: 8px 0 16px; }
 .progress div { height: 100%; background: var(--accent); border-radius: 2px; }
+.question-map-shell { margin: 8px 0 16px; }
+.question-map-toolbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.question-map { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(11, 92, 173, 0.03); max-height: 180px; overflow: auto; }
+.exam-chip { min-width: 34px; padding: 5px 8px; border-radius: 6px; font-size: .8rem; line-height: 1.2; }
+.exam-chip.pending { background: var(--card); border-style: dashed; }
+.exam-chip.answered { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.exam-chip.review { background: var(--warn-bg); border-color: #b88000; color: #8a5a00; }
+.exam-chip.current { box-shadow: inset 0 0 0 2px var(--accent); }
 .qtext { font-size: 1.1rem; white-space: pre-wrap; margin: 0 0 8px; }
 .hint { color: var(--accent); font-weight: 600; margin: 0 0 12px; }
 .opt { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; margin: 8px 0; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }

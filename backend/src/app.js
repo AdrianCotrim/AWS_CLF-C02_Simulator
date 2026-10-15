@@ -5,6 +5,7 @@ const cors = require('cors');
 const questionsRouter = require('./routes/questions');
 const userDataRouter = require('./routes/userData');
 const historyRouter = require('./routes/history');
+const backupRouter = require('./routes/backup');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(cors({
     callback(null, !origin || localOrigin.test(origin));
   }
 }));
+app.use('/api/backup', express.json({ limit: '25mb' }), backupRouter);
 app.use(express.json({ limit: '32kb' }));
 app.use('/api/questions', questionsRouter);
 app.use('/api/user-data', userDataRouter);
