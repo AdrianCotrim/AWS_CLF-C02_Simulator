@@ -8,6 +8,8 @@ const { after, before, test } = require('node:test');
 
 let directory;
 let questionsFile;
+let userDataFile;
+let historyFile;
 let server;
 let baseUrl;
 
@@ -44,8 +46,16 @@ const validQuestion = {
 before(async () => {
   directory = await fs.mkdtemp(path.join(os.tmpdir(), 'questions-api-'));
   questionsFile = path.join(directory, 'questions.json');
+  userDataFile = path.join(directory, 'user-data.json');
+  historyFile = path.join(directory, 'history.json');
+
   await fs.writeFile(questionsFile, JSON.stringify(initialQuestions));
+  await fs.writeFile(userDataFile, JSON.stringify({ version: 1, personalQuestions: [], errorBank: [], preferences: {}, updatedAt: null, createdAt: null }));
+  await fs.writeFile(historyFile, JSON.stringify({ version: 1, attempts: [], updatedAt: null, createdAt: null }));
+
   process.env.QUESTIONS_FILE = questionsFile;
+  process.env.USER_DATA_FILE = userDataFile;
+  process.env.HISTORY_FILE = historyFile;
 
   const app = require('../src/app');
   server = app.listen(0);
@@ -57,6 +67,8 @@ after(async () => {
   if (server) await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
   if (directory) await fs.rm(directory, { recursive: true, force: true });
   delete process.env.QUESTIONS_FILE;
+  delete process.env.USER_DATA_FILE;
+  delete process.env.HISTORY_FILE;
 });
 
 test('GET retorna o banco e a questão pelo ID', async () => {
@@ -226,4 +238,60 @@ test('POST e PUT preservam respostas múltiplas como array e validam duplicidade
 
   const persisted = JSON.parse(await fs.readFile(questionsFile, 'utf8'));
   assert.deepEqual(persisted.find(question => question.id === created.id).correct_answer, ['B', 'D']);
+});
+
+test('GET e POST de dados do usuário mantêm banco de erros e preferências separadamente', async () => {
+  const userDataResponse = await fetch(`${baseUrl}/api/user-data`);
+  const userData = await userDataResponse.json();
+  assert.equal(userDataResponse.status, 200);
+  assert.equal(userData.version, 1);
+  assert.deepEqual(userData.errorBank, []);
+
+  const addToBankResponse = await fetch(`${baseUrl}/api/user-data/error-bank`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questionId: 'personal-088' })
+  });
+  const updatedUserData = await addToBankResponse.json();
+  assert.equal(addToBankResponse.status, 200);
+  assert.ok(updatedUserData.errorBank.includes('personal-088'));
+
+  const preferencesResponse = await fetch(`${baseUrl}/api/user-data/preferences`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ theme: 'dark' })
+  });
+  const preferences = await preferencesResponse.json();
+  assert.equal(preferencesResponse.status, 200);
+  assert.equal(preferences.preferences.theme, 'dark');
+
+  const removeResponse = await fetch(`${baseUrl}/api/user-data/error-bank/personal-088`, { method: 'DELETE' });
+  const removed = await removeResponse.json();
+  assert.equal(removeResponse.status, 200);
+  assert.ok(!removed.errorBank.includes('personal-088'));
+});
+
+test('POST em histórico registra tentativas em arquivo separado', async () => {
+  const attempt = {
+    id: 'attempt-001',
+    startedAt: '2026-10-15T10:00:00.000Z',
+    finishedAt: '2026-10-15T10:10:00.000Z',
+    mode: 'exam',
+    score: 8,
+    totalQuestions: 10,
+    answered: 8,
+    unanswered: 2,
+    correctAnswers: 8
+  };
+
+  const response = await fetch(`${baseUrl}/api/history`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(attempt)
+  });
+  const created = await response.json();
+
+  assert.equal(response.status, 201);
+  assert.equal(created.attempts[0].id, 'attempt-001');
+  assert.equal(created.attempts[0].score, 8);
 });

@@ -25,7 +25,68 @@ class ApiError extends Error {
   }
 }
 
-function validateQuestion(body) {
+function normalizeOptionalText(field, value, fallback) {
+  if (value === undefined) return fallback;
+  if (typeof value !== 'string') {
+    throw new ApiError(400, 'INVALID_QUESTION', `O campo ${field} deve ser texto.`);
+  }
+
+  const trimmed = value.trim();
+  if (field === 'explanation') return trimmed;
+  return trimmed || fallback;
+}
+
+function normalizeOptions(options) {
+  if (!Array.isArray(options) || options.length < 2 || options.length > 26) {
+    throw new ApiError(400, 'INVALID_QUESTION', 'options deve ser um array com 2 a 26 alternativas.');
+  }
+
+  const normalized = options.map(option => typeof option === 'string' ? option.trim() : '');
+  if (normalized.some(option => !option)) {
+    throw new ApiError(400, 'INVALID_QUESTION', 'Cada alternativa deve ser um texto não vazio.');
+  }
+  if (new Set(normalized.map(option => option.toLocaleLowerCase('pt-BR'))).size !== normalized.length) {
+    throw new ApiError(400, 'INVALID_QUESTION', 'As alternativas não podem ser duplicadas.');
+  }
+
+  return normalized;
+}
+
+function normalizeCorrectAnswer(options, correctAnswer) {
+  const isMultipleAnswer = Array.isArray(correctAnswer);
+  const submittedAnswers = isMultipleAnswer ? correctAnswer : [correctAnswer];
+
+  if (!submittedAnswers.length || submittedAnswers.length > options.length) {
+    throw new ApiError(400, 'INVALID_QUESTION', 'correct_answer deve conter pelo menos uma resposta e não pode exceder o número de alternativas.');
+  }
+
+  const normalizedAnswers = submittedAnswers.map(answer => {
+    if (typeof answer !== 'string' || !answer.trim()) {
+      throw new ApiError(400, 'INVALID_QUESTION', 'Cada resposta correta deve ser um texto não vazio.');
+    }
+
+    const trimmedAnswer = answer.trim();
+    const letterIndex = /^[A-Z]$/i.test(trimmedAnswer) ? trimmedAnswer.toUpperCase().charCodeAt(0) - 65 : -1;
+    if (letterIndex >= 0 && letterIndex < options.length) {
+      return String.fromCharCode(65 + letterIndex);
+    }
+
+    const optionIndex = options.findIndex(option => option.toLocaleLowerCase('pt-BR') === trimmedAnswer.toLocaleLowerCase('pt-BR'));
+    if (optionIndex >= 0) {
+      return String.fromCharCode(65 + optionIndex);
+    }
+
+    throw new ApiError(400, 'INVALID_QUESTION', 'correct_answer deve corresponder à letra ou ao texto de uma alternativa.');
+  });
+
+  if (new Set(normalizedAnswers).size !== normalizedAnswers.length) {
+    throw new ApiError(400, 'INVALID_QUESTION', 'As respostas corretas não podem ser duplicadas.');
+  }
+
+  return isMultipleAnswer ? normalizedAnswers : normalizedAnswers[0];
+}
+
+function validateQuestion(body, { allowPartial = false } = {}) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     throw new ApiError(400, 'INVALID_QUESTION', 'O corpo deve ser um objeto JSON de questão.');
   }
@@ -35,64 +96,45 @@ function validateQuestion(body) {
     throw new ApiError(400, 'INVALID_QUESTION', `Campo não permitido: ${unexpected}.`);
   }
 
-  for (const field of allowedFields) {
-    if (!(field in body)) {
-      throw new ApiError(400, 'INVALID_QUESTION', `Campo obrigatório ausente: ${field}.`);
+  const normalized = {};
+
+  if (body.source !== undefined || !allowPartial) {
+    normalized.source = normalizeOptionalText('source', body.source, 'Personal');
+  }
+
+  if (body.tag !== undefined || !allowPartial) {
+    normalized.tag = normalizeOptionalText('tag', body.tag, 'Conceitos de nuvem');
+  }
+
+  if (body.question !== undefined || !allowPartial) {
+    if (typeof body.question !== 'string' || !body.question.trim()) {
+      throw new ApiError(400, 'INVALID_QUESTION', 'O campo question não pode estar vazio.');
     }
-    if (typeof body[field] !== 'string' && !['options', 'correct_answer'].includes(field)) {
-      throw new ApiError(400, 'INVALID_QUESTION', `O campo ${field} deve ser texto.`);
+    normalized.question = body.question.trim();
+  }
+
+  if (body.options !== undefined || !allowPartial) {
+    if (body.options === undefined) {
+      throw new ApiError(400, 'INVALID_QUESTION', 'Campo obrigatório ausente: options.');
     }
-    if (!['options', 'explanation', 'correct_answer'].includes(field) && !body[field].trim()) {
-      throw new ApiError(400, 'INVALID_QUESTION', `O campo ${field} não pode estar vazio.`);
+    normalized.options = normalizeOptions(body.options);
+  }
+
+  if (body.explanation !== undefined || !allowPartial) {
+    normalized.explanation = normalizeOptionalText('explanation', body.explanation, '');
+  }
+
+  if (body.correct_answer !== undefined || !allowPartial) {
+    if (body.correct_answer === undefined) {
+      throw new ApiError(400, 'INVALID_QUESTION', 'Campo obrigatório ausente: correct_answer.');
     }
-  }
-
-  if (!Array.isArray(body.options) || body.options.length < 2 || body.options.length > 26) {
-    throw new ApiError(400, 'INVALID_QUESTION', 'options deve ser um array com 2 a 26 alternativas.');
-  }
-
-  const options = body.options.map(option => typeof option === 'string' ? option.trim() : '');
-  if (options.some(option => !option)) {
-    throw new ApiError(400, 'INVALID_QUESTION', 'Cada alternativa deve ser um texto não vazio.');
-  }
-  if (new Set(options.map(option => option.toLocaleLowerCase('pt-BR'))).size !== options.length) {
-    throw new ApiError(400, 'INVALID_QUESTION', 'As alternativas não podem ser duplicadas.');
-  }
-
-  const isMultipleAnswer = Array.isArray(body.correct_answer);
-  const submittedAnswers = isMultipleAnswer ? body.correct_answer : [body.correct_answer];
-  if (!submittedAnswers.length || submittedAnswers.length > options.length) {
-    throw new ApiError(400, 'INVALID_QUESTION', 'correct_answer deve conter pelo menos uma resposta e não pode exceder o número de alternativas.');
-  }
-
-  const correctAnswers = submittedAnswers.map(answer => {
-    if (typeof answer !== 'string' || !answer.trim()) {
-      throw new ApiError(400, 'INVALID_QUESTION', 'Cada resposta correta deve ser um texto não vazio.');
+    if (!normalized.options) {
+      throw new ApiError(400, 'INVALID_QUESTION', 'Campo obrigatório ausente: options.');
     }
-    const normalizedAnswer = answer.trim();
-    const answerIndex = /^[A-Z]$/i.test(normalizedAnswer) ? normalizedAnswer.toUpperCase().charCodeAt(0) - 65 : -1;
-    if (answerIndex >= 0 && answerIndex < options.length) return String.fromCharCode(65 + answerIndex);
-    const optionIndex = options.findIndex(option => option.toLocaleLowerCase('pt-BR') === normalizedAnswer.toLocaleLowerCase('pt-BR'));
-    if (optionIndex >= 0) return String.fromCharCode(65 + optionIndex);
-    throw new ApiError(400, 'INVALID_QUESTION', 'correct_answer deve corresponder à letra ou ao texto de uma alternativa.');
-  });
-  if (new Set(correctAnswers).size !== correctAnswers.length) {
-    throw new ApiError(400, 'INVALID_QUESTION', 'As respostas corretas não podem ser duplicadas.');
+    normalized.correct_answer = normalizeCorrectAnswer(normalized.options, body.correct_answer);
   }
-  const singleAnswer = typeof body.correct_answer === 'string' ? body.correct_answer.trim() : '';
-  const singleAnswerIndex = /^[A-Z]$/i.test(singleAnswer) ? singleAnswer.toUpperCase().charCodeAt(0) - 65 : -1;
-  const singleAnswerText = options.find(option => option.toLocaleLowerCase('pt-BR') === singleAnswer.toLocaleLowerCase('pt-BR'));
 
-  return {
-    source: body.source.trim(),
-    tag: body.tag.trim(),
-    question: body.question.trim(),
-    options,
-    correct_answer: isMultipleAnswer
-      ? correctAnswers
-      : singleAnswerIndex >= 0 && singleAnswerIndex < options.length ? correctAnswers[0] : singleAnswerText,
-    explanation: body.explanation.trim()
-  };
+  return normalized;
 }
 
 async function getQuestions(req, res) {
@@ -121,7 +163,18 @@ async function deleteQuestion(req, res) {
 }
 
 async function updateQuestion(req, res) {
-  const updated = await saveQuestion(req.params.id, validateQuestion(req.body));
+  const currentQuestion = await getQuestionById(req.params.id);
+  if (!currentQuestion) {
+    throw new ApiError(404, 'QUESTION_NOT_FOUND', `Nenhuma questão encontrada com o ID ${req.params.id}.`);
+  }
+
+  const validated = validateQuestion(req.body, { allowPartial: true });
+  const mergedQuestion = { ...currentQuestion, ...validated, id: currentQuestion.id };
+  if (!mergedQuestion.source || !mergedQuestion.source.trim()) mergedQuestion.source = 'Personal';
+  if (!mergedQuestion.tag || !mergedQuestion.tag.trim()) mergedQuestion.tag = 'Conceitos de nuvem';
+  if (mergedQuestion.explanation === undefined) mergedQuestion.explanation = '';
+
+  const updated = await saveQuestion(req.params.id, mergedQuestion);
   if (!updated) {
     throw new ApiError(404, 'QUESTION_NOT_FOUND', `Nenhuma questão encontrada com o ID ${req.params.id}.`);
   }

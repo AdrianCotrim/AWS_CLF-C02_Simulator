@@ -71,6 +71,16 @@ O app aceita o formato atual do `questions.json` e também o formato antigo com 
 
 Em `multiple_choice`, a resposta só é correta quando o conjunto selecionado é igual ao conjunto de `correct_answer`, em qualquer ordem.
 
+## Persistência organizada
+
+A aplicação mantém a persistência em arquivos JSON locais, separados por responsabilidade:
+
+- `data/questions.json`: banco principal de questões e metadados do simulador.
+- `data/user-data.json`: questões pessoais, IDs no Banco de Erros e preferências do usuário. O formato inclui a versão dos dados para facilitar migrações futuras.
+- `data/history.json`: histórico de tentativas, resultados e demais campos usados nas estatísticas.
+
+Os acessos a esses arquivos passam por módulos centralizados no backend (`backend/src/data`), evitando que cada tela ou componente escreva diretamente no disco. A API local continua aceitando os formatos atuais de questão e preserva o comportamento já existente do simulador.
+
 ## LocalStorage
 
 O progresso fica na chave `clf-c02-progress` do navegador. As questões nunca são gravadas lá, apenas dados de desempenho por `questionId`:

@@ -3,6 +3,8 @@
 const express = require('express');
 const cors = require('cors');
 const questionsRouter = require('./routes/questions');
+const userDataRouter = require('./routes/userData');
+const historyRouter = require('./routes/history');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -15,6 +17,8 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '32kb' }));
 app.use('/api/questions', questionsRouter);
+app.use('/api/user-data', userDataRouter);
+app.use('/api/history', historyRouter);
 app.use((req, res) => {
   res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Endpoint não encontrado.' } });
 });
