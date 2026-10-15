@@ -2,11 +2,17 @@
 
 const {
   readQuestions,
+  getCatalogStatus: readCatalogStatus,
+  getQuestionMetadata: readQuestionMetadata,
   getQuestionById,
   addQuestion,
   deleteQuestion: removeQuestion,
-  updateQuestion: saveQuestion
+  updateQuestion: saveQuestion,
+  restoreDefaultQuestion: restoreDefault,
+  acknowledgeCatalogUpdate: acknowledgeCatalog
 } = require('../data/questionsStore');
+const backupStore = require('../data/backupStore');
+const progressStore = require('../data/progressStore');
 
 function normalizeQuestionText(text) {
   return String(text ?? '')
@@ -45,6 +51,12 @@ class ApiError extends Error {
     this.status = status;
     this.code = code;
   }
+}
+
+async function createCatalogMigrationBackup() {
+  const progress = await progressStore.readProgress();
+  const backup = await backupStore.createBackup(progress.progress);
+  await backupStore.writeUniqueBackup(backup, 'pre-question-layer-migration');
 }
 
 function normalizeOptionalText(field, value, fallback) {
@@ -243,7 +255,7 @@ async function importQuestions(req, res) {
 
   const importedQuestions = [];
   for (const question of summary.questions) {
-    importedQuestions.push(await addQuestion(question));
+    importedQuestions.push(await addQuestion(question, createCatalogMigrationBackup));
   }
 
   return res.status(201).json({
@@ -267,13 +279,25 @@ async function getQuestion(req, res) {
   res.json(question);
 }
 
+async function getCatalogStatus(req, res) {
+  res.json(await readCatalogStatus());
+}
+
+async function getQuestionMetadata(req, res) {
+  const metadata = await readQuestionMetadata(req.params.id);
+  if (!metadata.origin) {
+    throw new ApiError(404, 'QUESTION_NOT_FOUND', `Nenhuma questão encontrada com o ID ${req.params.id}.`);
+  }
+  res.json(metadata);
+}
+
 async function createQuestion(req, res) {
-  const question = await addQuestion(validateQuestion(req.body));
+  const question = await addQuestion(validateQuestion(req.body), createCatalogMigrationBackup);
   res.status(201).json(question);
 }
 
 async function deleteQuestion(req, res) {
-  const deleted = await removeQuestion(req.params.id);
+  const deleted = await removeQuestion(req.params.id, createCatalogMigrationBackup);
   if (!deleted) {
     throw new ApiError(404, 'QUESTION_NOT_FOUND', `Nenhuma questão encontrada com o ID ${req.params.id}.`);
   }
@@ -292,19 +316,35 @@ async function updateQuestion(req, res) {
   if (!mergedQuestion.tag || !mergedQuestion.tag.trim()) mergedQuestion.tag = 'Conceitos de nuvem';
   if (mergedQuestion.explanation === undefined) mergedQuestion.explanation = '';
 
-  const updated = await saveQuestion(req.params.id, mergedQuestion);
+  const updated = await saveQuestion(req.params.id, mergedQuestion, createCatalogMigrationBackup);
   if (!updated) {
     throw new ApiError(404, 'QUESTION_NOT_FOUND', `Nenhuma questão encontrada com o ID ${req.params.id}.`);
   }
   res.json(updated);
 }
 
+async function restoreDefaultQuestion(req, res) {
+  const restored = await restoreDefault(req.params.id, createCatalogMigrationBackup);
+  if (!restored) {
+    throw new ApiError(404, 'DEFAULT_QUESTION_NOT_FOUND', `A questão ${req.params.id} não possui uma versão padrão no catálogo atual.`);
+  }
+  res.json(restored);
+}
+
+async function acknowledgeCatalogUpdate(req, res) {
+  res.json(await acknowledgeCatalog(createCatalogMigrationBackup));
+}
+
 module.exports = {
   getQuestions,
   getQuestion,
+  getCatalogStatus,
+  getQuestionMetadata,
   createQuestion,
   deleteQuestion,
   updateQuestion,
+  restoreDefaultQuestion,
+  acknowledgeCatalogUpdate,
   importQuestions,
   summarizeImportQuestions,
   ApiError

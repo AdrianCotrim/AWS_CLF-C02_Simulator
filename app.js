@@ -6,10 +6,14 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 
 let Q = [];          // questões válidas (somente leitura)
 let byId = {};
-let P = loadProgress();   // progresso (LocalStorage)
+let P = createEmptyProgress();
 let S = null;        // sessão atual: { mode, ids, idx, answers, persist, done, startedAt, elapsedMs }
 let sel = [];        // seleção atual na tela
 let examTimerInterval = null;
+let progressSaveQueue = Promise.resolve();
+let pendingProgressSaves = 0;
+let progressSaveError = false;
+let progressPersisted = false;
 const QUESTION_SOURCES = ['Personal', 'Cloudverse', 'Examtopics'];
 const QUESTION_TAGS = ['Conceitos de nuvem', 'Segurança e conformidade', 'Tecnologia', 'Faturamento e definição de preço'];
 let currentView = 'simulator';
@@ -28,6 +32,9 @@ let bankRequestVersion = 0;
 let bankFilters = { query: '', source: '', tag: '', errorBank: '' };
 let bankDeleteError = '';
 let isDeletingQuestion = false;
+let isRestoringQuestion = false;
+let selectedQuestionMetadata = null;
+let catalogStatus = null;
 let statisticsPeriod = '7';
 let statisticsSort = { topics: 'lowest', sources: 'name' };
 
@@ -44,13 +51,72 @@ function createQuestionDraft() {
   };
 }
 
+function renderCatalogNotice(status) {
+  const notice = $('catalogNotice');
+  if (!notice) return;
+  catalogStatus = status;
+  if (!status || !status.initialized) {
+    notice.hidden = true;
+    notice.innerHTML = '';
+    return;
+  }
+
+  const changes = status.added.length + status.changed.length + status.removed.length;
+  const conflicts = status.conflicts || [];
+  if (!changes && !conflicts.length) {
+    notice.hidden = true;
+    notice.innerHTML = '';
+    return;
+  }
+
+  const details = [];
+  if (status.added.length) details.push(`${status.added.length} novas`);
+  if (status.changed.length) details.push(`${status.changed.length} atualizadas`);
+  if (status.removed.length) details.push(`${status.removed.length} removidas`);
+  const conflictIds = conflicts.slice(0, 8).map(item => esc(item.id)).join(', ');
+  notice.innerHTML = `<b>O catálogo padrão mudou.</b> ${details.join(', ') || 'Há alterações locais em conflito'}.
+    As questões locais, edições e exclusões foram preservadas.
+    ${conflicts.length ? `<p>${conflicts.length} conflito(s) em alterações locais: ${conflictIds}${conflicts.length > 8 ? ', …' : ''}. Restaure a versão padrão ou mantenha a edição local.</p>` : ''}
+    ${changes ? '<button type="button" class="link" data-catalog-action="acknowledge">Registrar que revisei este relatório</button>' : ''}`;
+  notice.hidden = false;
+}
+
 /* ---------- Progresso ---------- */
-function loadProgress() {
-  try {
-    const p = JSON.parse(localStorage.getItem(KEY));
-    if (p && typeof p.questionProgress === 'object') return { history: [], session: null, ...p };
-  } catch (e) { /* progresso corrompido: começa vazio */ }
+function createEmptyProgress() {
   return { version: 1, questionProgress: {}, history: [], session: null };
+}
+
+function validateProgressState(progress) {
+  if (!progress || typeof progress !== 'object' || Array.isArray(progress)
+    || progress.version !== 1
+    || !progress.questionProgress || typeof progress.questionProgress !== 'object' || Array.isArray(progress.questionProgress)
+    || !Array.isArray(progress.history)
+    || (progress.session !== null && (!progress.session || typeof progress.session !== 'object' || Array.isArray(progress.session)
+      || progress.session.persist !== true || progress.session.done === true
+      || !Array.isArray(progress.session.ids) || !progress.session.ids.length
+      || !Number.isInteger(progress.session.idx) || progress.session.idx < 0 || progress.session.idx >= progress.session.ids.length
+      || !progress.session.answers || typeof progress.session.answers !== 'object' || Array.isArray(progress.session.answers)))) {
+    throw new Error('O progresso legado não possui uma estrutura compatível. Ele foi mantido no LocalStorage sem alterações.');
+  }
+  return progress;
+}
+
+function readLegacyProgress() {
+  try {
+    const contents = localStorage.getItem(KEY);
+    if (contents === null) return null;
+    try {
+      return validateProgressState(JSON.parse(contents));
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error('O progresso encontrado no LocalStorage contém JSON inválido. Ele foi mantido sem alterações.');
+      }
+      throw error;
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('LocalStorage')) throw error;
+    throw new Error('Não foi possível ler o progresso legado deste navegador.');
+  }
 }
 
 function stats() {
@@ -64,21 +130,42 @@ function stats() {
   };
 }
 
+function renderProgressSaveStatus() {
+  const status = $('saveStatus');
+  if (!status) return;
+  status.textContent = pendingProgressSaves
+    ? 'Salvando progresso...'
+    : progressSaveError ? 'Falha ao salvar progresso; confira a notificação.'
+      : progressPersisted ? 'Progresso salvo no dispositivo' : 'Progresso ainda não salvo';
+  status.classList.toggle('saving', pendingProgressSaves > 0);
+  status.classList.toggle('save-error', progressSaveError && pendingProgressSaves === 0);
+}
+
 function save() {
   P.version = 1;
   P.statistics = stats();
   P.errorBank = Object.keys(P.questionProgress).filter(id => P.questionProgress[id].inErrorBank);
   P.session = S && S.persist && !S.done ? S : null;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(P));
+  const snapshot = structuredClone(P);
+  pendingProgressSaves++;
+  renderProgressSaveStatus();
+  const operation = progressSaveQueue.catch(() => {}).then(() => window.QuestionsApi.saveProgress(snapshot));
+  progressSaveQueue = operation;
+  return operation.then(() => {
+    progressSaveError = false;
+    progressPersisted = true;
     return true;
-  } catch (e) {
-    toast('Não foi possível salvar o progresso neste navegador.');
+  }).catch(error => {
+    progressSaveError = true;
+    toast(error.message || 'Não foi possível salvar o progresso no dispositivo.');
     return false;
-  }
+  }).finally(() => {
+    pendingProgressSaves--;
+    renderProgressSaveStatus();
+  });
 }
 
-function setErrorBankMembership(id, shouldAdd, notify = true) {
+async function setErrorBankMembership(id, shouldAdd, notify = true) {
   if (!byId[id]) return false;
 
   const previous = P.questionProgress[id];
@@ -90,7 +177,7 @@ function setErrorBankMembership(id, shouldAdd, notify = true) {
     : { timesAnswered: 0, timesWrong: 0, inErrorBank: false };
   progress.inErrorBank = shouldAdd;
   P.questionProgress[id] = progress;
-  if (save()) {
+  if (await save()) {
     if (notify) toast(shouldAdd ? 'Questão adicionada ao Banco de Erros.' : 'Questão removida do Banco de Erros.');
     return true;
   }
@@ -99,8 +186,81 @@ function setErrorBankMembership(id, shouldAdd, notify = true) {
   else delete P.questionProgress[id];
   P.errorBank = Object.keys(P.questionProgress).filter(questionId => P.questionProgress[questionId].inErrorBank);
   renderStats();
-  if (notify) toast('Não foi possível atualizar o Banco de Erros neste navegador.');
+  if (notify) toast('Não foi possível atualizar o Banco de Erros no dispositivo.');
   return false;
+}
+
+async function initializeProgress() {
+  const current = await window.QuestionsApi.getProgress();
+  if (current.exists) {
+    P = current.progress;
+    progressPersisted = true;
+  }
+  renderProgressSaveStatus();
+
+  if (current.migration) {
+    return;
+  }
+
+  let legacy;
+  try {
+    legacy = readLegacyProgress();
+  } catch (error) {
+    toast(error.message);
+    if (!current.exists) {
+      P = createEmptyProgress();
+      await save();
+    }
+    return;
+  }
+
+  if (legacy) {
+    let preview;
+    try {
+      preview = await window.QuestionsApi.previewProgressMigration(legacy);
+    } catch (error) {
+      toast(error.message);
+      return;
+    }
+    const summary = preview.summary;
+    const backendSummary = preview.backend.summary;
+    const existingData = preview.backend.hasData;
+    const message = existingData
+      ? `Foram encontrados dados no LocalStorage e progresso já persistido no backend.\n\n` +
+        `LocalStorage: ${summary.progressEntries} questões, ${summary.responseHistory} respostas, sessão ativa: ${summary.hasActiveSession ? 'sim' : 'não'}.\n` +
+        `Backend: ${backendSummary.progressEntries} questões, ${backendSummary.responseHistory} respostas, sessão ativa: ${backendSummary.hasActiveSession ? 'sim' : 'não'}.\n\n` +
+        'SIM substitui o progresso do backend pelos dados legados; serão criados backups separados dos dois estados. NÃO mantém o backend atual e preserva o LocalStorage sem alterá-lo.'
+      : `Foi encontrado progresso legado neste navegador:\n\n` +
+        `- Questões com progresso: ${summary.progressEntries}\n` +
+        `- Respostas no histórico: ${summary.responseHistory}\n` +
+        `- Banco de erros: ${summary.errorBankEntries}\n` +
+        `- Sessão ativa: ${summary.hasActiveSession ? `sim (${summary.sessionQuestionCount} questões)` : 'não'}\n\n` +
+        'A migração criará um backup antes de gravar e verificará os dados depois. O LocalStorage não será apagado. Migrar agora?';
+    if (confirm(message)) {
+      try {
+        const result = await window.QuestionsApi.migrateProgress(legacy, existingData);
+        P = result.progress;
+        progressPersisted = true;
+        progressSaveError = false;
+        renderProgressSaveStatus();
+        S = P.session && P.session.ids.every(id => byId[id]) ? P.session : null;
+        toast(`Migração concluída e verificada. Backup legado: ${result.backups.legacyBackup}`);
+      } catch (error) {
+        toast(error.message);
+      }
+      return;
+    }
+    if (!current.exists) {
+      P = createEmptyProgress();
+      await save();
+    }
+    return;
+  }
+
+  if (!current.exists) {
+    P = createEmptyProgress();
+    await save();
+  }
 }
 
 function record(q, ok) {
@@ -296,15 +456,18 @@ function validate(raw, seen) {
 async function init() {
   let data;
   try {
-    const r = await fetch('data/questions.json');
-    if (!r.ok) throw new Error(r.status);
-    data = await r.json();
+    data = await window.QuestionsApi.getQuestions();
     if (!Array.isArray(data)) throw new Error('não é uma lista');
   } catch (e) {
     $('main').innerHTML = `<div class="banner err"><p><b>Não foi possível carregar o banco de questões.</b></p>
-      <p>Verifique se o arquivo <code>data/questions.json</code> existe e está formatado corretamente.</p>
-      <p>Se você abriu o <code>index.html</code> com duplo clique, use um servidor local (veja o README).</p></div>`;
+      <p>${esc(e.message || 'Verifique se o backend está funcionando.')}</p>
+      <p>O progresso e o catálogo efetivo são carregados pela API local; consulte o README para iniciar o aplicativo.</p></div>`;
     return;
+  }
+  try {
+    renderCatalogNotice(await window.QuestionsApi.getCatalogStatus());
+  } catch (error) {
+    toast(error.message || 'Não foi possível verificar as atualizações do catálogo.');
   }
   const seen = new Set(), problems = [];
   data.forEach((q, i) => {
@@ -322,6 +485,12 @@ async function init() {
     $('warn').innerHTML = `<b>${problems.length} questão(ões) ignorada(s) por problemas no banco:</b><br>${problems.map(esc).join('<br>')}`;
   }
   if (!Q.length) { $('main').innerHTML = '<div class="banner err">Nenhuma questão válida encontrada.</div>'; return; }
+  try {
+    await initializeProgress();
+  } catch (error) {
+    $('main').innerHTML = `<div class="banner err"><b>Não foi possível carregar o progresso persistido.</b><p>${esc(error.message)}</p></div>`;
+    return;
+  }
   // retoma simulado interrompido
   const s = P.session;
   if (s && s.persist && !s.done && Array.isArray(s.ids) && s.ids.every(id => byId[id])) S = s;
@@ -974,9 +1143,13 @@ function loadQuestionBank() {
   const requestVersion = ++bankRequestVersion;
   render();
 
-  window.QuestionsApi.getQuestions().then(questions => {
+  Promise.all([
+    window.QuestionsApi.getQuestions(),
+    window.QuestionsApi.getCatalogStatus()
+  ]).then(([questions, status]) => {
     if (requestVersion !== bankRequestVersion || currentView !== 'bank') return;
     bankQuestions = questions;
+    renderCatalogNotice(status);
     bankStatus = questions.length ? 'ready' : 'empty';
     renderQuestionBankResults($('bankResults'));
   }).catch(error => {
@@ -1069,11 +1242,18 @@ function renderQuestionBank(main) {
 
   const sourceOptions = ['Personal', 'Cloudverse', 'Examtopics'];
   const tagOptions = QUESTION_TAGS;
+  const deletedIds = catalogStatus && Array.isArray(catalogStatus.deletedIds) ? catalogStatus.deletedIds : [];
   main.innerHTML = `<section class="question-bank" aria-labelledby="question-bank-title">
     <div class="bank-heading">
       <h2 id="question-bank-title">Banco de Questões</h2>
       <button type="button" class="primary" data-bank-action="import">Importar questões</button>
     </div>
+    ${deletedIds.length ? `<section class="catalog-deletions" aria-label="Questões padrão excluídas">
+      <b>Questões padrão excluídas localmente</b>
+      ${deletedIds.map(id => `<div class="catalog-deletion-item"><span>${esc(id)}</span>
+        <button type="button" data-bank-action="restore-deleted" data-question-id="${esc(id)}" ${isRestoringQuestion ? 'disabled' : ''}>Desfazer exclusão</button>
+      </div>`).join('')}
+    </section>` : ''}
     <div class="bank-filters">
       <label class="form-field bank-search"><span>Pesquisar questões</span>
         <input class="form-control" type="search" data-bank-filter="query" value="${esc(bankFilters.query)}" placeholder="ID, enunciado, alternativa..." autocomplete="off">
@@ -1174,6 +1354,9 @@ function renderQuestionBankDetail(main) {
     ${explanation ? `<section class="bank-detail-section"><h3>Explanation</h3><p class="bank-explanation">${esc(explanation)}</p></section>` : ''}
     <div class="bank-detail-actions">
       <button type="button" data-bank-action="edit" ${isDeletingQuestion ? 'disabled' : ''}>Editar questão</button>
+      ${selectedQuestionMetadata && selectedQuestionMetadata.origin === 'catalog' && selectedQuestionMetadata.hasOverride
+        ? `<button type="button" data-bank-action="restore-default" ${isRestoringQuestion ? 'disabled' : ''}>Restaurar versão padrão</button>`
+        : ''}
       <span class="error-bank-status ${inErrorBank ? 'in-bank' : ''}" role="status">${inErrorBank ? '✓ No Banco de Erros' : 'Fora do Banco de Erros'}</span>
       <button type="button" data-bank-action="toggle-error-bank" ${isDeletingQuestion ? 'disabled' : ''}>
         ${inErrorBank ? 'Remover do Banco de Erros' : 'Adicionar ao Banco de Erros'}
@@ -1185,12 +1368,45 @@ function renderQuestionBankDetail(main) {
   </section>`;
 }
 
-function openQuestionBankQuestion(id) {
+async function openQuestionBankQuestion(id) {
   if (!id || !bankQuestions.some(question => question && question.id === id)) return;
   bankListScrollY = window.scrollY;
   bankSelectedId = id;
+  selectedQuestionMetadata = null;
   renderQuestionBank($('main'));
   window.scrollTo(0, 0);
+  try {
+    selectedQuestionMetadata = await window.QuestionsApi.getQuestionMetadata(id);
+    if (bankSelectedId === id && currentView === 'bank') renderQuestionBankDetail($('main'));
+  } catch (error) {
+    toast(error.message || 'Não foi possível verificar se a questão possui uma edição local.');
+  }
+}
+
+async function restoreQuestionToDefault(id) {
+  if (!id || isRestoringQuestion) return;
+  if (!confirm(`Restaurar a questão ${id} para a versão padrão atual?\n\nA edição local será removida.`)) return;
+  isRestoringQuestion = true;
+  try {
+    const restored = await window.QuestionsApi.restoreDefaultQuestion(id);
+    const questions = await window.QuestionsApi.getQuestions();
+    bankQuestions = questions;
+    Q = questions.map(question => normalizeQuestion(question));
+    byId = Object.fromEntries(Q.map(question => [question.id, question]));
+    catalogStatus = await window.QuestionsApi.getCatalogStatus();
+    renderCatalogNotice(catalogStatus);
+    selectedQuestionMetadata = await window.QuestionsApi.getQuestionMetadata(id);
+    isRestoringQuestion = false;
+    if (currentView === 'bank') {
+      bankStatus = bankQuestions.length ? 'ready' : 'empty';
+      renderQuestionBank($('main'));
+    }
+    toast(`Questão ${restored.id} restaurada para a versão padrão.`);
+  } catch (error) {
+    isRestoringQuestion = false;
+    if (currentView === 'bank') renderQuestionBank($('main'));
+    toast(error.message || 'Não foi possível restaurar a versão padrão da questão.');
+  }
 }
 
 function returnToQuestionBankList() {
@@ -1229,7 +1445,7 @@ function startEditingQuestion(id) {
 async function deleteQuestionFromBank(id) {
   const question = bankQuestions.find(item => item && item.id === id);
   if (!question || isDeletingQuestion) return;
-  if (!confirm(`Excluir a questão ${id}?\n\nEsta ação não pode ser desfeita.`)) return;
+  if (!confirm(`Excluir a questão ${id}?\n\nQuestões padrão poderão ser restauradas no Banco de Questões.`)) return;
 
   bankDeleteError = '';
   isDeletingQuestion = true;
@@ -1240,13 +1456,11 @@ async function deleteQuestionFromBank(id) {
     bankQuestions = bankQuestions.filter(item => item && item.id !== id);
     Q = Q.filter(item => item.id !== id);
     delete byId[id];
-    delete P.questionProgress[id];
 
     if (S && Array.isArray(S.ids)) {
       const sessionIndex = S.ids.indexOf(id);
       if (sessionIndex !== -1) {
         S.ids.splice(sessionIndex, 1);
-        if (S.answers) delete S.answers[id];
         if (!S.ids.length) S = null;
         else if (sessionIndex < S.idx || S.idx >= S.ids.length) S.idx = Math.min(S.idx, S.ids.length - 1);
       }
@@ -1256,6 +1470,11 @@ async function deleteQuestionFromBank(id) {
     bankDeleteError = '';
     bankSelectedId = null;
     bankStatus = bankQuestions.length ? 'ready' : 'empty';
+    try {
+      renderCatalogNotice(await window.QuestionsApi.getCatalogStatus());
+    } catch (statusError) {
+      toast(statusError.message || 'A questão foi excluída, mas não foi possível atualizar o relatório do catálogo.');
+    }
     save();
     render();
     window.scrollTo(0, bankListScrollY);
@@ -1361,13 +1580,14 @@ async function submitQuestion(event, allowDuplicate = false) {
       bankQuestions = bankQuestions.map(question => question && question.id === saved.id ? saved : question);
       Q = Q.map(question => question.id === saved.id ? normalized : question);
       byId[saved.id] = normalized;
-      const wasInErrorBank = Boolean(P.questionProgress[saved.id] && P.questionProgress[saved.id].inErrorBank);
-      delete P.questionProgress[saved.id];
-      if (wasInErrorBank) P.questionProgress[saved.id] = { timesAnswered: 0, timesWrong: 0, inErrorBank: true };
-      if (S && S.answers) delete S.answers[saved.id];
-      if (S && S.done) S = null;
-      else if (S && S.ids[S.idx] === saved.id) sel = [];
+      if (S && !S.done && S.ids[S.idx] === saved.id) sel = [];
       bankSelectedId = saved.id;
+      try {
+        selectedQuestionMetadata = await window.QuestionsApi.getQuestionMetadata(saved.id);
+        renderCatalogNotice(await window.QuestionsApi.getCatalogStatus());
+      } catch (statusError) {
+        toast(statusError.message || 'A questão foi salva, mas não foi possível atualizar seus metadados.');
+      }
       editingQuestionId = null;
       duplicateMatches = null;
       currentView = 'bank';
@@ -1511,15 +1731,19 @@ $('main').addEventListener('change', e => {
   }
 });
 
-$('main').addEventListener('click', e => {
+$('main').addEventListener('click', async e => {
   const bankAction = e.target.closest('[data-bank-action]');
   if (bankAction) {
-    if (bankAction.dataset.bankAction === 'open') openQuestionBankQuestion(bankAction.dataset.questionId);
+    if (bankAction.dataset.bankAction === 'open') await openQuestionBankQuestion(bankAction.dataset.questionId);
     else if (bankAction.dataset.bankAction === 'back') returnToQuestionBankList();
     else if (bankAction.dataset.bankAction === 'edit') startEditingQuestion(bankSelectedId);
     else if (bankAction.dataset.bankAction === 'delete') deleteQuestionFromBank(bankSelectedId);
+    else if (bankAction.dataset.bankAction === 'restore-default'
+      || bankAction.dataset.bankAction === 'restore-deleted') {
+      await restoreQuestionToDefault(bankAction.dataset.questionId || bankSelectedId);
+    }
     else if (bankAction.dataset.bankAction === 'toggle-error-bank') {
-      if (setErrorBankMembership(bankSelectedId, !(P.questionProgress[bankSelectedId] && P.questionProgress[bankSelectedId].inErrorBank))) {
+      if (await setErrorBankMembership(bankSelectedId, !(P.questionProgress[bankSelectedId] && P.questionProgress[bankSelectedId].inErrorBank))) {
         renderQuestionBankDetail($('main'));
       }
     }
@@ -1640,13 +1864,25 @@ $('main').addEventListener('click', e => {
     S.idx = S.ids.indexOf(id);
     save(); render();
   } else if (act === 'guess') {
-    P.questionProgress[q.id].inErrorBank = true; save(); render();
-    toast('Questão adicionada ao Banco de Erros.');
+    if (await setErrorBankMembership(q.id, true, false)) {
+      render();
+      toast('Questão adicionada ao Banco de Erros.');
+    }
   } else if (act === 'quit') {
     if (!S.done && !confirm('Encerrar a sessão atual? As respostas já enviadas continuam salvas.')) return;
     S = null; save(); render();
   } else if (act === 'start-another') {
     S = null; save(); currentView = 'simulator'; render();
+  }
+});
+
+$('catalogNotice').addEventListener('click', async event => {
+  if (!event.target.closest('[data-catalog-action="acknowledge"]')) return;
+  try {
+    renderCatalogNotice(await window.QuestionsApi.acknowledgeCatalogUpdate());
+    toast('Relatório de atualização do catálogo registrado.');
+  } catch (error) {
+    toast(error.message || 'Não foi possível registrar a revisão do catálogo.');
   }
 });
 
@@ -1678,6 +1914,7 @@ document.addEventListener('visibilitychange', () => {
 /* ---------- Backup, restauração e reset ---------- */
 $('fullBackupBtn').onclick = async () => {
   try {
+    await progressSaveQueue;
     const backup = await window.QuestionsApi.createBackup(P);
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -1711,37 +1948,23 @@ $('fullBackupFile').onchange = async event => {
       `- Respostas no histórico: ${summary.responseHistory}\n` +
       `- Tentativas em arquivo: ${summary.storedAttempts}\n` +
       `- Sessão em andamento: ${summary.hasActiveSession ? 'sim' : 'não'}\n\n` +
-      'A restauração substituirá os arquivos locais de questões, sequência de IDs, dados do usuário, histórico e o progresso deste navegador. Um backup de segurança será criado antes da alteração. Continuar?'
+      'A restauração substituirá os arquivos locais de questões, sequência de IDs, dados do usuário, histórico e o progresso persistido. Um backup de segurança será criado antes da alteração. Continuar?'
     );
     if (!confirmed) return;
 
     const previousProgress = P;
-    const previousLocalStorage = localStorage.getItem(KEY);
     const restoredProgress = backup.data.progress;
-    try {
-      localStorage.setItem(KEY, JSON.stringify(restoredProgress));
-    } catch {
-      throw new Error('Não foi possível preparar o progresso restaurado neste navegador. Nenhum arquivo do aplicativo foi alterado.');
-    }
-
-    let result;
-    try {
-      result = await window.QuestionsApi.restoreBackup({ backup, currentProgress: previousProgress });
-    } catch (error) {
-      try {
-        if (previousLocalStorage === null) localStorage.removeItem(KEY);
-        else localStorage.setItem(KEY, previousLocalStorage);
-      } catch {
-        throw new Error(`${error.message} Não foi possível recuperar automaticamente o LocalStorage anterior; não feche a aplicação e use o backup de segurança se ele foi criado.`);
-      }
-      throw error;
-    }
+    await progressSaveQueue;
+    const result = await window.QuestionsApi.restoreBackup({ backup, currentProgress: previousProgress });
 
     Q = backup.data.questions.map(question => normalizeQuestion(question));
     byId = Object.fromEntries(Q.map(question => [question.id, question]));
     bankQuestions = backup.data.questions;
     bankStatus = bankQuestions.length ? 'ready' : 'empty';
     P = restoredProgress;
+    progressPersisted = true;
+    progressSaveError = false;
+    renderProgressSaveStatus();
     S = P.session && P.session.ids.every(id => byId[id]) ? P.session : null;
     questionMapVisible = false;
     currentView = 'simulator';
@@ -1772,12 +1995,22 @@ $('importFile').onchange = async e => {
   e.target.value = '';
   if (!f) return;
   try {
-    const d = JSON.parse(await f.text());
-    if (d.version !== 1 || !d.questionProgress || typeof d.questionProgress !== 'object' || Array.isArray(d.questionProgress)) throw new Error('formato');
+    const imported = JSON.parse(await f.text());
+    if (!imported || typeof imported !== 'object' || Array.isArray(imported)) {
+      throw new Error('O arquivo não contém um objeto de progresso.');
+    }
+    const d = validateProgressState({ ...imported, session: imported.session ?? null });
     if (!confirm('Importar substituirá o progresso atual. Continuar?')) return;
-    P = { version: 1, questionProgress: d.questionProgress, history: Array.isArray(d.history) ? d.history : [], session: null };
-    S = null; save(); render(); toast('Progresso restaurado.');
-  } catch (err) { toast('Arquivo de progresso inválido.'); }
+    await progressSaveQueue;
+    const result = await window.QuestionsApi.importProgress({ ...d, session: null });
+    P = result.progress;
+    progressPersisted = true;
+    progressSaveError = false;
+    renderProgressSaveStatus();
+    S = null;
+    render();
+    toast(`Progresso restaurado. Backup de segurança: ${result.safetyBackup}`);
+  } catch (err) { toast(err.message || 'Arquivo de progresso inválido.'); }
 };
 
 $('bankImportFile').onchange = async e => {
@@ -1787,10 +2020,20 @@ $('bankImportFile').onchange = async e => {
   await importQuestionsFromFile(file);
 };
 
-$('resetBtn').onclick = () => {
+$('resetBtn').onclick = async () => {
   if (!confirm('Tem certeza que deseja apagar todo o seu progresso?\n\nEsta ação removerá:\n- histórico\n- estatísticas\n- Banco de Erros\n- questões respondidas')) return;
-  P = { version: 1, questionProgress: {}, history: [], session: null };
-  S = null; localStorage.removeItem(KEY); save(); render(); toast('Progresso apagado.');
+  const previousProgress = P;
+  const previousSession = S;
+  P = createEmptyProgress();
+  S = null;
+  if (await save()) {
+    render();
+    toast('Progresso apagado.');
+  } else {
+    P = previousProgress;
+    S = previousSession;
+    render();
+  }
 };
 
 let toastTimer;

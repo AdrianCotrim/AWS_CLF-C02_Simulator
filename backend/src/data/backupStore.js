@@ -6,10 +6,12 @@ const { createHash, randomUUID } = require('node:crypto');
 const questionStore = require('./questionsStore');
 const userDataStore = require('./userDataStore');
 const historyStore = require('./historyStore');
+const progressStore = require('./progressStore');
 
 const FORMAT = 'aws-clf-c02-backup';
-const VERSION = 1;
-const componentNames = ['questions', 'questionSequence', 'userData', 'history', 'progress'];
+const VERSION = 2;
+const legacyComponentNames = ['questions', 'questionSequence', 'userData', 'history', 'progress'];
+const componentNames = [...legacyComponentNames, 'catalog', 'questionChanges'];
 const backupDirectory = process.env.BACKUP_DIRECTORY
   ? path.resolve(process.env.BACKUP_DIRECTORY)
   : path.resolve(__dirname, '../../../data/backups');
@@ -108,24 +110,24 @@ function validateProgress(progress) {
 
 function validateBackup(backup) {
   if (!backup || typeof backup !== 'object' || Array.isArray(backup)
-    || backup.format !== FORMAT || backup.version !== VERSION) {
+    || backup.format !== FORMAT || ![1, VERSION].includes(backup.version)) {
     throw new BackupError('UNSUPPORTED_BACKUP_VERSION', 'O formato ou a versão deste backup não é compatível.');
   }
+  const expectedComponents = backup.version === 1 ? legacyComponentNames : componentNames;
   if (typeof backup.exportedAt !== 'string' || !Number.isFinite(Date.parse(backup.exportedAt))
     || !Array.isArray(backup.includes)
-    || JSON.stringify(backup.includes) !== JSON.stringify(componentNames)
+    || JSON.stringify(backup.includes) !== JSON.stringify(expectedComponents)
     || !backup.data || typeof backup.data !== 'object' || Array.isArray(backup.data)
     || !backup.checksums || typeof backup.checksums !== 'object' || Array.isArray(backup.checksums)) {
     throw new BackupError('INVALID_BACKUP_MANIFEST', 'O manifesto do backup está incompleto ou inválido.');
   }
-
   const data = backup.data;
   validateQuestionBank(data.questions);
   if (!data.questionSequence || !Number.isSafeInteger(data.questionSequence.lastIssued) || data.questionSequence.lastIssued < 0) {
     throw new BackupError('INVALID_BACKUP_SEQUENCE', 'A sequência de IDs do backup está ausente ou inválida.');
   }
   const highestPersonalId = data.questions.reduce((highest, question) => {
-    const match = /^personal-(\d+)$/i.exec(question.id);
+    const match = /^(?:personal|local)-(\d+)$/i.exec(question.id);
     const value = match ? Number(match[1]) : 0;
     return Number.isSafeInteger(value) ? Math.max(highest, value) : highest;
   }, 0);
@@ -141,9 +143,23 @@ function validateBackup(backup) {
     throw new BackupError('INVALID_BACKUP_PROGRESS', 'A sessão salva referencia questões ausentes no banco do backup.');
   }
 
-  for (const name of componentNames) {
+  for (const name of expectedComponents) {
     if (typeof backup.checksums[name] !== 'string' || backup.checksums[name] !== hash(data[name])) {
       throw new BackupError('BACKUP_CHECKSUM_MISMATCH', `A verificação de integridade falhou para ${name}.`);
+    }
+  }
+
+  if (backup.version === VERSION) {
+    questionStore.validateCatalog(data.catalog);
+    questionStore.validateLocalChanges(data.questionChanges);
+    let composed;
+    try {
+      composed = questionStore.composeQuestions(data.catalog, data.questionChanges);
+    } catch (error) {
+      throw new BackupError('INVALID_BACKUP_QUESTION_LAYERS', error.message);
+    }
+    if (JSON.stringify(composed) !== JSON.stringify(data.questions)) {
+      throw new BackupError('INVALID_BACKUP_QUESTION_LAYERS', 'As questões efetivas não correspondem ao catálogo e às alterações locais do backup.');
     }
   }
 
@@ -183,30 +199,48 @@ async function readRequiredJson(filePath, label) {
   }
 }
 
-async function readCurrentData(progress) {
-  const questions = await readRequiredJson(questionStore.questionsFile, 'questions.json');
+async function readCurrentData(progress, { usePersistedProgress = true } = {}) {
+  const layers = await questionStore.readQuestionLayers();
+  const questionChanges = layers.initialized
+    ? layers.changes
+    : questionStore.emptyLocalChanges(layers.catalog, true);
+  const questions = layers.questions;
   const userData = await readRequiredJson(userDataStore.userDataFile, 'user-data.json');
   const history = await readRequiredJson(historyStore.historyFile, 'history.json');
   const questionSequence = { lastIssued: await questionStore.readIdHighWaterMark(questions) };
+  const persistedProgress = await progressStore.readProgress();
+  const selectedProgress = usePersistedProgress && persistedProgress.exists
+    ? persistedProgress.progress
+    : progress;
   return {
     questions,
+    catalog: layers.catalog,
+    questionChanges,
     questionSequence,
     userData,
     history,
-    progress: validateProgress(progress)
+    progress: validateProgress(selectedProgress)
   };
 }
 
-async function createBackup(progress) {
-  return validateBackup(createBundle(await readCurrentData(progress)));
+async function createBackup(progress, options) {
+  return validateBackup(createBundle(await readCurrentData(progress, options)));
 }
 
 function getRestoreTargets(data) {
+  const restoredAt = new Date().toISOString();
+  const isLegacyBackup = !data.catalog || !data.questionChanges;
+  const catalog = isLegacyBackup ? data.questions : data.catalog;
+  const questionChanges = isLegacyBackup
+    ? questionStore.emptyLocalChanges(catalog, true)
+    : data.questionChanges;
   return [
-    { filePath: questionStore.questionsFile, payload: data.questions },
+    { filePath: questionStore.questionsFile, payload: catalog },
+    { filePath: questionStore.localQuestionsFile, payload: questionChanges },
     { filePath: questionStore.idSequenceFile, payload: data.questionSequence },
     { filePath: userDataStore.userDataFile, payload: data.userData },
-    { filePath: historyStore.historyFile, payload: data.history }
+    { filePath: historyStore.historyFile, payload: data.history },
+    { filePath: progressStore.progressFile, payload: progressStore.createDocument(data.progress, { source: 'backup-restore', completedAt: restoredAt }) }
   ];
 }
 
@@ -248,7 +282,7 @@ async function rollbackTargets(changedTargets) {
         const rollbackFile = `${target.filePath}.${process.pid}.${randomUUID()}.rollback`;
         try {
           await fs.writeFile(rollbackFile, target.original, { flag: 'wx' });
-          await fs.rename(rollbackFile, target.filePath);
+          await replaceFile(rollbackFile, target.filePath);
         } catch (error) {
           await fs.rm(rollbackFile, { force: true }).catch(() => {});
           throw error;
@@ -261,7 +295,26 @@ async function rollbackTargets(changedTargets) {
   return failures;
 }
 
+async function replaceFile(source, destination) {
+  try {
+    await fs.rename(source, destination);
+  } catch (error) {
+    if (process.platform !== 'win32' || !['EPERM', 'EACCES'].includes(error.code)) throw error;
+    const sourceContents = await fs.readFile(source, 'utf8');
+    await fs.copyFile(source, destination);
+    if (await fs.readFile(destination, 'utf8') !== sourceContents) {
+      throw new Error(`A verificação da substituição de ${path.basename(destination)} falhou.`);
+    }
+    await fs.rm(source, { force: true });
+  }
+}
+
 async function restoreBackup(backup, currentProgress) {
+  return questionStore.runExclusive(() =>
+    progressStore.runExclusive(() => restoreBackupLocked(backup, currentProgress)));
+}
+
+async function restoreBackupLocked(backup, currentProgress) {
   validateBackup(backup);
   validateProgress(currentProgress);
 
@@ -270,7 +323,8 @@ async function restoreBackup(backup, currentProgress) {
     try {
       return await fs.readFile(target.filePath, 'utf8');
     } catch (error) {
-      if (error.code === 'ENOENT' && target.filePath === questionStore.idSequenceFile) return null;
+      if (error.code === 'ENOENT'
+        && [questionStore.localQuestionsFile, questionStore.idSequenceFile, progressStore.progressFile].includes(target.filePath)) return null;
       if (error.code === 'ENOENT') {
         throw new BackupError('BACKUP_SOURCE_MISSING', `Não foi possível restaurar com segurança: o arquivo atual ${path.basename(target.filePath)} está ausente.`, 500);
       }
@@ -293,8 +347,8 @@ async function restoreBackup(backup, currentProgress) {
   const changedTargets = [];
   try {
     for (let index = 0; index < staged.length; index += 1) {
-      await fs.rename(staged[index].temporaryFile, staged[index].filePath);
       changedTargets.push({ ...staged[index], original: originals[index] });
+      await replaceFile(staged[index].temporaryFile, staged[index].filePath);
     }
   } catch (error) {
     const rollbackFailures = await rollbackTargets(changedTargets);
@@ -323,5 +377,6 @@ module.exports = {
   createBackup,
   validateBackup,
   getSummary,
-  restoreBackup
+  restoreBackup,
+  writeUniqueBackup
 };

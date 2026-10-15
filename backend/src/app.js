@@ -6,6 +6,7 @@ const questionsRouter = require('./routes/questions');
 const userDataRouter = require('./routes/userData');
 const historyRouter = require('./routes/history');
 const backupRouter = require('./routes/backup');
+const progressRouter = require('./routes/progress');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(cors({
   }
 }));
 app.use('/api/backup', express.json({ limit: '25mb' }), backupRouter);
+app.use('/api/progress', express.json({ limit: '25mb' }), progressRouter);
 app.use(express.json({ limit: '32kb' }));
 app.use('/api/questions', questionsRouter);
 app.use('/api/user-data', userDataRouter);

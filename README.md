@@ -1,6 +1,6 @@
 # AWS CLF-C02 Simulator
 
-Ferramenta pessoal e local para praticar questões do exame AWS Certified Cloud Practitioner. O simulador continua usando HTML, CSS, JavaScript puro, JSON e LocalStorage. Um backend Express opcional, documentado abaixo, expõe uma API local para o banco de questões.
+Ferramenta pessoal e local para praticar questões do exame AWS Certified Cloud Practitioner. O simulador usa HTML, CSS, JavaScript puro e JSON; o backend Express local persiste o progresso e expõe a API do banco de questões.
 
 ## Como executar
 
@@ -19,7 +19,7 @@ cd aws-simulado
 python -m http.server 8000
 ```
 
-Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servidor estático serve (`npx serve`, extensão Live Server do VS Code etc.). Para usar o formulário de cadastro, mantenha também a API local em execução (instruções abaixo).
+Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servidor estático serve (`npx serve`, extensão Live Server do VS Code etc.). Para persistir o progresso e usar o formulário de cadastro, mantenha também a API local em execução (instruções abaixo).
 
 ## Modos
 
@@ -30,11 +30,11 @@ Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servid
 
 ## Como adicionar questões
 
-Para editar o banco manualmente, inclua um objeto em `data/questions.json`. Também é possível cadastrar pela tela **Adicionar questão**: o formulário envia a questão à API, que gera o ID e grava no mesmo arquivo. A questão criada é incluída no simulador sem recarregar a página. No cadastro, marque **Adicionar ao Banco de Erros** para incluir também a referência da nova questão.
+O catálogo aprovado fica em `data/questions.json`. Cadastros pela tela **Adicionar questão** são gravados separadamente em `data/questions.local.json`, sem regravar o catálogo. O backend gera IDs `local-NNN`, e a questão criada é incluída no simulador sem recarregar a página. No cadastro, marque **Adicionar ao Banco de Erros** para incluir também a referência da nova questão.
 
 Ao salvar uma nova questão, o app compara o enunciado com os registros existentes após normalizar espaços, quebras de linha, HTML e maiúsculas/minúsculas. Se encontrar correspondências, permite cancelar, visualizar cada questão encontrada ou confirmar **Cadastrar mesmo assim**. A verificação ocorre apenas no envio e não altera o texto salvo.
 
-Na visualização de uma questão em **Banco de Questões**, use **Adicionar ao Banco de Erros** ou **Remover do Banco de Erros** para alterar essa marcação a qualquer momento. O Banco de Erros continua sendo salvo no progresso do navegador, em `questionProgress`, e referencia as questões pelo ID; os dados da questão não são copiados. Excluir uma questão pela interface também remove seu progresso e sua referência ao Banco de Erros.
+Na visualização de uma questão em **Banco de Questões**, use **Adicionar ao Banco de Erros** ou **Remover do Banco de Erros** para alterar essa marcação a qualquer momento. O Banco de Erros é salvo no progresso persistido e referencia as questões pelo ID; os dados da questão não são copiados. Excluir uma questão não apaga o progresso nem o histórico associados ao ID.
 
 ## Estatísticas
 
@@ -76,40 +76,39 @@ Em `multiple_choice`, a resposta só é correta quando o conjunto selecionado é
 A aplicação mantém a persistência em arquivos JSON locais, separados por responsabilidade:
 
 - `data/questions.json`: banco principal de questões e metadados do simulador.
+- `data/questions.local.json`: cadastros, edições e exclusões locais, mantidos fora do catálogo padrão.
 - `data/user-data.json`: questões pessoais, IDs no Banco de Erros e preferências do usuário. O formato inclui a versão dos dados para facilitar migrações futuras.
 - `data/history.json`: histórico de tentativas, resultados e demais campos usados nas estatísticas.
 
-Os acessos a esses arquivos passam por módulos centralizados no backend (`backend/src/data`), evitando que cada tela ou componente escreva diretamente no disco. A API local continua aceitando os formatos atuais de questão e preserva o comportamento já existente do simulador.
+As 763 questões atuais foram aprovadas como baseline para separar as alterações futuras; isso não afirma que sejam o catálogo original nem recupera questões anteriores ausentes. Edições e exclusões de questões do catálogo ficam registradas localmente como substituições e exclusões lógicas. O relatório de catálogo informa questões novas, alteradas, removidas e conflitos. Uma questão editada pode ser restaurada à versão padrão atual pela tela Banco de Questões. Os arquivos locais e backups não são distribuídos junto ao projeto.
 
-## LocalStorage
+Os acessos aos arquivos passam por módulos centralizados no backend (`backend/src/data`), evitando que cada tela ou componente escreva diretamente no disco. A API local continua aceitando os formatos atuais de questão e preserva o comportamento já existente do simulador.
 
-O progresso fica na chave `clf-c02-progress` do navegador. As questões nunca são gravadas lá, apenas dados de desempenho por `questionId`:
+## Persistência do progresso e migração
 
-```json
-{ "timesAnswered": 3, "timesWrong": 2, "lastAnswered": "2026-09-30", "lastCorrect": false, "inErrorBank": true }
-```
+O progresso ativo do simulador é persistido pelo backend em `data/progress.json`, como documento JSON versionado. Ele contém o estado compatível com o frontend: dados por `questionId`, histórico de respostas, Banco de Erros e sessão de simulado retomável. Cada gravação é serializada, escrita por substituição atômica e relida para verificação. O rodapé informa quando o progresso está sendo salvo.
 
-Também ficam salvos o histórico de respostas, as estatísticas e o simulado em andamento. O LocalStorage não modifica `data/questions.json`; ele pode ser alterado manualmente ou pela API local documentada abaixo.
+Na primeira execução após esta atualização, o app verifica a chave legada `clf-c02-progress` do LocalStorage. Se encontrar dados, mostra um resumo e pede confirmação antes de migrá-los. Se já houver progresso no backend, a substituição exige confirmação explícita; antes dela são criados backups separados dos estados atual e legado em `data/backups/`. A migração valida a estrutura e as referências da sessão, verifica a gravação e só então informa sucesso. O LocalStorage legado não é apagado nem recebe novas gravações. Se os dados forem inválidos ou a migração falhar, o erro é informado e o original permanece intacto.
 
-Limite: o LocalStorage pertence ao navegador e ao endereço usado (`localhost:8000` e `localhost:5500` têm armazenamentos separados). Limpar os dados do navegador apaga o progresso.
+O LocalStorage é consultado somente durante essa migração assistida. Assim, dados antigos ainda podem existir por navegador e endereço (`localhost:8000` e `localhost:5500` têm armazenamentos separados), mas não são mais a fonte ativa do progresso.
 
 ## Backup do progresso
 
 - **Exportar progresso** baixa um arquivo JSON (`version`, `exportedAt`, `statistics`, `questionProgress`, `errorBank`, `history`).
-- **Importar progresso** restaura esse arquivo, substituindo o progresso atual após confirmação.
-- **Apagar progresso** remove tudo do LocalStorage após confirmação; o `questions.json` não é afetado.
+- **Importar progresso** cria primeiro um backup de segurança no backend e, após confirmação, substitui o estado persistido; a sessão ativa não é importada.
+- **Apagar progresso** remove o estado atual de `data/progress.json` após confirmação; `questions.json` não é afetado. O LocalStorage legado não é removido.
 
-Faça backups periódicos.
+Faça backups periódicos e mantenha cópias fora da pasta do projeto.
 
 ## Backup completo e restauração
 
-Use **Criar backup completo** para baixar um arquivo JSON versionado com o banco atual de questões, a sequência de IDs, `user-data.json`, `history.json` e o progresso enviado explicitamente pelo frontend. Esse progresso inclui `questionProgress`, histórico de respostas e a sessão de simulado em andamento, quando existente. O backend não acessa o LocalStorage diretamente; o frontend envia esses dados à API apenas para montar o arquivo.
+Use **Criar backup completo** para baixar um arquivo JSON versionado com as questões efetivas, o catálogo padrão, as alterações locais, a sequência de IDs, `user-data.json`, `history.json` e o progresso persistido. O progresso inclui `questionProgress`, histórico de respostas e a sessão de simulado em andamento, quando existente.
 
-Use **Validar e restaurar backup** para selecionar um arquivo completo. A aplicação valida formato, versão, estrutura e checksums antes de mostrar o resumo e pedir confirmação. Um arquivo válido contém `format: "aws-clf-c02-backup"`, `version: 1` e todos os componentes listados no manifesto. Os checksums SHA-256 detectam corrupção acidental; não autenticam o arquivo nem provam que seu conteúdo é confiável.
+Use **Validar e restaurar backup** para selecionar um arquivo completo. A aplicação valida formato, versão, estrutura e checksums antes de mostrar o resumo e pedir confirmação. O formato atual usa `format: "aws-clf-c02-backup"` e `version: 2`; backups legados `version: 1` continuam aceitos e são restaurados como um catálogo baseline, sem classificação retroativa de origem. Os checksums SHA-256 detectam corrupção acidental; não autenticam o arquivo nem provam que seu conteúdo é confiável.
 
-Antes de substituir os dados, o backend cria um backup de segurança com os arquivos JSON atuais e o progresso atual recebido do frontend, em `data/backups/`. Os quatro arquivos JSON são preparados em temporários e substituídos individualmente; se uma substituição falhar, o backend tenta reverter os arquivos já substituídos. O LocalStorage é atualizado pelo frontend, que preserva seu valor anterior se a requisição de restauração falhar.
+Antes de substituir os dados, o backend cria um backup de segurança com os arquivos JSON atuais, incluindo o progresso persistido, em `data/backups/`. Os arquivos são preparados em temporários e substituídos individualmente; se uma substituição falhar, o backend tenta reverter os arquivos já substituídos. Após a restauração, o frontend usa o progresso restaurado pelo backend.
 
-A troca entre vários arquivos no disco e LocalStorage não é uma transação única: uma queda abrupta do processo entre a gravação do LocalStorage e a conclusão do backend, ou uma falha durante o rollback, ainda pode exigir recuperação manual usando o backup de segurança. Guarde também o arquivo baixado em outro local. A API requer os arquivos atuais `questions.json`, `user-data.json` e `history.json` para criar o backup e a cópia de segurança; se algum estiver ausente ou corrompido, a operação é recusada em vez de substituir silenciosamente por valores vazios. O arquivo de sequência pode estar ausente, pois nesse caso o próximo ID é derivado do maior ID atual.
+A restauração de vários arquivos não é uma transação única: uma queda abrupta do processo ou uma falha durante o rollback ainda pode exigir recuperação manual usando o backup de segurança. Guarde também o arquivo baixado em outro local. A API requer os arquivos atuais `questions.json`, `user-data.json` e `history.json` para criar o backup e a cópia de segurança; se algum estiver ausente ou corrompido, a operação é recusada em vez de substituir silenciosamente por valores vazios. O arquivo de sequência pode estar ausente, pois nesse caso o próximo ID é derivado do maior ID atual.
 
 O backup completo não inclui `node_modules`, caches ou logs, nem modifica a fonte oficial de persistência. O backend continua lendo e gravando os caminhos JSON atuais. O diretório `data/backups/` é a localização adequada ao projeto local atual; em uma futura distribuição Electron, os backups e demais dados graváveis devem ser movidos para o diretório de dados do usuário do aplicativo. O servidor do backend escuta somente em `127.0.0.1`, sem expor a API às interfaces de rede externas.
 
@@ -127,15 +126,23 @@ A API fica em `http://127.0.0.1:3000`; a porta pode ser alterada pela variável 
 
 Endpoints disponíveis:
 
-- `POST /api/backup/create`: cria um backup versionado. Envie `{ progress: ... }` com o estado atual do LocalStorage obtido pelo frontend.
+- `GET /api/progress`: lê o estado persistido e informa se ele existe.
+- `PUT /api/progress`: valida e salva um snapshot completo do progresso.
+- `POST /api/progress/migration/preview`: valida o progresso legado e retorna resumos do LocalStorage e do backend.
+- `POST /api/progress/migration`: migra o progresso legado. Use `replaceExisting: true` somente após confirmação explícita para substituir progresso preexistente; a rota cria os backups antes de gravar.
+- `POST /api/progress/import`: importa um estado validado após criar backup de segurança.
+- `POST /api/backup/create`: cria um backup versionado usando o progresso persistido.
 - `POST /api/backup/validate`: valida um bundle completo enviado em `{ backup: ... }`, sem gravar dados.
 - `POST /api/backup/restore`: restaura um bundle validado enviado em `{ backup: ..., currentProgress: ... }`. Cria primeiro uma cópia de segurança dos dados atuais.
-- `GET /api/questions`: retorna a lista completa.
+- `GET /api/questions`: retorna a lista efetiva composta pelo catálogo padrão e pelas alterações locais.
+- `GET /api/questions/catalog-status`: informa atualizações do catálogo e conflitos com alterações locais; `POST /api/questions/catalog-status/acknowledge` registra que o relatório foi revisado.
+- `GET /api/questions/:id/metadata`: informa se a questão é do catálogo ou local.
+- `POST /api/questions/:id/restore-default`: remove a edição local e restaura a versão padrão atual.
 - `GET /api/questions/:id`: retorna uma questão ou HTTP 404.
-- `POST /api/questions`: valida e adiciona uma questão, retornando HTTP 201. O servidor gera o ID `personal-NNN`; não envie `id`.
+- `POST /api/questions`: valida e adiciona uma questão, retornando HTTP 201. O servidor gera o ID `local-NNN`; não envie `id`.
 - `POST /api/questions/import`: faz pré-visualização ou confirma a importação em lote. Envie `{ questions: [...] }` e use `confirm: true` somente na confirmação final. A rota responde com resumo de itens válidos, duplicados e inválidos antes de gravar qualquer dado.
 - `PUT /api/questions/:id`: valida e atualiza os campos da questão sem alterar o ID; responde HTTP 404 se não existir.
-- `DELETE /api/questions/:id`: exclui a questão e retorna seu ID; responde HTTP 404 se não existir.
+- `DELETE /api/questions/:id`: exclui uma questão local ou registra uma exclusão lógica da questão padrão; retorna seu ID e responde HTTP 404 se não existir.
 
 Exemplo de questão para criação (o campo `correct_answer` pode ser a letra da alternativa ou seu texto):
 
@@ -169,7 +176,7 @@ No simulador, **Banco de Questões** carrega a lista atual pela API e permite pe
 
 O POST altera o arquivo JSON persistente. Dados inválidos retornam HTTP 400 em JSON; erros de leitura, escrita ou arquivo corrompido retornam HTTP 500. CORS permite origens locais em `localhost` e `127.0.0.1` durante o desenvolvimento.
 
-O DELETE é permanente e a interface pede confirmação antes de executar. Uma sequência auxiliar de IDs preserva o maior número já emitido, para que a exclusão não faça o backend reutilizar IDs antigos.
+O DELETE pede confirmação na interface. Para questões padrão, a exclusão é lógica e pode ser revertida se a questão voltar a existir no catálogo; questões locais são removidas das alterações locais. Uma sequência auxiliar preserva o maior número já emitido, para que o backend não reutilize IDs antigos.
 
 ## Decisões de implementação
 
