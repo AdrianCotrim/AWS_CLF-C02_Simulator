@@ -4,6 +4,25 @@ Ferramenta pessoal e local para praticar questões do exame AWS Certified Cloud 
 
 ## Como executar
 
+### Aplicativo Electron
+
+Para executar a versão desktop em desenvolvimento:
+
+```powershell
+npm install
+npm run electron:dev
+```
+
+Para gerar o instalador Windows NSIS:
+
+```powershell
+npm run dist:win
+```
+
+O instalador e a versão portátil de validação são gerados em `release/`. O pacote inclui o frontend, o backend e as dependências de produção; Node.js e Python não são necessários no computador do usuário.
+
+Na versão instalada, o catálogo padrão permanece junto aos recursos da aplicação. Questões locais, progresso, histórico, banco de erros, configurações e backups ficam no diretório de dados do usuário do Electron (`app.getPath('userData')`) e não são removidos pelo desinstalador padrão. Dados usados no desenvolvimento não são migrados automaticamente.
+
 No Windows, inicie o backend e o frontend juntos com:
 
 ```powershell

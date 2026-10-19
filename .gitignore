@@ -1,2 +1,5 @@
-data/questions.local.json
+node_modules/
 data/backups/
+data/questions.local.json
+data/progress.json
+release/

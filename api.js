@@ -1,9 +1,10 @@
 'use strict';
 
 (function () {
-  const endpoint = 'http://127.0.0.1:3000/api/questions';
-  const backupEndpoint = 'http://127.0.0.1:3000/api/backup';
-  const progressEndpoint = 'http://127.0.0.1:3000/api/progress';
+  const apiBaseUrl = window.__AWS_CLF_API_BASE_URL__ || 'http://127.0.0.1:3000/api';
+  const endpoint = `${apiBaseUrl}/questions`;
+  const backupEndpoint = `${apiBaseUrl}/backup`;
+  const progressEndpoint = `${apiBaseUrl}/progress`;
 
   async function getQuestions() {
     let response;

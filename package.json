@@ -1,0 +1,48 @@
+{
+  "name": "aws-clf-c02-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AWS CLF-C02 Simulator para Windows",
+  "main": "electron/main.js",
+  "scripts": {
+    "electron:dev": "electron .",
+    "test": "npm --prefix backend test",
+    "dist:win": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^38.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.adriancotrim.awsclf.c02simulator",
+    "productName": "AWS CLF-C02 Simulator",
+    "artifactName": "${productName}-Setup-${version}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "backend/**/*",
+      "index.html",
+      "api.js",
+      "app.js",
+      "style.css",
+      "data/questions.json",
+      "package.json"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "backend/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}
