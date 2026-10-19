@@ -34,8 +34,20 @@ async function writeJsonFile(filePath, payload) {
   }
 }
 
+async function ensureJsonFile(filePath, payload) {
+  try {
+    await fs.access(filePath);
+  } catch (error) {
+    if (error && error.code === 'ENOENT') {
+      await writeJsonFile(filePath, payload);
+      return;
+    }
+    throw error;
+  }
+}
+
 function normalizeArray(value, fallback) {
   return Array.isArray(value) ? value : fallback;
 }
 
-module.exports = { readJsonFile, writeJsonFile, normalizeArray };
+module.exports = { readJsonFile, writeJsonFile, ensureJsonFile, normalizeArray };

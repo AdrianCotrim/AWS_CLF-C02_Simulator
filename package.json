@@ -7,7 +7,8 @@
   "scripts": {
     "electron:dev": "electron .",
     "test": "npm --prefix backend test && node --test electron/updateManager.test.js",
-    "dist:win": "electron-builder --win nsis"
+    "dist:win": "electron-builder --win nsis",
+    "validate:release": "node scripts/validate-release.js"
   },
   "dependencies": {
     "electron-updater": "^6.6.2"
@@ -19,7 +20,7 @@
   "build": {
     "appId": "com.adriancotrim.awsclf.c02simulator",
     "productName": "AWS CLF-C02 Simulator",
-    "artifactName": "${productName}-Setup-${version}.${ext}",
+    "artifactName": "AWS-CLF-C02-Simulator-Setup-${version}.${ext}",
     "directories": {
       "output": "release"
     },

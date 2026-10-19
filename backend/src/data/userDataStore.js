@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('node:path');
-const { readJsonFile, writeJsonFile, normalizeArray } = require('./storeUtils');
+const { readJsonFile, writeJsonFile, ensureJsonFile, normalizeArray } = require('./storeUtils');
 const { readQuestions } = require('./questionsStore');
 
 const defaultFile = path.resolve(__dirname, '../../../data/user-data.json');
@@ -38,6 +38,10 @@ function normalizeUserData(data) {
 async function readUserData() {
   const data = await readJsonFile(userDataFile, defaultUserData);
   return normalizeUserData(data);
+}
+
+function ensureUserDataFile() {
+  return ensureJsonFile(userDataFile, defaultUserData);
 }
 
 async function writeUserData(userData) {
@@ -115,6 +119,7 @@ module.exports = {
   defaultUserData,
   defaultFile,
   userDataFile,
+  ensureUserDataFile,
   readUserData,
   writeUserData,
   addPersonalQuestion,

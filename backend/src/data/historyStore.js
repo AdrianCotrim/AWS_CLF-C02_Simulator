@@ -2,7 +2,7 @@
 
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const { readJsonFile, writeJsonFile, normalizeArray } = require('./storeUtils');
+const { readJsonFile, writeJsonFile, ensureJsonFile, normalizeArray } = require('./storeUtils');
 
 const defaultFile = path.resolve(__dirname, '../../../data/history.json');
 const historyFile = process.env.HISTORY_FILE
@@ -28,6 +28,10 @@ function normalizeHistory(data) {
 async function readHistory() {
   const data = await readJsonFile(historyFile, defaultHistory);
   return normalizeHistory(data);
+}
+
+function ensureHistoryFile() {
+  return ensureJsonFile(historyFile, defaultHistory);
 }
 
 async function writeHistory(history) {
@@ -64,6 +68,7 @@ module.exports = {
   defaultHistory,
   defaultFile,
   historyFile,
+  ensureHistoryFile,
   readHistory,
   writeHistory,
   appendAttempt,

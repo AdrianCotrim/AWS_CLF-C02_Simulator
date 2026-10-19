@@ -2,4 +2,6 @@ node_modules/
 data/backups/
 data/questions.local.json
 data/progress.json
+data/history.json
+data/user-data.json
 release/
