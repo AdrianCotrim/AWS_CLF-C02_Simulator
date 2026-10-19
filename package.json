@@ -6,8 +6,11 @@
   "main": "electron/main.js",
   "scripts": {
     "electron:dev": "electron .",
-    "test": "npm --prefix backend test",
+    "test": "npm --prefix backend test && node --test electron/updateManager.test.js",
     "dist:win": "electron-builder --win nsis"
+  },
+  "dependencies": {
+    "electron-updater": "^6.6.2"
   },
   "devDependencies": {
     "electron": "^38.2.0",
@@ -43,6 +46,12 @@
       "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
       "deleteAppDataOnUninstall": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "AdrianCotrim",
+      "repo": "AWS_CLF-C02_Simulator",
+      "releaseType": "release"
     }
   }
 }

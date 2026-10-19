@@ -23,6 +23,24 @@ O instalador e a versão portátil de validação são gerados em `release/`. O 
 
 Na versão instalada, o catálogo padrão permanece junto aos recursos da aplicação. Questões locais, progresso, histórico, banco de erros, configurações e backups ficam no diretório de dados do usuário do Electron (`app.getPath('userData')`) e não são removidos pelo desinstalador padrão. Dados usados no desenvolvimento não são migrados automaticamente.
 
+### Atualizações pelo GitHub Releases
+
+A versão empacotada consulta atualizações somente após iniciar normalmente e nunca baixa uma atualização sem confirmação. O provedor está configurado para o repositório público `AdrianCotrim/AWS_CLF-C02_Simulator`. No modo de desenvolvimento, nenhuma consulta é feita.
+
+Para publicar uma versão:
+
+1. Atualize o campo `version` em `package.json` usando uma versão semântica, por exemplo `1.0.1`.
+2. Atualize as notas da versão.
+3. Execute `npm install` e `npm run dist:win`.
+4. Crie uma tag correspondente, por exemplo `v1.0.1`.
+5. Crie uma GitHub Release para essa tag.
+6. Anexe o instalador `.exe`, o arquivo `.blockmap` e o `latest.yml` gerados em `release/`.
+7. Teste a detecção a partir da versão anterior instalada em uma VM.
+
+O arquivo `latest.yml` e o instalador precisam permanecer disponíveis na release. O aplicativo apresenta a versão disponível e as notas, pergunta antes de baixar, mostra o progresso no título da janela e pergunta antes de instalar e reiniciar. Se a rede ou o GitHub estiverem indisponíveis, a versão instalada continua funcionando.
+
+As atualizações substituem somente os arquivos da aplicação. Os dados em `app.getPath('userData')` não são migrados, reinicializados ou sobrescritos pelo atualizador. O instalador não possui assinatura digital configurada; alertas do SmartScreen podem ocorrer.
+
 No Windows, inicie o backend e o frontend juntos com:
 
 ```powershell

@@ -5,6 +5,8 @@ const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawn } = require('node:child_process');
+const { autoUpdater } = require('electron-updater');
+const { createUpdateManager } = require('./updateManager');
 
 const HOST = '127.0.0.1';
 const frontendDirectory = app.getAppPath();
@@ -14,6 +16,7 @@ const healthRetryDelayMs = 200;
 
 let backendProcess;
 let frontendServer;
+let mainWindow;
 let isShuttingDown = false;
 
 function getBackendDirectory() {
@@ -167,7 +170,7 @@ async function stopServices() {
 }
 
 function createWindow(frontendUrl) {
-  const window = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 900,
     minWidth: 900,
@@ -181,18 +184,19 @@ function createWindow(frontendUrl) {
   });
 
   const allowedOrigin = new URL(frontendUrl).origin;
-  window.webContents.setWindowOpenHandler(({ url }) => {
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     return { action: new URL(url).origin === allowedOrigin ? 'allow' : 'deny' };
   });
-  window.webContents.on('will-navigate', event => {
-    if (window.webContents.getURL() && new URL(event.url).origin !== allowedOrigin) {
+  mainWindow.webContents.on('will-navigate', event => {
+    if (mainWindow.webContents.getURL() && new URL(event.url).origin !== allowedOrigin) {
       event.preventDefault();
     }
   });
-  window.once('ready-to-show', () => window.show());
-  window.loadURL(frontendUrl).catch(error => {
+  mainWindow.once('ready-to-show', () => mainWindow.show());
+  mainWindow.loadURL(frontendUrl).catch(error => {
     dialog.showErrorBox('Falha ao carregar o aplicativo', error.message);
   });
+  return mainWindow;
 }
 
 app.whenReady().then(async () => {
@@ -202,6 +206,13 @@ app.whenReady().then(async () => {
     });
     const frontendUrl = await startServices();
     createWindow(frontendUrl);
+    const updateManager = createUpdateManager({
+      updater: autoUpdater,
+      getWindow: () => mainWindow,
+      isPackaged: app.isPackaged,
+      dialogApi: dialog
+    });
+    void updateManager.check();
   } catch (error) {
     await stopServices();
     dialog.showErrorBox('Falha ao iniciar o aplicativo', error.message);
