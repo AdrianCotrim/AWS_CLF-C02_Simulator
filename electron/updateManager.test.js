@@ -5,16 +5,25 @@ const { EventEmitter } = require('node:events');
 const { test } = require('node:test');
 const { createUpdateManager } = require('./updateManager');
 
-function createHarness({ packaged = true, checkResult = null, responses = [] } = {}) {
+function createHarness({
+  packaged = true,
+  currentVersion = '1.0.0',
+  checkResult = null,
+  responses = []
+} = {}) {
   const updater = new EventEmitter();
   updater.autoDownload = true;
   updater.autoInstallOnAppQuit = true;
-  updater.currentVersion = { version: '1.0.0' };
+  updater.currentVersion = { version: currentVersion };
   updater.checkForUpdates = async () => checkResult;
   updater.downloadUpdate = async () => {};
   updater.quitAndInstall = () => { updater.installed = true; };
+  const dialogCalls = [];
   const dialogApi = {
-    showMessageBox: async () => ({ response: responses.shift() ?? 1 })
+    showMessageBox: async (_window, options) => {
+      dialogCalls.push(options);
+      return { response: responses.shift() ?? 1 };
+    }
   };
   const logger = { error() {}, warn() {} };
   const manager = createUpdateManager({
@@ -24,7 +33,7 @@ function createHarness({ packaged = true, checkResult = null, responses = [] } =
     dialogApi,
     logger
   });
-  return { manager, updater };
+  return { manager, updater, dialogCalls };
 }
 
 test('não verifica atualizações no modo de desenvolvimento', async () => {
@@ -45,6 +54,40 @@ test('desativa download automático e mantém a versão atual quando não há at
 
   assert.equal(updater.autoDownload, false);
   assert.equal(updater.autoInstallOnAppQuit, false);
+});
+
+test('não notifica quando a versão remota é igual à instalada', async () => {
+  const { manager, updater, dialogCalls } = createHarness({
+    currentVersion: '1.0.1',
+    checkResult: { updateInfo: { version: '1.0.1' } }
+  });
+  updater.downloadUpdate = async () => {
+    throw new Error('não deveria baixar');
+  };
+
+  await manager.check();
+
+  assert.equal(updater.installed, undefined);
+  assert.equal(dialogCalls.length, 0);
+});
+
+test('notifica quando a versão remota é mais recente', async () => {
+  const { manager, updater, dialogCalls } = createHarness({
+    currentVersion: '1.0.1',
+    checkResult: { updateInfo: { version: '1.0.2' } },
+    responses: [1]
+  });
+  updater.downloadUpdate = async () => { throw new Error('não deveria baixar'); };
+
+  await manager.check();
+
+  assert.equal(updater.installed, undefined);
+  assert.equal(dialogCalls.length, 1);
+});
+
+test('reconhece corretamente uma versão 1.0.10 como mais recente que 1.0.9', async () => {
+  const { compareVersions } = require('./updateManager');
+  assert.equal(compareVersions('1.0.10', '1.0.9'), 1);
 });
 
 test('só baixa e instala depois da confirmação explícita', async () => {

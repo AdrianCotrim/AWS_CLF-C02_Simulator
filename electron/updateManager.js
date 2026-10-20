@@ -8,6 +8,46 @@ function formatReleaseNotes(notes) {
   return '';
 }
 
+function parseVersion(version) {
+  if (typeof version !== 'string') return null;
+  const match = version.trim().replace(/^v/i, '').match(
+    /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/
+  );
+  if (!match) return null;
+  return {
+    core: match.slice(1, 4).map(Number),
+    prerelease: match[4] ? match[4].split('.') : []
+  };
+}
+
+function compareVersions(left, right) {
+  const leftVersion = parseVersion(left);
+  const rightVersion = parseVersion(right);
+  if (!leftVersion || !rightVersion) return null;
+
+  for (let index = 0; index < leftVersion.core.length; index += 1) {
+    if (leftVersion.core[index] !== rightVersion.core[index]) {
+      return leftVersion.core[index] > rightVersion.core[index] ? 1 : -1;
+    }
+  }
+
+  if (leftVersion.prerelease.length === 0 && rightVersion.prerelease.length > 0) return 1;
+  if (leftVersion.prerelease.length > 0 && rightVersion.prerelease.length === 0) return -1;
+  for (let index = 0; index < leftVersion.prerelease.length; index += 1) {
+    if (index >= rightVersion.prerelease.length) return 1;
+    const leftIdentifier = leftVersion.prerelease[index];
+    const rightIdentifier = rightVersion.prerelease[index];
+    if (leftIdentifier === rightIdentifier) continue;
+    const leftNumber = /^\d+$/.test(leftIdentifier) ? Number(leftIdentifier) : null;
+    const rightNumber = /^\d+$/.test(rightIdentifier) ? Number(rightIdentifier) : null;
+    if (leftNumber !== null && rightNumber !== null) return leftNumber > rightNumber ? 1 : -1;
+    if (leftNumber !== null) return -1;
+    if (rightNumber !== null) return 1;
+    return leftIdentifier > rightIdentifier ? 1 : -1;
+  }
+  return leftVersion.prerelease.length === rightVersion.prerelease.length ? 0 : -1;
+}
+
 function createUpdateManager({ updater, getWindow, isPackaged, dialogApi, logger = console }) {
   let checkStarted = false;
   let downloadInProgress = false;
@@ -90,9 +130,14 @@ function createUpdateManager({ updater, getWindow, isPackaged, dialogApi, logger
     updater.autoInstallOnAppQuit = false;
     try {
       const result = await updater.checkForUpdates();
-      if (result && result.updateInfo && result.updateInfo.version
-        && await askToDownload(result.updateInfo)) {
-        await download(result.updateInfo);
+      const updateInfo = result && result.updateInfo;
+      const currentVersion = updater.currentVersion && updater.currentVersion.version;
+      const versionComparison = updateInfo && compareVersions(updateInfo.version, currentVersion);
+      if (versionComparison === null && updateInfo && updateInfo.version) {
+        logger.warn('Versão de atualização inválida:', updateInfo.version);
+      }
+      if (versionComparison > 0 && await askToDownload(updateInfo)) {
+        await download(updateInfo);
       }
     } catch (error) {
       logger.warn('Não foi possível verificar atualizações:', error.message);
@@ -102,4 +147,4 @@ function createUpdateManager({ updater, getWindow, isPackaged, dialogApi, logger
   return { check };
 }
 
-module.exports = { createUpdateManager };
+module.exports = { compareVersions, createUpdateManager };
