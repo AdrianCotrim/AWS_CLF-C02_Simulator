@@ -16,6 +16,7 @@ let progressSaveError = false;
 let progressPersisted = false;
 const QUESTION_TAGS = ['Conceitos de nuvem', 'Segurança e conformidade', 'Tecnologia', 'Faturamento e definição de preço'];
 let currentView = 'simulator';
+let viewBeforeSettings = 'simulator';
 let questionMapVisible = false;
 let questionDraft = createQuestionDraft();
 let questionFeedback = null;
@@ -705,7 +706,12 @@ function renderStats() {
 function render() {
   syncExamTimer();
   renderStats();
+  document.body.classList.toggle('settings-view', currentView === 'settings');
   const m = $('main');
+  if (currentView === 'settings') {
+    m.innerHTML = '<section class="settings-screen"><h1>Configurações</h1><button type="button" data-settings-action="back">Voltar</button></section>';
+    return;
+  }
   if (currentView === 'statistics') return renderStatistics(m);
   if (currentView === 'bank') return renderQuestionBank(m);
   if (currentView === 'add') return renderQuestionForm(m);
@@ -1698,6 +1704,15 @@ $('main').addEventListener('change', e => {
 });
 
 $('main').addEventListener('click', async e => {
+  const settingsAction = e.target.closest('[data-settings-action]');
+  if (settingsAction) {
+    if (settingsAction.dataset.settingsAction === 'back') {
+      currentView = viewBeforeSettings;
+      render();
+    }
+    return;
+  }
+
   const bankAction = e.target.closest('[data-bank-action]');
   if (bankAction) {
     if (bankAction.dataset.bankAction === 'open') await openQuestionBankQuestion(bankAction.dataset.questionId);
@@ -1874,6 +1889,12 @@ document.querySelector('nav').addEventListener('click', e => {
     currentView = 'simulator';
     start(button.dataset.mode);
   }
+});
+
+$('settingsBtn').addEventListener('click', () => {
+  viewBeforeSettings = currentView;
+  currentView = 'settings';
+  render();
 });
 
 $('examTimeLimitEnabled').addEventListener('change', e => {

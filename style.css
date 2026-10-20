@@ -27,6 +27,13 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 button.link { border: 0; background: none; color: var(--accent); padding: 4px 0; text-decoration: underline; }
 button.danger { color: var(--bad); }
 nav button[data-view="add"] { margin-left: auto; }
+body.settings-view > header,
+body.settings-view > .stats,
+body.settings-view > .banner,
+body.settings-view > footer { display: none; }
+body.settings-view main { padding-top: 32px; }
+.settings-screen { display: grid; gap: 16px; justify-items: start; }
+.settings-screen h1 { margin: 0; }
 .stats { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 16px; color: var(--muted); font-size: .9rem; }
 .stats b { color: var(--text); }
 main { padding-top: 16px; padding-bottom: 16px; }
