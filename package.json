@@ -1,6 +1,6 @@
 {
   "name": "aws-clf-c02-simulator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "AWS CLF-C02 Simulator para Windows",
   "main": "electron/main.js",
