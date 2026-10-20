@@ -320,7 +320,7 @@
   async function migrateProgress(progress, replaceExisting = false) {
     const result = await requestProgress('/migration', { method: 'POST', body: { progress, replaceExisting } });
     if (result.exists !== true || !result.progress || result.progress.version !== 1
-      || !result.migration || result.migration.source !== 'localStorage' || !result.backups) {
+      || !result.migration || !result.backups) {
       throw new Error('A API respondeu em um formato inesperado ao confirmar a migração.');
     }
     return result;

@@ -14,7 +14,6 @@ let progressSaveQueue = Promise.resolve();
 let pendingProgressSaves = 0;
 let progressSaveError = false;
 let progressPersisted = false;
-const QUESTION_SOURCES = ['Personal', 'Cloudverse', 'Examtopics'];
 const QUESTION_TAGS = ['Conceitos de nuvem', 'Segurança e conformidade', 'Tecnologia', 'Faturamento e definição de preço'];
 let currentView = 'simulator';
 let questionMapVisible = false;
@@ -29,18 +28,17 @@ let bankError = '';
 let bankSelectedId = null;
 let bankListScrollY = 0;
 let bankRequestVersion = 0;
-let bankFilters = { query: '', source: '', tag: '', errorBank: '' };
+let bankFilters = { query: '', tag: '', errorBank: '' };
 let bankDeleteError = '';
 let isDeletingQuestion = false;
 let isRestoringQuestion = false;
 let selectedQuestionMetadata = null;
 let catalogStatus = null;
 let statisticsPeriod = '7';
-let statisticsSort = { topics: 'lowest', sources: 'name' };
+let statisticsSort = { topics: 'lowest' };
 
 function createQuestionDraft() {
   return {
-    source: 'Personal',
     tag: QUESTION_TAGS[0],
     question: '',
     options: ['', ''],
@@ -277,7 +275,6 @@ function record(q, ok) {
     mode: S.mode,
     date: new Date().toISOString(),
     tag: q.tag || '',
-    source: q.source || '',
     wasInErrorBank,
     ...(S.mode === 'exam' && S.sessionId ? { sessionId: S.sessionId } : {})
   });
@@ -803,7 +800,6 @@ function getStatisticsData() {
     .filter(entry => entry.ok && entry.mode === 'errors' && entry.wasInErrorBank)
     .map(entry => entry.id));
   const topics = new Map();
-  const sources = new Map();
   const daily = new Map();
 
   function addGroup(groups, name, isCorrect) {
@@ -818,7 +814,6 @@ function getStatisticsData() {
   for (const entry of responses) {
     const question = byId[entry.id];
     addGroup(topics, entry.tag || (question && question.tag), entry.ok);
-    addGroup(sources, entry.source || (question && question.source), entry.ok);
 
     const key = dateKey(entry.date);
     if (key) {
@@ -876,7 +871,6 @@ function getStatisticsData() {
     recoveredIds,
     recoveryPercentage: percentage(recoveredIds.size, recoveredIds.size + errorBankQuestions.length),
     topics: [...topics.values()],
-    sources: [...sources.values()],
     errorTopics: [...errorTopics.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
     daily: [...daily.values()].sort((a, b) => a.date.localeCompare(b.date)),
     exams
@@ -925,11 +919,8 @@ function renderStatistics(main) {
   if (statisticsSort.topics === 'highest') topicRows.sort((a, b) => percentage(b.correct, b.answered) - percentage(a.correct, a.answered));
   else if (statisticsSort.topics === 'errors') topicRows.sort((a, b) => b.errors - a.errors);
   else topicRows.sort((a, b) => percentage(a.correct, a.answered) - percentage(b.correct, b.answered));
-  const sourceRows = data.sources.slice();
-  if (statisticsSort.sources === 'accuracy') sourceRows.sort((a, b) => percentage(b.correct, b.answered) - percentage(a.correct, a.answered));
-  else sourceRows.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   const table = (rows, type) => rows.length ? `<div class="statistics-table-wrap"><table class="statistics-table">
-    <thead><tr><th>${type === 'topics' ? 'Tópico' : 'Source'}</th><th>Respondidas</th><th>Acertos</th><th>Erros</th><th>Aproveitamento</th></tr></thead>
+    <thead><tr><th>Tópico</th><th>Respondidas</th><th>Acertos</th><th>Erros</th><th>Aproveitamento</th></tr></thead>
     <tbody>${rows.map(row => `<tr><th scope="row">${esc(row.name)}</th><td>${row.answered}</td><td>${row.correct}</td>
       <td>${row.errors}</td><td>${formatPercentage(percentage(row.correct, row.answered))}</td></tr>`).join('')}</tbody>
   </table></div>` : '<p class="muted statistics-empty">Ainda não há respostas suficientes para gerar esta estatística.</p>';
@@ -969,17 +960,6 @@ function renderStatistics(main) {
         </div>
         ${table(topicRows, 'topics')}
       </section>
-      <section class="card statistics-section" aria-labelledby="source-statistics-title">
-        <div class="statistics-section-heading"><h3 id="source-statistics-title">Desempenho por source</h3>
-          <label class="statistics-filter">Ordenar
-            <select class="form-control" data-stat-filter="sources">
-              <option value="name" ${statisticsSort.sources === 'name' ? 'selected' : ''}>Nome</option>
-              <option value="accuracy" ${statisticsSort.sources === 'accuracy' ? 'selected' : ''}>Maior taxa de acerto</option>
-            </select>
-          </label>
-        </div>
-        ${table(sourceRows, 'sources')}
-      </section>
     </div>
     <section class="card statistics-section" aria-labelledby="error-statistics-title">
       <h3 id="error-statistics-title">Banco de Erros</h3>
@@ -1015,10 +995,6 @@ function renderQuestionForm(main, focus) {
   const editingQuestion = editingQuestionId
     ? bankQuestions.find(question => question && question.id === editingQuestionId)
     : null;
-  const sourceOptions = [...new Set([
-    ...QUESTION_SOURCES,
-    ...(editingQuestion && editingQuestion.source && !QUESTION_SOURCES.includes(editingQuestion.source) ? [editingQuestion.source] : [])
-  ])];
   const tagOptions = [...new Set([
     ...QUESTION_TAGS,
     ...(editingQuestion && editingQuestion.tag && !QUESTION_TAGS.includes(editingQuestion.tag) ? [editingQuestion.tag] : [])
@@ -1066,7 +1042,7 @@ function renderQuestionForm(main, focus) {
       : `Foram encontradas ${duplicateMatches.length} questões com o mesmo enunciado.`}</h3>
     <ol>${duplicateMatches.map(question => `<li>
       <p>${esc((question.question || '').slice(0, 240))}${question.question && question.question.length > 240 ? '…' : ''}</p>
-      <p class="duplicate-meta">Source: ${esc(question.source || 'Não informada')} · ID: ${esc(question.id)}</p>
+      <p class="duplicate-meta">ID: ${esc(question.id)}</p>
       <button type="button" data-form-action="view-duplicate" data-question-id="${esc(question.id)}">Ver questão</button>
     </li>`).join('')}</ol>
     <div class="actions">
@@ -1085,9 +1061,6 @@ function renderQuestionForm(main, focus) {
     ${duplicateWarning}
     <form id="questionForm" class="question-form" novalidate>
       <div class="form-row">
-        <label class="form-field"><span>Source</span>
-          <select class="form-control" data-question-field="source" required>${sourceOptions.map(source => `<option value="${esc(source)}" ${questionDraft.source === source ? 'selected' : ''}>${esc(source)}</option>`).join('')}</select>
-        </label>
         <label class="form-field"><span>Tag</span>
           <select class="form-control" data-question-field="tag" required>${tagOptions.map(tag => `<option value="${esc(tag)}" ${questionDraft.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}</select>
         </label>
@@ -1221,7 +1194,6 @@ function questionMatchesTag(question, tag) {
 function getFilteredBankQuestions() {
   const search = bankFilters.query.trim().toLocaleLowerCase('pt-BR');
   return bankQuestions.filter(question => {
-    if (bankFilters.source && question.source !== bankFilters.source) return false;
     if (!questionMatchesTag(question, bankFilters.tag)) return false;
     const progress = P.questionProgress[question.id];
     const inErrorBank = Boolean(progress && progress.inErrorBank);
@@ -1231,7 +1203,6 @@ function getFilteredBankQuestions() {
     const searchableText = [
       question.id,
       question.question,
-      question.source,
       question.tag,
       ...questionOptions(question)
     ].join(' ').toLocaleLowerCase('pt-BR');
@@ -1242,7 +1213,6 @@ function getFilteredBankQuestions() {
 function renderQuestionBank(main) {
   if (bankSelectedId) return renderQuestionBankDetail(main);
 
-  const sourceOptions = ['Personal', 'Cloudverse', 'Examtopics'];
   const tagOptions = QUESTION_TAGS;
   const deletedIds = catalogStatus && Array.isArray(catalogStatus.deletedIds) ? catalogStatus.deletedIds : [];
   main.innerHTML = `<section class="question-bank" aria-labelledby="question-bank-title">
@@ -1262,11 +1232,6 @@ function renderQuestionBank(main) {
     <div class="bank-filters">
       <label class="form-field bank-search"><span>Pesquisar questões</span>
         <input class="form-control" type="search" data-bank-filter="query" value="${esc(bankFilters.query)}" placeholder="ID, enunciado, alternativa..." autocomplete="off">
-      </label>
-      <label class="form-field"><span>Source</span>
-        <select class="form-control" data-bank-filter="source">
-          <option value="">Todos</option>${sourceOptions.map(source => `<option value="${esc(source)}" ${bankFilters.source === source ? 'selected' : ''}>${esc(source)}</option>`).join('')}
-        </select>
       </label>
       <label class="form-field"><span>Tag</span>
         <select class="form-control" data-bank-filter="tag">
@@ -1317,7 +1282,7 @@ function renderQuestionBankResults(container) {
   container.innerHTML = `<div class="bank-results-heading"><p aria-live="polite">${countLabel}</p></div>
     <div class="bank-list">${questions.map(question => `<article class="card bank-item">
       <div class="bank-item-id">${esc(question.id || 'Sem ID')}</div>
-      <div class="bank-item-meta">${esc(question.source || 'Sem source')} · ${esc(question.tag || 'Sem tag')}</div>
+      <div class="bank-item-meta">${esc(question.tag || 'Sem tag')}</div>
       <p class="bank-item-question">${esc(question.question || 'Questão sem enunciado')}</p>
       <div class="actions"><button type="button" class="primary" data-bank-action="open" data-question-id="${esc(question.id || '')}">Ver questão</button></div>
     </article>`).join('')}</div>`;
@@ -1346,7 +1311,6 @@ function renderQuestionBankDetail(main) {
     ${bankDeleteError ? `<p class="form-feedback error" role="alert">${esc(bankDeleteError)}</p>` : ''}
     <h2 id="bank-detail-title" class="bank-detail-id">${esc(question.id || 'Sem ID')}</h2>
     <dl class="bank-detail-meta">
-      <div><dt>Source</dt><dd>${esc(question.source || 'Sem source')}</dd></div>
       <div><dt>Tag</dt><dd>${esc(question.tag || 'Sem tag')}</dd></div>
     </dl>
     <section class="bank-detail-section"><h3>Question</h3><p class="bank-detail-question">${esc(question.question || '')}</p></section>
@@ -1431,7 +1395,6 @@ function startEditingQuestion(id) {
     .filter(index => index >= 0)
     .map(String);
   questionDraft = {
-    source: question.source || QUESTION_SOURCES[0],
     tag: question.tag || QUESTION_TAGS[0],
     question: question.question || '',
     options: options.length ? options.map(([, text]) => String(text)) : ['', ''],
@@ -1526,7 +1489,6 @@ function clearQuestionFeedback() {
 
 function validateQuestionDraft() {
   const original = editingQuestionId ? bankQuestions.find(question => question && question.id === editingQuestionId) : null;
-  if (!QUESTION_SOURCES.includes(questionDraft.source) && questionDraft.source !== original?.source) return 'Selecione uma origem válida.';
   if (!QUESTION_TAGS.includes(questionDraft.tag) && questionDraft.tag !== original?.tag) return 'Selecione uma categoria válida.';
   if (!questionDraft.question.trim()) return 'Preencha o enunciado da questão.';
   if (questionDraft.options.length < 2) return 'Adicione pelo menos duas alternativas.';
@@ -1552,7 +1514,6 @@ async function submitQuestion(event, allowDuplicate = false) {
   duplicateMatches = null;
   const correctAnswers = questionDraft.correctAnswers.map(index => String.fromCharCode(65 + Number(index)));
   const payload = {
-    source: questionDraft.source,
     tag: questionDraft.tag,
     question: questionDraft.question.trim(),
     options: questionDraft.options.map(option => option.trim()),
@@ -1689,7 +1650,7 @@ $('main').addEventListener('change', e => {
     statisticsPeriod = e.target.value;
     return renderStatistics($('main'));
   }
-  if (statisticsFilter === 'topics' || statisticsFilter === 'sources') {
+  if (statisticsFilter === 'topics') {
     statisticsSort[statisticsFilter] = e.target.value;
     return renderStatistics($('main'));
   }
@@ -1765,9 +1726,8 @@ $('main').addEventListener('click', async e => {
       $('bankImportFile').click();
     }
     else if (bankAction.dataset.bankAction === 'clear-filters') {
-      bankFilters = { query: '', source: '', tag: '', errorBank: '' };
+      bankFilters = { query: '', tag: '', errorBank: '' };
       $('main').querySelector('[data-bank-filter="query"]').value = '';
-      $('main').querySelector('[data-bank-filter="source"]').value = '';
       $('main').querySelector('[data-bank-filter="tag"]').value = '';
       $('main').querySelector('[data-bank-filter="errorBank"]').value = '';
       renderQuestionBankResults($('bankResults'));

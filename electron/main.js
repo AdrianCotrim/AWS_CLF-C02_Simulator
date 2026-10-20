@@ -10,6 +10,7 @@ const { createUpdateManager } = require('./updateManager');
 
 const HOST = '127.0.0.1';
 const frontendDirectory = app.getAppPath();
+const appIconPath = path.join(frontendDirectory, 'build', 'icon.ico');
 const backendHealthPath = '/api/questions';
 const maxHealthAttempts = 30;
 const healthRetryDelayMs = 200;
@@ -176,6 +177,7 @@ function createWindow(frontendUrl) {
     minWidth: 900,
     minHeight: 650,
     show: false,
+    icon: appIconPath,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -201,6 +203,7 @@ function createWindow(frontendUrl) {
 
 app.whenReady().then(async () => {
   try {
+    if (process.platform === 'win32') app.setAppUserModelId('com.adriancotrim.awsclf.c02simulator');
     session.defaultSession.webRequest.onBeforeRequest({ urls: ['file://*/*'] }, (details, callback) => {
       callback({ cancel: true });
     });

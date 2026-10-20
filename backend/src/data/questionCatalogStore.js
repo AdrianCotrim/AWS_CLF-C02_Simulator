@@ -13,6 +13,7 @@ const localQuestionsFile = process.env.LOCAL_QUESTIONS_FILE
   : path.join(path.dirname(questionsFile), 'questions.local.json');
 const idSequenceFile = `${questionsFile}.sequence.json`;
 const LOCAL_ID_PATTERN = /^local-(\d+)$/i;
+const NUMERIC_ID_PATTERN = /^[1-9]\d*$/;
 const SEQUENCE_ID_PATTERN = /^(?:personal|local)-(\d+)$/i;
 
 class StoreError extends Error {
@@ -90,7 +91,8 @@ function validateLocalChanges(changes) {
   const createdIds = new Set();
   for (const question of changes.createdQuestions) {
     if (!question || typeof question !== 'object' || Array.isArray(question)
-      || typeof question.id !== 'string' || !LOCAL_ID_PATTERN.test(question.id)
+      || typeof question.id !== 'string'
+      || (!LOCAL_ID_PATTERN.test(question.id) && !NUMERIC_ID_PATTERN.test(question.id))
       || createdIds.has(question.id)) {
       throw new StoreError('LOCAL_QUESTIONS_FILE_INVALID', 'A lista de questões locais contém IDs inválidos ou duplicados.');
     }
@@ -307,7 +309,7 @@ function highestSequenceId(questions) {
   let highest = 0;
   for (const question of questions) {
     const match = typeof question?.id === 'string' ? SEQUENCE_ID_PATTERN.exec(question.id) : null;
-    const value = match ? Number(match[1]) : 0;
+    const value = match ? Number(match[1]) : NUMERIC_ID_PATTERN.test(question?.id || '') ? Number(question.id) : 0;
     if (Number.isSafeInteger(value)) highest = Math.max(highest, value);
   }
   return highest;
@@ -341,10 +343,11 @@ async function writeIdHighWaterMark(lastIssued) {
 function generateNextId(questions, highWaterMark) {
   const usedIds = new Set(questions.map(question => question.id));
   let next = Math.max(highestSequenceId(questions), highWaterMark) + 1;
-  let id = `local-${String(next).padStart(3, '0')}`;
+  const numericCatalog = questions.some(question => NUMERIC_ID_PATTERN.test(question.id));
+  let id = numericCatalog ? String(next) : `local-${String(next).padStart(3, '0')}`;
   while (usedIds.has(id)) {
     next += 1;
-    id = `local-${String(next).padStart(3, '0')}`;
+    id = numericCatalog ? String(next) : `local-${String(next).padStart(3, '0')}`;
   }
   return { id, sequence: next };
 }

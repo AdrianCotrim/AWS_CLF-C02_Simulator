@@ -33,6 +33,7 @@
       "style.css",
       "data/questions.json",
       "examples/question-bank-import.json",
+      "build/icon.ico",
       "package.json"
     ],
     "asar": true,
@@ -40,14 +41,18 @@
       "backend/**/*"
     ],
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": "always",
       "createStartMenuShortcut": true,
-      "deleteAppDataOnUninstall": false
+      "deleteAppDataOnUninstall": false,
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
     },
     "publish": {
       "provider": "github",
