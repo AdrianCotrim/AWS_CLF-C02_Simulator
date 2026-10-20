@@ -5,6 +5,7 @@
   const endpoint = `${apiBaseUrl}/questions`;
   const backupEndpoint = `${apiBaseUrl}/backup`;
   const progressEndpoint = `${apiBaseUrl}/progress`;
+  const userDataEndpoint = `${apiBaseUrl}/user-data`;
 
   async function getQuestions() {
     let response;
@@ -301,6 +302,39 @@
     return result;
   }
 
+  async function getUserData() {
+    const response = await fetch(userDataEndpoint).catch(() => {
+      throw new Error('Não foi possível carregar as configurações. Verifique se o backend está funcionando.');
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result || typeof result !== 'object'
+      || !result.preferences || typeof result.preferences !== 'object'
+      || !Array.isArray(result.preferences.tags || [])) {
+      throw new Error(result && result.error && result.error.message
+        ? result.error.message
+        : 'A API respondeu em um formato inesperado ao carregar as configurações.');
+    }
+    return result;
+  }
+
+  async function updatePreferences(preferences) {
+    const response = await fetch(`${userDataEndpoint}/preferences`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(preferences)
+    }).catch(() => {
+      throw new Error('Não foi possível salvar as configurações. Verifique se o backend está funcionando.');
+    });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result || typeof result !== 'object'
+      || !result.preferences || !Array.isArray(result.preferences.tags || [])) {
+      throw new Error(result && result.error && result.error.message
+        ? result.error.message
+        : 'A API respondeu em um formato inesperado ao salvar as configurações.');
+    }
+    return result;
+  }
+
   async function saveProgress(progress) {
     const result = await requestProgress('', { method: 'PUT', body: { progress } });
     if (result.exists !== true || !result.progress || result.progress.version !== 1) {
@@ -348,6 +382,8 @@
     validateBackup,
     restoreBackup,
     getProgress,
+    getUserData,
+    updatePreferences,
     saveProgress,
     previewProgressMigration,
     migrateProgress,

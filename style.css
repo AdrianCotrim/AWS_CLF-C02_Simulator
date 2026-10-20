@@ -34,6 +34,11 @@ body.settings-view > footer { display: none; }
 body.settings-view main { padding-top: 32px; }
 .settings-screen { display: grid; gap: 16px; justify-items: start; }
 .settings-screen h1 { margin: 0; }
+.settings-screen h2, .settings-screen h3 { margin: 0; }
+.settings-tag-form { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+.settings-tag-form .form-field { min-width: 240px; }
+.settings-tag-list { display: grid; gap: 8px; list-style: none; margin: 16px 0; padding: 0; width: min(100%, 520px); }
+.settings-tag-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding: 6px 0; }
 .stats { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 16px; color: var(--muted); font-size: .9rem; }
 .stats b { color: var(--text); }
 main { padding-top: 16px; padding-bottom: 16px; }

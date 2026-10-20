@@ -6,7 +6,7 @@
   "main": "electron/main.js",
   "scripts": {
     "electron:dev": "electron .",
-    "test": "npm --prefix backend test && node --test electron/updateManager.test.js",
+    "test": "npm --prefix backend test && node --test electron/*.test.js",
     "dist:win": "electron-builder --win nsis",
     "validate:release": "node scripts/validate-release.js"
   },

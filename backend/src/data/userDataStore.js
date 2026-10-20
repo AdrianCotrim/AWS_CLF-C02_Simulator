@@ -26,6 +26,19 @@ function normalizeUserData(data) {
   result.preferences = result.preferences && typeof result.preferences === 'object' && !Array.isArray(result.preferences)
     ? result.preferences
     : {};
+  {
+    const tags = [];
+    const normalizedNames = new Set();
+    (Array.isArray(result.preferences.tags) ? result.preferences.tags : []).forEach(tag => {
+      if (typeof tag !== 'string') return;
+      const trimmed = tag.trim();
+      const normalized = trimmed.toLocaleLowerCase('pt-BR');
+      if (!trimmed || normalizedNames.has(normalized)) return;
+      normalizedNames.add(normalized);
+      tags.push(trimmed);
+    });
+    result.preferences.tags = tags;
+  }
   result.errorBank = [...new Set(result.errorBank.filter(value => typeof value === 'string' && value.trim()))];
   result.personalQuestions = result.personalQuestions.filter(question =>
     question && typeof question === 'object' && typeof question.id === 'string'

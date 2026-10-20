@@ -302,6 +302,28 @@ test('GET e POST de dados do usuário mantêm banco de erros e preferências sep
   assert.ok(!removed.errorBank.includes('personal-088'));
 });
 
+test('normaliza tags nas preferências e aceita questão sem tag', async () => {
+  const preferencesResponse = await fetch(`${baseUrl}/api/user-data/preferences`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tags: [' Matemática ', 'matemática', ' História', '   '] })
+  });
+  const preferences = await preferencesResponse.json();
+
+  assert.equal(preferencesResponse.status, 200);
+  assert.deepEqual(preferences.preferences.tags, ['Matemática', 'História']);
+
+  const questionResponse = await fetch(`${baseUrl}/api/questions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...validQuestion, tag: '' })
+  });
+  const question = await questionResponse.json();
+
+  assert.equal(questionResponse.status, 201);
+  assert.equal(question.tag, '');
+});
+
 test('POST em histórico registra tentativas em arquivo separado', async () => {
   const attempt = {
     id: 'attempt-001',

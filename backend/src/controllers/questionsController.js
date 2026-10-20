@@ -187,7 +187,7 @@ function validateQuestion(body, { allowPartial = false } = {}) {
   }
 
   if (body.tag !== undefined || !allowPartial) {
-    normalized.tag = normalizeOptionalText('tag', body.tag, 'Conceitos de nuvem');
+    normalized.tag = normalizeOptionalText('tag', body.tag, '');
   }
 
   if (body.question !== undefined || !allowPartial) {
@@ -313,7 +313,7 @@ async function updateQuestion(req, res) {
   const validated = validateQuestion(req.body, { allowPartial: true });
   const mergedQuestion = { ...currentQuestion, ...validated, id: currentQuestion.id };
   if (!mergedQuestion.source || !mergedQuestion.source.trim()) mergedQuestion.source = 'Personal';
-  if (!mergedQuestion.tag || !mergedQuestion.tag.trim()) mergedQuestion.tag = 'Conceitos de nuvem';
+  if (!mergedQuestion.tag || !mergedQuestion.tag.trim()) mergedQuestion.tag = '';
   if (mergedQuestion.explanation === undefined) mergedQuestion.explanation = '';
 
   const updated = await saveQuestion(req.params.id, mergedQuestion, createCatalogMigrationBackup);

@@ -14,7 +14,7 @@ let progressSaveQueue = Promise.resolve();
 let pendingProgressSaves = 0;
 let progressSaveError = false;
 let progressPersisted = false;
-const QUESTION_TAGS = ['Conceitos de nuvem', 'Segurança e conformidade', 'Tecnologia', 'Faturamento e definição de preço'];
+let availableTags = [];
 let currentView = 'simulator';
 let viewBeforeSettings = 'simulator';
 let questionMapVisible = false;
@@ -40,7 +40,7 @@ let statisticsSort = { topics: 'lowest' };
 
 function createQuestionDraft() {
   return {
-    tag: QUESTION_TAGS[0],
+    tag: '',
     question: '',
     options: ['', ''],
     multipleAnswers: false,
@@ -484,6 +484,12 @@ async function init() {
     $('warn').hidden = false;
     $('warn').innerHTML = `<b>${problems.length} questão(ões) ignorada(s) por problemas no banco:</b><br>${problems.map(esc).join('<br>')}`;
   }
+  try {
+    const userData = await window.QuestionsApi.getUserData();
+    availableTags = normalizeTags(userData.preferences.tags);
+  } catch (error) {
+    toast(error.message || 'Não foi possível carregar as tags cadastradas.');
+  }
   if (!Q.length) { $('main').innerHTML = '<div class="banner err">Nenhuma questão válida encontrada.</div>'; return; }
   try {
     await initializeProgress();
@@ -703,13 +709,55 @@ function renderStats() {
     <span>Novas: <b>${s.new}</b> / ${s.total}</span><span>Banco de Erros: <b>${s.errorBank}</b></span>`;
 }
 
+function normalizeTags(tags) {
+  const result = [];
+  const names = new Set();
+  for (const tag of Array.isArray(tags) ? tags : []) {
+    if (typeof tag !== 'string') continue;
+    const trimmed = tag.trim();
+    const normalized = trimmed.toLocaleLowerCase('pt-BR');
+    if (!trimmed || names.has(normalized)) continue;
+    names.add(normalized);
+    result.push(trimmed);
+  }
+  return result;
+}
+
+async function persistTags(tags) {
+  const result = await window.QuestionsApi.updatePreferences({ tags: normalizeTags(tags) });
+  availableTags = normalizeTags(result.preferences.tags);
+}
+
+function renderSettings(main) {
+  const tagList = availableTags.length
+    ? `<ul class="settings-tag-list">${availableTags.map(tag => `<li><span>${esc(tag)}</span>
+        <button type="button" class="link danger" data-settings-action="remove-tag" data-tag="${esc(tag)}">Remover</button>
+      </li>`).join('')}</ul>`
+    : '<p class="muted">Nenhuma tag cadastrada.</p>';
+  main.innerHTML = `<section class="card settings-screen" aria-labelledby="settings-title">
+    <h2 id="settings-title">Configurações</h2>
+    <section aria-labelledby="settings-tags-title">
+      <h3 id="settings-tags-title">Tags</h3>
+      <form id="tagForm" class="settings-tag-form">
+        <label class="form-field"><span>Nova tag</span>
+          <input class="form-control" name="tag" type="text" maxlength="100" autocomplete="off">
+        </label>
+        <button class="primary" type="submit">Adicionar tag</button>
+      </form>
+      <div id="settingsTagFeedback" class="form-feedback error" role="alert" hidden></div>
+      ${tagList}
+    </section>
+    <button type="button" data-settings-action="back">Voltar</button>
+  </section>`;
+}
+
 function render() {
   syncExamTimer();
   renderStats();
   document.body.classList.toggle('settings-view', currentView === 'settings');
   const m = $('main');
   if (currentView === 'settings') {
-    m.innerHTML = '<section class="settings-screen"><h1>Configurações</h1><button type="button" data-settings-action="back">Voltar</button></section>';
+    renderSettings(m);
     return;
   }
   if (currentView === 'statistics') return renderStatistics(m);
@@ -1002,8 +1050,8 @@ function renderQuestionForm(main, focus) {
     ? bankQuestions.find(question => question && question.id === editingQuestionId)
     : null;
   const tagOptions = [...new Set([
-    ...QUESTION_TAGS,
-    ...(editingQuestion && editingQuestion.tag && !QUESTION_TAGS.includes(editingQuestion.tag) ? [editingQuestion.tag] : [])
+    ...availableTags,
+    ...(editingQuestion && editingQuestion.tag && !availableTags.includes(editingQuestion.tag) ? [editingQuestion.tag] : [])
   ])];
   const options = questionDraft.options.map((option, index) => `<div class="option-editor">
     <div class="option-editor-heading">
@@ -1067,11 +1115,14 @@ function renderQuestionForm(main, focus) {
     ${duplicateWarning}
     <form id="questionForm" class="question-form" novalidate>
       <div class="form-row">
-        <label class="form-field"><span>Tag</span>
-          <select class="form-control" data-question-field="tag" required>${tagOptions.map(tag => `<option value="${esc(tag)}" ${questionDraft.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}</select>
+        <label class="form-field"><span>Assunto/Matéria</span>
+          <select class="form-control" data-question-field="tag">
+            <option value="" ${questionDraft.tag === '' ? 'selected' : ''}>Sem tag</option>
+            ${tagOptions.map(tag => `<option value="${esc(tag)}" ${questionDraft.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}
+          </select>
         </label>
       </div>
-      <label class="form-field"><span>Question</span>
+      <label class="form-field"><span>Questão</span>
         <textarea class="form-control question-textarea" data-question-field="question" maxlength="10000" placeholder="Digite o enunciado da questão..." required>${esc(questionDraft.question)}</textarea>
       </label>
       <label class="question-multichoice-toggle">
@@ -1080,7 +1131,7 @@ function renderQuestionForm(main, focus) {
         <span>Tipo de resposta: múltiplas respostas</span>
       </label>
       <fieldset class="options-fieldset">
-        <legend>Options</legend>
+        <legend>Alternativas</legend>
         <div class="option-editors">${options}</div>
         <button type="button" data-form-action="add-option" ${questionDraft.options.length >= 26 ? 'disabled title="Limite de 26 alternativas da API"' : ''}>+ Adicionar resposta</button>
       </fieldset>
@@ -1094,7 +1145,7 @@ function renderQuestionForm(main, focus) {
         ${questionDraft.multipleAnswers ? `<button type="button" data-form-action="add-correct-answer"
           ${questionDraft.correctAnswers.length >= questionDraft.options.length ? 'disabled title="Cada alternativa pode ser selecionada apenas uma vez"' : ''}>+ Adicionar resposta correta</button>` : ''}
       </fieldset>
-      <label class="form-field"><span>Explanation <span class="optional-label">(opcional)</span></span>
+      <label class="form-field"><span>Explicação <span class="optional-label">(opcional)</span></span>
         <textarea class="form-control explanation-textarea" data-question-field="explanation" maxlength="10000" placeholder="Explique por que essa é a resposta correta.">${esc(questionDraft.explanation)}</textarea>
       </label>
       ${editingQuestionId ? '' : `<label class="question-multichoice-toggle error-bank-toggle">
@@ -1193,7 +1244,7 @@ function questionOptions(question) {
 
 function questionMatchesTag(question, tag) {
   if (!tag) return true;
-  if (tag === 'Faturamento e definição de preço') return question.tag === tag || question.tag === 'Cobrança e preços';
+  if (tag === '__without_tag__') return !question.tag || !question.tag.trim();
   return question.tag === tag;
 }
 
@@ -1219,7 +1270,8 @@ function getFilteredBankQuestions() {
 function renderQuestionBank(main) {
   if (bankSelectedId) return renderQuestionBankDetail(main);
 
-  const tagOptions = QUESTION_TAGS;
+  const existingTags = bankQuestions.map(question => question && typeof question.tag === 'string' ? question.tag.trim() : '');
+  const tagOptions = normalizeTags([...availableTags, ...existingTags]);
   const deletedIds = catalogStatus && Array.isArray(catalogStatus.deletedIds) ? catalogStatus.deletedIds : [];
   main.innerHTML = `<section class="question-bank" aria-labelledby="question-bank-title">
     <div class="bank-heading">
@@ -1241,7 +1293,9 @@ function renderQuestionBank(main) {
       </label>
       <label class="form-field"><span>Tag</span>
         <select class="form-control" data-bank-filter="tag">
-          <option value="">Todas</option>${tagOptions.map(tag => `<option value="${esc(tag)}" ${bankFilters.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}
+          <option value="">Todas</option>
+          <option value="__without_tag__" ${bankFilters.tag === '__without_tag__' ? 'selected' : ''}>Sem tag</option>
+          ${tagOptions.map(tag => `<option value="${esc(tag)}" ${bankFilters.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}
         </select>
       </label>
       <label class="form-field"><span>Banco de erros</span>
@@ -1319,14 +1373,14 @@ function renderQuestionBankDetail(main) {
     <dl class="bank-detail-meta">
       <div><dt>Tag</dt><dd>${esc(question.tag || 'Sem tag')}</dd></div>
     </dl>
-    <section class="bank-detail-section"><h3>Question</h3><p class="bank-detail-question">${esc(question.question || '')}</p></section>
-    <section class="bank-detail-section"><h3>Options</h3>
+    <section class="bank-detail-section"><h3>Questão</h3><p class="bank-detail-question">${esc(question.question || '')}</p></section>
+    <section class="bank-detail-section"><h3>Alternativas</h3>
       <ol class="bank-option-list">${options.map(option => `<li class="${isCorrect(option) ? 'correct' : ''}">
         <span class="bank-option-letter">${esc(option.letter)}.</span><span>${esc(option.text)}</span>${isCorrect(option) ? '<strong>Correta</strong>' : ''}
       </li>`).join('')}</ol>
     </section>
-    <section class="bank-detail-section"><h3>Correct Answer</h3><p class="bank-correct-answer">${esc(correctAnswer || 'Não informada')}</p></section>
-    ${explanation ? `<section class="bank-detail-section"><h3>Explanation</h3><p class="bank-explanation">${esc(explanation)}</p></section>` : ''}
+    <section class="bank-detail-section"><h3>Resposta correta</h3><p class="bank-correct-answer">${esc(correctAnswer || 'Não informada')}</p></section>
+    ${explanation ? `<section class="bank-detail-section"><h3>Explicação</h3><p class="bank-explanation">${esc(explanation)}</p></section>` : ''}
     <div class="bank-detail-actions">
       <button type="button" data-bank-action="edit" ${isDeletingQuestion ? 'disabled' : ''}>Editar questão</button>
       ${selectedQuestionMetadata && selectedQuestionMetadata.origin === 'catalog' && selectedQuestionMetadata.hasOverride
@@ -1401,7 +1455,7 @@ function startEditingQuestion(id) {
     .filter(index => index >= 0)
     .map(String);
   questionDraft = {
-    tag: question.tag || QUESTION_TAGS[0],
+    tag: question.tag || '',
     question: question.question || '',
     options: options.length ? options.map(([, text]) => String(text)) : ['', ''],
     multipleAnswers: normalized.type === 'multiple_choice',
@@ -1495,7 +1549,7 @@ function clearQuestionFeedback() {
 
 function validateQuestionDraft() {
   const original = editingQuestionId ? bankQuestions.find(question => question && question.id === editingQuestionId) : null;
-  if (!QUESTION_TAGS.includes(questionDraft.tag) && questionDraft.tag !== original?.tag) return 'Selecione uma categoria válida.';
+  if (questionDraft.tag && !availableTags.includes(questionDraft.tag) && questionDraft.tag !== original?.tag) return 'Selecione uma tag válida.';
   if (!questionDraft.question.trim()) return 'Preencha o enunciado da questão.';
   if (questionDraft.options.length < 2) return 'Adicione pelo menos duas alternativas.';
   if (questionDraft.options.some(option => !option.trim())) return 'Preencha todas as alternativas.';
@@ -1682,6 +1736,30 @@ $('main').addEventListener('change', e => {
 
 $('main').addEventListener('submit', e => {
   if (e.target.id === 'questionForm') submitQuestion(e);
+  if (e.target.id === 'tagForm') {
+    e.preventDefault();
+    const input = e.target.elements.tag;
+    const tag = input.value.trim();
+    const duplicate = availableTags.some(item => item.toLocaleLowerCase('pt-BR') === tag.toLocaleLowerCase('pt-BR'));
+    const feedback = $('settingsTagFeedback');
+    if (!tag) {
+      feedback.textContent = 'Informe um nome de tag.';
+      feedback.hidden = false;
+      return;
+    }
+    if (duplicate) {
+      feedback.textContent = 'Essa tag já está cadastrada.';
+      feedback.hidden = false;
+      return;
+    }
+    persistTags([...availableTags, tag]).then(() => {
+      renderSettings($('main'));
+      toast('Tag adicionada.');
+    }).catch(error => {
+      feedback.textContent = error.message || 'Não foi possível salvar a tag.';
+      feedback.hidden = false;
+    });
+  }
 });
 
 /* ---------- Eventos ---------- */
@@ -1709,6 +1787,16 @@ $('main').addEventListener('click', async e => {
     if (settingsAction.dataset.settingsAction === 'back') {
       currentView = viewBeforeSettings;
       render();
+    } else if (settingsAction.dataset.settingsAction === 'remove-tag') {
+      const tag = settingsAction.dataset.tag;
+      availableTags = availableTags.filter(item => item !== tag);
+      try {
+        await persistTags(availableTags);
+        renderSettings($('main'));
+      } catch (error) {
+        availableTags.push(tag);
+        toast(error.message || 'Não foi possível remover a tag.');
+      }
     }
     return;
   }
