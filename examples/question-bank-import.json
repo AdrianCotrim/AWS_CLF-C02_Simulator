@@ -1,0 +1,46 @@
+{
+  "questions": [
+    {
+      "source": "Personal",
+      "tag": "Conceitos de nuvem",
+      "question": "Qual modelo de pagamento permite pagar somente pelos recursos consumidos?",
+      "options": [
+        "Pagamento conforme o uso",
+        "Pagamento antecipado obrigatório",
+        "Licença vitalícia",
+        "Pagamento somente por usuário"
+      ],
+      "correct_answer": "A",
+      "explanation": "No modelo de pagamento conforme o uso, você paga pelos recursos que realmente utiliza."
+    },
+    {
+      "source": "Personal",
+      "tag": "Segurança",
+      "question": "Quais são responsabilidades do cliente no modelo de responsabilidade compartilhada? Selecione duas alternativas.",
+      "options": [
+        "Configurar as regras do grupo de segurança",
+        "Proteger a infraestrutura física dos datacenters",
+        "Gerenciar as permissões dos usuários",
+        "Substituir os discos físicos dos servidores da AWS"
+      ],
+      "correct_answer": [
+        "A",
+        "C"
+      ],
+      "explanation": "O cliente configura os controles de segurança na nuvem, como grupos de segurança e permissões de usuários."
+    },
+    {
+      "source": "Personal",
+      "tag": "Serviços AWS",
+      "question": "Qual serviço fornece armazenamento de objetos?",
+      "options": [
+        "Amazon EC2",
+        "Amazon S3",
+        "Amazon VPC",
+        "AWS IAM"
+      ],
+      "correct_answer": "Amazon S3",
+      "explanation": "O Amazon S3 é um serviço de armazenamento de objetos."
+    }
+  ]
+}

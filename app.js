@@ -321,7 +321,9 @@ function normalizeQuestion(raw) {
 
   const q = { ...raw };
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-  const hasMultipleAnswers = Array.isArray(q.correct_answer) || q.type === 'multiple_choice';
+  const hasMultipleAnswers = q.type
+    ? q.type === 'multiple_choice'
+    : Array.isArray(q.correct_answer);
 
   if (Array.isArray(q.options)) {
     q.options = q.options.reduce((acc, opt, index) => {
