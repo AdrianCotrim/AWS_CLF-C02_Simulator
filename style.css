@@ -67,6 +67,7 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .wrong-list { padding-left: 20px; }
 .question-form-card { margin-bottom: 8px; }
 .form-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+.bank-heading-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .form-heading h2 { font-size: 1.15rem; margin: 0; }
 .form-heading p { margin: 4px 0 0; }
 .question-form { display: grid; gap: 18px; }

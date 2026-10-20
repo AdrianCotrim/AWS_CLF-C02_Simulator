@@ -1248,7 +1248,10 @@ function renderQuestionBank(main) {
   main.innerHTML = `<section class="question-bank" aria-labelledby="question-bank-title">
     <div class="bank-heading">
       <h2 id="question-bank-title">Banco de Questões</h2>
-      <button type="button" class="primary" data-bank-action="import">Importar questões</button>
+      <div class="bank-heading-actions">
+        <button type="button" data-bank-action="download-template">Baixar modelo</button>
+        <button type="button" class="primary" data-bank-action="import">Importar questões</button>
+      </div>
     </div>
     ${deletedIds.length ? `<section class="catalog-deletions" aria-label="Questões padrão excluídas">
       <b>Questões padrão excluídas localmente</b>
@@ -1738,6 +1741,14 @@ $('main').addEventListener('click', async e => {
   if (bankAction) {
     if (bankAction.dataset.bankAction === 'open') await openQuestionBankQuestion(bankAction.dataset.questionId);
     else if (bankAction.dataset.bankAction === 'back') returnToQuestionBankList();
+    else if (bankAction.dataset.bankAction === 'download-template') {
+      const link = document.createElement('a');
+      link.href = 'examples/question-bank-import.json';
+      link.download = 'question-bank-import.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
     else if (bankAction.dataset.bankAction === 'edit') startEditingQuestion(bankSelectedId);
     else if (bankAction.dataset.bankAction === 'delete') deleteQuestionFromBank(bankSelectedId);
     else if (bankAction.dataset.bankAction === 'restore-default'

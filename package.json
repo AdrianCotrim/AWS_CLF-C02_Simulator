@@ -32,6 +32,7 @@
       "app.js",
       "style.css",
       "data/questions.json",
+      "examples/question-bank-import.json",
       "package.json"
     ],
     "asar": true,
