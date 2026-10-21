@@ -21,7 +21,7 @@ npm run dist:win
 
 O instalador e a versão portátil de validação são gerados em `release/`. O pacote inclui o frontend, o backend e as dependências de produção; Node.js e Python não são necessários no computador do usuário.
 
-Na versão instalada, o catálogo padrão permanece junto aos recursos da aplicação. Questões locais, progresso, histórico, banco de erros, configurações e backups ficam no diretório de dados do usuário do Electron (`app.getPath('userData')`) e não são removidos pelo desinstalador padrão. Dados usados no desenvolvimento não são migrados automaticamente.
+Na versão instalada, o seed distribuído do catálogo é vazio (`distribution/questions.json`), para que questões pessoais não sejam incorporadas ao instalador. Questões locais, progresso, histórico, banco de erros, configurações e backups ficam no diretório de dados do usuário do Electron (`app.getPath('userData')`) e não são removidos pelo desinstalador padrão. O catálogo usado no desenvolvimento (`data/questions.json`) não é incluído no pacote.
 
 ### Atualizações pelo GitHub Releases
 
@@ -112,7 +112,8 @@ Em `multiple_choice`, a resposta só é correta quando o conjunto selecionado é
 
 A aplicação mantém a persistência em arquivos JSON locais, separados por responsabilidade:
 
-- `data/questions.json`: banco principal de questões e metadados do simulador.
+- `data/questions.json`: banco principal usado no desenvolvimento; não é incluído na distribuição.
+- `distribution/questions.json`: seed do catálogo incluído no aplicativo empacotado; permanece vazio para novas instalações.
 - `data/questions.local.json`: cadastros, edições e exclusões locais, mantidos fora do catálogo padrão.
 - `data/user-data.json`: questões pessoais, IDs no Banco de Erros e preferências do usuário. O formato inclui a versão dos dados para facilitar migrações futuras.
 - `data/history.json`: histórico de tentativas, resultados e demais campos usados nas estatísticas.
@@ -151,7 +152,7 @@ O backup completo não inclui `node_modules`, caches ou logs, nem modifica a fon
 
 ## API local de questões
 
-O simulador carrega o banco inicial de `data/questions.json`; a tela de cadastro usa a API local. Para instalar e iniciar a API, use Node.js 18 ou superior:
+No desenvolvimento, o simulador carrega o banco inicial de `data/questions.json`; no aplicativo empacotado, carrega o seed vazio de `distribution/questions.json`. A tela de cadastro usa a API local. Para instalar e iniciar a API, use Node.js 18 ou superior:
 
 ```bash
 cd backend

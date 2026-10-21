@@ -95,7 +95,8 @@ function configureDataPaths() {
   process.env.HISTORY_FILE = path.join(userDataDirectory, 'history.json');
   process.env.PROGRESS_FILE = path.join(userDataDirectory, 'progress.json');
   process.env.BACKUP_DIRECTORY = path.join(userDataDirectory, 'backups');
-  process.env.QUESTIONS_FILE = path.join(app.getAppPath(), 'data', 'questions.json');
+  process.env.QUESTIONS_FILE = path.join(app.getAppPath(), 'distribution', 'questions.json');
+  process.env.QUESTIONS_SEQUENCE_FILE = path.join(userDataDirectory, 'questions.json.sequence.json');
 }
 
 function startBackend(port) {

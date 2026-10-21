@@ -31,7 +31,7 @@
       "api.js",
       "app.js",
       "style.css",
-      "data/questions.json",
+      "distribution/questions.json",
       "examples/question-bank-import.json",
       "build/icon.ico",
       "package.json"

@@ -17,6 +17,7 @@ let progressPersisted = false;
 let availableTags = [];
 let currentView = 'simulator';
 let viewBeforeSettings = 'simulator';
+let examConfiguration = { count: 60, timed: false, minutes: 90, selection: 'all', source: '', tag: '' };
 let questionMapVisible = false;
 let questionDraft = createQuestionDraft();
 let questionFeedback = null;
@@ -648,34 +649,45 @@ function syncExamTimer() {
   if (examTimerInterval === null) examTimerInterval = setInterval(updateDisplay, 250);
 }
 
-function start(mode) {
+function getExamPool(configuration) {
+  const pq = P.questionProgress;
+  let pool = Q;
+  if (configuration.selection === 'new') pool = Q.filter(q => !pq[q.id]);
+  if (configuration.selection === 'errors') pool = Q.filter(q => pq[q.id] && pq[q.id].inErrorBank);
+  if (configuration.source) pool = pool.filter(q => q.source === configuration.source);
+  if (configuration.tag) pool = pool.filter(q => q.tag === configuration.tag);
+  return pool;
+}
+
+function start(mode, configuration = null) {
+  if (mode === 'exam' && (!configuration
+    || !Number.isSafeInteger(configuration.count) || configuration.count <= 0)) {
+    toast('Informe uma quantidade inteira e positiva de questões.');
+    return;
+  }
   let durationMs;
-  if (mode === 'exam' && $('examTimeLimitEnabled').checked) {
-    const minutes = Number($('examTimeLimitMinutes').value);
+  if (mode === 'exam' && configuration && configuration.timed) {
+    const minutes = configuration.minutes;
     const requestedDurationMs = minutes * 60 * 1000;
     if (!Number.isSafeInteger(minutes) || minutes <= 0 || !Number.isSafeInteger(requestedDurationMs)
       || !Number.isSafeInteger(Date.now() + requestedDurationMs)) {
       toast('Informe um limite de tempo válido em minutos.');
-      $('examTimeLimitMinutes').focus();
+      $('main').querySelector('[data-exam-field="minutes"]')?.focus();
       return;
     }
     durationMs = requestedDurationMs;
   }
   if (S && S.persist && !S.done && !confirm('Há um simulado em andamento. Descartá-lo e iniciar outra sessão?')) return;
-  const pq = P.questionProgress;
-  let pool = Q;
-  if (mode === 'new') pool = Q.filter(q => !pq[q.id]);
-  if (mode === 'errors') pool = Q.filter(q => pq[q.id] && pq[q.id].inErrorBank);
+  const pool = mode === 'exam' ? getExamPool(configuration) : (() => {
+    const pq = P.questionProgress;
+    if (mode === 'new') return Q.filter(q => !pq[q.id]);
+    if (mode === 'errors') return Q.filter(q => pq[q.id] && pq[q.id].inErrorBank);
+    return Q;
+  })();
   if (!pool.length) { toast(mode === 'new' ? 'Você já respondeu todas as questões.' : mode === 'errors' ? 'Seu Banco de Erros está vazio.' : 'Sem questões.'); return; }
   let ids = shuffle(pool.map(q => q.id));
   if (mode === 'exam') {
-    const requestedCount = parseInt($('examCount').value, 10);
-    const safeCount = Number.isInteger(requestedCount) && requestedCount > 0 ? requestedCount : ids.length;
-    const count = Math.min(safeCount, ids.length);
-    if (count < 1) {
-      toast('Não há questões elegíveis suficientes para iniciar um simulado.');
-      return;
-    }
+    const count = configuration.count;
     ids = ids.slice(0, count);
     const modeLabel = Number.isFinite(durationMs) ? `${formatDuration(durationMs)} de tempo` : 'sem limite de tempo';
     if (!confirm(`Iniciar simulado:
@@ -694,6 +706,7 @@ function start(mode) {
       ...(Number.isFinite(durationMs) ? { durationMs, deadlineAt: startedAt + durationMs } : {})
     } : {})
   };
+  currentView = 'simulator';
   save(); render();
 }
 
@@ -751,15 +764,65 @@ function renderSettings(main) {
   </section>`;
 }
 
+function renderExamConfiguration(main) {
+  const sources = normalizeTags(Q.map(question => question.source).filter(Boolean));
+  const tags = normalizeTags(Q.map(question => question.tag).filter(Boolean));
+  const pool = getExamPool(examConfiguration);
+  const sourceOptions = sources.length
+    ? `<label class="form-field"><span>Fonte</span><select class="form-control" data-exam-field="source">
+        <option value="">Todas as fontes</option>
+        ${sources.map(source => `<option value="${esc(source)}" ${examConfiguration.source === source ? 'selected' : ''}>${esc(source)}</option>`).join('')}
+      </select></label>` : '';
+  const tagOptions = tags.length
+    ? `<label class="form-field"><span>Matéria / tag</span><select class="form-control" data-exam-field="tag">
+        <option value="">Todas as matérias</option>
+        ${tags.map(tag => `<option value="${esc(tag)}" ${examConfiguration.tag === tag ? 'selected' : ''}>${esc(tag)}</option>`).join('')}
+      </select></label>` : '';
+  main.innerHTML = `<section class="card exam-configuration" aria-labelledby="exam-configuration-title">
+    <div class="form-heading"><div><h2 id="exam-configuration-title">Configuração do Simulado</h2>
+      <p class="muted">Escolha as questões e o tempo antes de iniciar.</p></div></div>
+    <section class="exam-config-section" aria-labelledby="exam-count-title">
+      <h3 id="exam-count-title">Número de questões</h3>
+      <label class="form-field"><span>Quantidade</span>
+        <input class="form-control" data-exam-field="count" type="number" min="1" step="1" value="${esc(examConfiguration.count)}">
+      </label>
+      <p class="muted" data-exam-available>${pool.length} ${pool.length === 1 ? 'questão disponível' : 'questões disponíveis'} com os filtros atuais.</p>
+    </section>
+    <section class="exam-config-section" aria-labelledby="exam-time-title">
+      <h3 id="exam-time-title">Limite de tempo</h3>
+      <label class="question-multichoice-toggle"><input data-exam-field="timed" type="checkbox" ${examConfiguration.timed ? 'checked' : ''}>
+        <span>Com limite de tempo</span></label>
+      <label class="form-field exam-duration"><span>Duração (minutos)</span>
+        <input class="form-control" data-exam-field="minutes" type="number" min="1" step="1" value="${esc(examConfiguration.minutes)}" ${examConfiguration.timed ? '' : 'disabled'}>
+      </label>
+      <p class="muted">Sem limite de tempo, o simulado não será encerrado automaticamente.</p>
+    </section>
+    <section class="exam-config-section" aria-labelledby="exam-filters-title">
+      <h3 id="exam-filters-title">Filtros de questões</h3>
+      <label class="form-field"><span>Conjunto inicial</span><select class="form-control" data-exam-field="selection">
+        <option value="all" ${examConfiguration.selection === 'all' ? 'selected' : ''}>Todas as questões</option>
+        <option value="errors" ${examConfiguration.selection === 'errors' ? 'selected' : ''}>Apenas banco de erros</option>
+        <option value="new" ${examConfiguration.selection === 'new' ? 'selected' : ''}>Apenas questões novas</option>
+      </select></label>
+      <div class="form-row">${sourceOptions}${tagOptions}</div>
+    </section>
+    <div class="exam-config-feedback" data-exam-feedback role="alert" hidden></div>
+    <div class="actions"><button type="button" class="primary" data-exam-action="start">Iniciar Simulado</button>
+      <button type="button" data-exam-action="back">Voltar</button></div>
+  </section>`;
+}
+
 function render() {
   syncExamTimer();
   renderStats();
   document.body.classList.toggle('settings-view', currentView === 'settings');
+  document.body.classList.toggle('exam-configuration-view', currentView === 'exam-configuration');
   const m = $('main');
   if (currentView === 'settings') {
     renderSettings(m);
     return;
   }
+  if (currentView === 'exam-configuration') return renderExamConfiguration(m);
   if (currentView === 'statistics') return renderStatistics(m);
   if (currentView === 'bank') return renderQuestionBank(m);
   if (currentView === 'add') return renderQuestionForm(m);
@@ -1764,6 +1827,14 @@ $('main').addEventListener('submit', e => {
 
 /* ---------- Eventos ---------- */
 $('main').addEventListener('change', e => {
+  const examField = e.target.dataset.examField;
+  if (examField) {
+    if (examField === 'count' || examField === 'minutes') examConfiguration[examField] = Number(e.target.value);
+    else if (examField === 'timed') examConfiguration.timed = e.target.checked;
+    else examConfiguration[examField] = e.target.value;
+    renderExamConfiguration($('main'));
+    return;
+  }
   if (e.target.name !== 'opt') return;
   if (S && !S.done && isExamExpired(S)) {
     finishExam('time-expired');
@@ -1782,6 +1853,45 @@ $('main').addEventListener('change', e => {
 });
 
 $('main').addEventListener('click', async e => {
+  const examAction = e.target.closest('[data-exam-action]');
+  if (examAction) {
+    if (examAction.dataset.examAction === 'back') {
+      currentView = 'simulator';
+      render();
+      return;
+    }
+    const count = examConfiguration.count;
+    const minutes = examConfiguration.minutes;
+    const pool = getExamPool(examConfiguration);
+    const feedback = $('main').querySelector('[data-exam-feedback]');
+    const showFeedback = message => {
+      feedback.textContent = message;
+      feedback.hidden = false;
+    };
+    if (!Number.isSafeInteger(count) || count <= 0) {
+      showFeedback('Informe uma quantidade inteira e positiva de questões.');
+      return;
+    }
+    if (examConfiguration.timed && (!Number.isSafeInteger(minutes) || minutes <= 0)) {
+      showFeedback('Informe uma duração inteira e positiva em minutos.');
+      return;
+    }
+    if (!pool.length) {
+      const modeMessage = examConfiguration.selection === 'errors'
+        ? 'Não há questões no Banco de Erros para os filtros selecionados.'
+        : examConfiguration.selection === 'new'
+          ? 'Não há questões novas para os filtros selecionados.'
+          : 'Não há questões disponíveis para os filtros selecionados.';
+      showFeedback(modeMessage);
+      return;
+    }
+    if (count > pool.length) {
+      showFeedback(`A configuração solicita ${count} questões, mas apenas ${pool.length} estão disponíveis após os filtros.`);
+      return;
+    }
+    if (examAction.dataset.examAction === 'start') start('exam', { ...examConfiguration });
+    return;
+  }
   const settingsAction = e.target.closest('[data-settings-action]');
   if (settingsAction) {
     if (settingsAction.dataset.settingsAction === 'back') {
@@ -1973,6 +2083,10 @@ document.querySelector('nav').addEventListener('click', e => {
   } else if (button.dataset.view === 'statistics') {
     currentView = 'statistics';
     render();
+  } else if (button.dataset.mode === 'exam' && Q.length) {
+    examConfiguration = { ...examConfiguration, count: Math.min(examConfiguration.count, Q.length) || Q.length };
+    currentView = 'exam-configuration';
+    render();
   } else if (button.dataset.mode && Q.length) {
     currentView = 'simulator';
     start(button.dataset.mode);
@@ -1983,10 +2097,6 @@ $('settingsBtn').addEventListener('click', () => {
   viewBeforeSettings = currentView;
   currentView = 'settings';
   render();
-});
-
-$('examTimeLimitEnabled').addEventListener('change', e => {
-  $('examTimeLimitMinutes').disabled = !e.target.checked;
 });
 
 document.addEventListener('visibilitychange', () => {

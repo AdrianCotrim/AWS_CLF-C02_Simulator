@@ -11,7 +11,9 @@ const questionsFile = process.env.QUESTIONS_FILE
 const localQuestionsFile = process.env.LOCAL_QUESTIONS_FILE
   ? path.resolve(process.env.LOCAL_QUESTIONS_FILE)
   : path.join(path.dirname(questionsFile), 'questions.local.json');
-const idSequenceFile = `${questionsFile}.sequence.json`;
+const idSequenceFile = process.env.QUESTIONS_SEQUENCE_FILE
+  ? path.resolve(process.env.QUESTIONS_SEQUENCE_FILE)
+  : `${questionsFile}.sequence.json`;
 const LOCAL_ID_PATTERN = /^local-(\d+)$/i;
 const NUMERIC_ID_PATTERN = /^[1-9]\d*$/;
 const SEQUENCE_ID_PATTERN = /^(?:personal|local)-(\d+)$/i;

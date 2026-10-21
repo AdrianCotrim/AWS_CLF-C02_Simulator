@@ -28,10 +28,14 @@ button.link { border: 0; background: none; color: var(--accent); padding: 4px 0;
 button.danger { color: var(--bad); }
 nav button[data-view="add"] { margin-left: auto; }
 body.settings-view > header,
+body.exam-configuration-view > header,
 body.settings-view > .stats,
+body.exam-configuration-view > .stats,
 body.settings-view > .banner,
+body.exam-configuration-view > .banner,
 body.settings-view > footer { display: none; }
-body.settings-view main { padding-top: 32px; }
+body.exam-configuration-view > footer { display: none; }
+body.settings-view main, body.exam-configuration-view main { padding-top: 32px; }
 .settings-screen { display: grid; gap: 16px; justify-items: start; }
 .settings-screen h1 { margin: 0; }
 .settings-screen h2, .settings-screen h3 { margin: 0; }
@@ -39,6 +43,12 @@ body.settings-view main { padding-top: 32px; }
 .settings-tag-form .form-field { min-width: 240px; }
 .settings-tag-list { display: grid; gap: 8px; list-style: none; margin: 16px 0; padding: 0; width: min(100%, 520px); }
 .settings-tag-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); padding: 6px 0; }
+.exam-configuration { display: grid; gap: 20px; }
+.exam-configuration h2, .exam-configuration h3 { margin: 0; }
+.exam-config-section { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+.exam-config-section > .form-field { max-width: 320px; }
+.exam-duration { max-width: 180px !important; }
+.exam-config-feedback { padding: 10px 12px; border-radius: 6px; background: var(--bad-bg); color: var(--bad); }
 .stats { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 16px; color: var(--muted); font-size: .9rem; }
 .stats b { color: var(--text); }
 main { padding-top: 16px; padding-bottom: 16px; }
