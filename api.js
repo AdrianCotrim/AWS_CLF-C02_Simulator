@@ -134,6 +134,9 @@
     }
 
     if (!response.ok) {
+      if (response.status === 413) {
+        throw new Error('O arquivo de questões é grande demais para ser importado.');
+      }
       if (response.status === 400 && result && result.error && result.error.message) {
         throw new Error(result.error.message);
       }
@@ -171,6 +174,27 @@
       throw new Error('Não foi possível excluir a questão. Tente novamente.');
     }
     if (!result || result.id !== id) throw new Error('O servidor respondeu em um formato inesperado.');
+    return result;
+  }
+
+  async function deleteAllQuestions() {
+    let response;
+    try {
+      response = await fetch(endpoint, { method: 'DELETE' });
+    } catch {
+      throw new Error('Não foi possível conectar à API. Confirme se o backend está em execução e tente novamente.');
+    }
+
+    const result = await response.json().catch(() => null);
+    if (!response.ok) {
+      if (response.status >= 500) throw new Error('O backend não conseguiu excluir o banco de questões. Tente novamente mais tarde.');
+      throw new Error(result && result.error && result.error.message
+        ? result.error.message
+        : 'Não foi possível excluir o banco de questões. Tente novamente.');
+    }
+    if (!result || !Number.isInteger(result.deletedCount)) {
+      throw new Error('O servidor respondeu em um formato inesperado ao excluir o banco de questões.');
+    }
     return result;
   }
 
@@ -376,6 +400,7 @@
     createQuestion,
     importQuestions,
     deleteQuestion,
+    deleteAllQuestions,
     updateQuestion,
     restoreDefaultQuestion,
     createBackup,

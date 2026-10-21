@@ -409,6 +409,21 @@ function deleteQuestion(id, beforeInitialize) {
   });
 }
 
+function deleteAllQuestions(beforeInitialize) {
+  return enqueue(async () => {
+    const layers = await readQuestionLayers();
+    const changes = await changesForMutation(layers, beforeInitialize);
+    const deletedCount = layers.questions.length;
+    changes.createdQuestions = [];
+    changes.overrides = {};
+    changes.tombstones = Object.fromEntries(
+      layers.catalog.map(question => [question.id, { baseQuestion: clone(question) }])
+    );
+    await writeLocalChanges(changes);
+    return { deletedCount };
+  });
+}
+
 function updateQuestion(id, question, beforeInitialize) {
   return enqueue(async () => {
     const layers = await readQuestionLayers();
@@ -502,6 +517,7 @@ module.exports = {
   getQuestionById,
   addQuestion,
   deleteQuestion,
+  deleteAllQuestions,
   updateQuestion,
   restoreDefaultQuestion,
   runExclusive: enqueue

@@ -7,6 +7,7 @@ const {
   getQuestionById,
   addQuestion,
   deleteQuestion: removeQuestion,
+  deleteAllQuestions: removeAllQuestions,
   updateQuestion: saveQuestion,
   restoreDefaultQuestion: restoreDefault,
   acknowledgeCatalogUpdate: acknowledgeCatalog
@@ -122,7 +123,13 @@ function normalizeCorrectAnswer(options, correctAnswer) {
 
 function sanitizeImportedQuestion(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return raw;
-  return Object.fromEntries(Object.entries(raw).filter(([field]) => allowedFields.has(field)));
+  const sanitized = Object.fromEntries(Object.entries(raw).filter(([field]) => allowedFields.has(field)));
+  if (raw.options && !Array.isArray(raw.options) && typeof raw.options === 'object') {
+    sanitized.options = Object.keys(raw.options)
+      .sort()
+      .map(letter => raw.options[letter]);
+  }
+  return sanitized;
 }
 
 function summarizeImportQuestions(rawQuestions, existingQuestions = []) {
@@ -304,6 +311,11 @@ async function deleteQuestion(req, res) {
   res.json({ id: deleted.id, message: 'Questão excluída.' });
 }
 
+async function deleteAllQuestions(req, res) {
+  const result = await removeAllQuestions(createCatalogMigrationBackup);
+  res.json({ ...result, message: 'Banco de questões excluído.' });
+}
+
 async function updateQuestion(req, res) {
   const currentQuestion = await getQuestionById(req.params.id);
   if (!currentQuestion) {
@@ -342,6 +354,7 @@ module.exports = {
   getQuestionMetadata,
   createQuestion,
   deleteQuestion,
+  deleteAllQuestions,
   updateQuestion,
   restoreDefaultQuestion,
   acknowledgeCatalogUpdate,

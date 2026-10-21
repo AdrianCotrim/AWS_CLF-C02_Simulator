@@ -1335,21 +1335,16 @@ function renderQuestionBank(main) {
 
   const existingTags = bankQuestions.map(question => question && typeof question.tag === 'string' ? question.tag.trim() : '');
   const tagOptions = normalizeTags([...availableTags, ...existingTags]);
-  const deletedIds = catalogStatus && Array.isArray(catalogStatus.deletedIds) ? catalogStatus.deletedIds : [];
   main.innerHTML = `<section class="question-bank" aria-labelledby="question-bank-title">
     <div class="bank-heading">
       <h2 id="question-bank-title">Banco de Questões</h2>
       <div class="bank-heading-actions">
         <button type="button" data-bank-action="download-template">Baixar modelo</button>
+        <button type="button" data-bank-action="export">Exportar banco</button>
         <button type="button" class="primary" data-bank-action="import">Importar questões</button>
+        <button type="button" class="danger" data-bank-action="delete-all">Excluir banco</button>
       </div>
     </div>
-    ${deletedIds.length ? `<section class="catalog-deletions" aria-label="Questões padrão excluídas">
-      <b>Questões padrão excluídas localmente</b>
-      ${deletedIds.map(id => `<div class="catalog-deletion-item"><span>${esc(id)}</span>
-        <button type="button" data-bank-action="restore-deleted" data-question-id="${esc(id)}" ${isRestoringQuestion ? 'disabled' : ''}>Desfazer exclusão</button>
-      </div>`).join('')}
-    </section>` : ''}
     <div class="bank-filters">
       <label class="form-field bank-search"><span>Pesquisar questões</span>
         <input class="form-control" type="search" data-bank-filter="query" value="${esc(bankFilters.query)}" placeholder="ID, enunciado, alternativa..." autocomplete="off">
@@ -1409,6 +1404,42 @@ function renderQuestionBankResults(container) {
       <p class="bank-item-question">${esc(question.question || 'Questão sem enunciado')}</p>
       <div class="actions"><button type="button" class="primary" data-bank-action="open" data-question-id="${esc(question.id || '')}">Ver questão</button></div>
     </article>`).join('')}</div>`;
+}
+
+function exportQuestionBank() {
+  const payload = `${JSON.stringify(bankQuestions, null, 2)}\n`;
+  const blob = new Blob([payload], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'question-bank.json';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  toast('Banco de questões exportado.');
+}
+
+async function deleteQuestionBank() {
+  if (!bankQuestions.length || !confirm(
+    'Excluir todo o Banco de Questões?\n\nTodas as questões serão removidas da lista. Questões padrão poderão ser restauradas posteriormente.'
+  )) return;
+
+  try {
+    const result = await window.QuestionsApi.deleteAllQuestions();
+    bankQuestions = [];
+    Q = [];
+    byId = {};
+    bankSelectedId = null;
+    bankStatus = 'empty';
+    S = null;
+    renderCatalogNotice(await window.QuestionsApi.getCatalogStatus());
+    save();
+    render();
+    toast(`${result.deletedCount} questão(ões) excluída(s).`);
+  } catch (error) {
+    toast(error.message || 'Não foi possível excluir o banco de questões.');
+  }
 }
 
 function renderQuestionBankDetail(main) {
@@ -1923,6 +1954,8 @@ $('main').addEventListener('click', async e => {
       link.click();
       link.remove();
     }
+    else if (bankAction.dataset.bankAction === 'export') exportQuestionBank();
+    else if (bankAction.dataset.bankAction === 'delete-all') await deleteQuestionBank();
     else if (bankAction.dataset.bankAction === 'edit') startEditingQuestion(bankSelectedId);
     else if (bankAction.dataset.bankAction === 'delete') deleteQuestionFromBank(bankSelectedId);
     else if (bankAction.dataset.bankAction === 'restore-default'

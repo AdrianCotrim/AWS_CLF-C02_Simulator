@@ -8,6 +8,7 @@ const {
   getQuestionMetadata,
   createQuestion,
   deleteQuestion,
+  deleteAllQuestions,
   updateQuestion,
   restoreDefaultQuestion,
   acknowledgeCatalogUpdate,
@@ -19,6 +20,7 @@ const router = express.Router();
 router.post('/import', importQuestions);
 router.get('/catalog-status', getCatalogStatus);
 router.post('/catalog-status/acknowledge', acknowledgeCatalogUpdate);
+router.delete('/', deleteAllQuestions);
 router.get('/', getQuestions);
 router.get('/:id/metadata', getQuestionMetadata);
 router.post('/:id/restore-default', restoreDefaultQuestion);

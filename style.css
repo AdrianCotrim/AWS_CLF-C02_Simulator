@@ -61,8 +61,6 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .progress div { height: 100%; background: var(--accent); border-radius: 2px; }
 .question-map-shell { margin: 8px 0 16px; }
 .question-map-toolbar { display: flex; justify-content: flex-end; margin-bottom: 8px; }
-.catalog-deletions { margin: 12px 0; padding: 12px; border: 1px solid var(--line); border-radius: 6px; }
-.catalog-deletion-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; }
 .question-map { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: rgba(11, 92, 173, 0.03); max-height: 180px; overflow: auto; }
 .exam-chip { min-width: 34px; padding: 5px 8px; border-radius: 6px; font-size: .8rem; line-height: 1.2; }
 .exam-chip.pending { background: var(--card); border-style: dashed; }
@@ -162,6 +160,7 @@ main { padding-top: 16px; padding-bottom: 16px; }
 .exam-statistics { align-items: start; }
 .question-bank { display: grid; gap: 16px; }
 .bank-heading h2 { margin: 0; font-size: 1.15rem; }
+.bank-heading-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .bank-filters { display: grid; grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(150px, 1fr)); gap: 12px; align-items: end; }
 .bank-results-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 12px; }
 .bank-results-heading p { margin: 0; color: var(--muted); font-size: .92rem; }

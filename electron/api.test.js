@@ -25,7 +25,7 @@ test('expõe todos os métodos da API usados pelo frontend', () => {
   const methods = loadApi(async () => response({}));
   [
     'getQuestions', 'getCatalogStatus', 'acknowledgeCatalogUpdate', 'getQuestionMetadata',
-    'createQuestion', 'importQuestions', 'deleteQuestion', 'updateQuestion',
+    'createQuestion', 'importQuestions', 'deleteQuestion', 'deleteAllQuestions', 'updateQuestion',
     'restoreDefaultQuestion', 'createBackup', 'validateBackup', 'restoreBackup',
     'getProgress', 'getUserData', 'updatePreferences', 'saveProgress',
     'previewProgressMigration', 'migrateProgress', 'importProgress'

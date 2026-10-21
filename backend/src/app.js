@@ -19,8 +19,8 @@ app.use(cors({
 }));
 app.use('/api/backup', express.json({ limit: '25mb' }), backupRouter);
 app.use('/api/progress', express.json({ limit: '25mb' }), progressRouter);
+app.use('/api/questions', express.json({ limit: '25mb' }), questionsRouter);
 app.use(express.json({ limit: '32kb' }));
-app.use('/api/questions', questionsRouter);
 app.use('/api/user-data', userDataRouter);
 app.use('/api/history', historyRouter);
 app.use((req, res) => {

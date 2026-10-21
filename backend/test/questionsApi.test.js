@@ -382,6 +382,7 @@ test('POST /api/questions/import faz pré-visualização e importa apenas itens 
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ questions: importPayload })
   });
+
   const preview = await previewResponse.json();
 
   assert.equal(previewResponse.status, 200);
@@ -403,6 +404,31 @@ test('POST /api/questions/import faz pré-visualização e importa apenas itens 
   const persisted = await readEffectiveQuestions();
   assert.equal(persisted.length, beforeImport.length + 1);
   assert.equal(persisted[persisted.length - 1].question, 'Questão importada de teste?');
+});
+
+test('POST /api/questions/import aceita o formato atual exportado pelo banco', async () => {
+  const exportedQuestion = {
+    id: '1329',
+    tag: 'Formato atual',
+    question: 'Questão exportada no formato atual?',
+    options: { A: 'Sim', B: 'Não' },
+    correct_answer: ['A'],
+    explanation: '',
+    type: 'single_choice'
+  };
+
+  const response = await fetch(`${baseUrl}/api/questions/import`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questions: [exportedQuestion], confirm: true })
+  });
+  const imported = await response.json();
+
+  assert.equal(response.status, 201);
+  assert.equal(imported.imported, 1);
+  assert.ok(imported.questions[0].id.startsWith('local-'));
+  assert.deepEqual(imported.questions[0].options, ['Sim', 'Não']);
+  assert.deepEqual(imported.questions[0].correct_answer, ['A']);
 });
 
 const backupProgress = {
@@ -554,6 +580,35 @@ test('POST /api/backup/create distingue arquivo fonte obrigatório ausente', asy
   } finally {
     await fs.rename(missingFile, historyFile);
   }
+});
+
+test('DELETE sem ID exclui o banco inteiro e mantém a restauração de questões padrão', async () => {
+  const beforeDelete = await readEffectiveQuestions();
+  assert.ok(beforeDelete.length > 0);
+
+  const response = await fetch(`${baseUrl}/api/questions`, { method: 'DELETE' });
+  const result = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(result.deletedCount, beforeDelete.length);
+  assert.deepEqual(await readEffectiveQuestions(), []);
+
+  const restoreResponse = await fetch(`${baseUrl}/api/questions/${initialQuestions[0].id}/restore-default`, {
+    method: 'POST'
+  });
+  assert.equal(restoreResponse.status, 200);
+  assert.equal((await readEffectiveQuestions()).length, 1);
+
+  await fetch(`${baseUrl}/api/questions`, { method: 'DELETE' });
+  const importResponse = await fetch(`${baseUrl}/api/questions/import`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questions: initialQuestions, confirm: true })
+  });
+  const imported = await importResponse.json();
+  assert.equal(importResponse.status, 201);
+  assert.equal(imported.imported, initialQuestions.length);
+  assert.equal((await readEffectiveQuestions()).length, initialQuestions.length);
 });
 
 test('POST /api/backup/create rejeita arquivo fonte corrompido sem substituí-lo', async () => {
