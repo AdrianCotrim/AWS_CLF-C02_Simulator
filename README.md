@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="720" height="720" alt="logo" src="https://github.com/user-attachments/assets/bfb87ae8-ca28-44df-a837-0ddf4a16cea9" />
+</p>
+
 # AWS CLF-C02 Simulator
 
 Ferramenta pessoal e local para praticar questões do exame AWS Certified Cloud Practitioner. O simulador usa HTML, CSS, JavaScript puro e JSON; o backend Express local persiste o progresso e expõe a API do banco de questões.
