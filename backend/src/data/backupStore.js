@@ -332,7 +332,7 @@ async function restoreBackupLocked(backup, currentProgress) {
     }
   }));
 
-  const safetyBundle = validateBackup(createBundle(await readCurrentData(currentProgress)));
+  const safetyBundle = validateBackup(createBundle(await readCurrentData(currentProgress, { usePersistedProgress: false })));
   const safetyBackup = await writeUniqueBackup(safetyBundle, 'safety');
   const staged = [];
   try {

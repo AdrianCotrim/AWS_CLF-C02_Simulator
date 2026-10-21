@@ -5,7 +5,26 @@ const { createHash } = require('node:crypto');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
-const { after, before, test } = require('node:test');
+const { after, before, test: nodeTest } = require('node:test');
+
+let testQueue = Promise.resolve();
+
+function test(name, handler) {
+  return nodeTest(name, async t => {
+    const previous = testQueue;
+    let release;
+    testQueue = new Promise(resolve => {
+      release = resolve;
+    });
+    await previous;
+    try {
+      await resetData();
+      return await handler(t);
+    } finally {
+      release();
+    }
+  });
+}
 
 let directory;
 let questionsFile;
@@ -78,6 +97,26 @@ before(async () => {
   await new Promise(resolve => server.once('listening', resolve));
   baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
+
+async function resetData() {
+  const questionStore = require('../src/data/questionsStore');
+  const progressStore = require('../src/data/progressStore');
+
+  await Promise.all([
+    fs.writeFile(questionsFile, JSON.stringify(initialQuestions)),
+    fs.writeFile(localQuestionsFile, JSON.stringify(questionStore.emptyLocalChanges(initialQuestions, true))),
+    fs.writeFile(`${questionsFile}.sequence.json`, JSON.stringify({ lastIssued: 88 })),
+    fs.writeFile(userDataFile, JSON.stringify({ version: 1, personalQuestions: [], errorBank: [], preferences: {}, updatedAt: null, createdAt: null })),
+    fs.writeFile(historyFile, JSON.stringify({ version: 1, attempts: [], updatedAt: null, createdAt: null })),
+    fs.writeFile(progressFile, JSON.stringify(progressStore.createDocument({
+      version: 1,
+      questionProgress: {},
+      history: [],
+      session: null
+    })))
+  ]);
+  await fs.rm(backupDirectory, { recursive: true, force: true });
+}
 
 after(async () => {
   if (server) {
@@ -448,6 +487,12 @@ const backupProgress = {
 };
 
 test('POST /api/backup/create inclui os JSONs do backend e o progresso enviado pelo frontend', async () => {
+  await fs.writeFile(historyFile, JSON.stringify({
+    version: 1,
+    attempts: [{ id: 'personal-002', ok: false, mode: 'exam' }],
+    updatedAt: null,
+    createdAt: null
+  }));
   const response = await fetch(`${baseUrl}/api/backup/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -460,7 +505,7 @@ test('POST /api/backup/create inclui os JSONs do backend e o progresso enviado p
   assert.equal(backup.version, 2);
   assert.deepEqual(backup.includes, ['questions', 'questionSequence', 'userData', 'history', 'progress', 'catalog', 'questionChanges']);
   assert.ok(backup.data.questions.length > 0);
-  assert.ok(backup.data.questionSequence.lastIssued >= 90);
+  assert.ok(backup.data.questionSequence.lastIssued >= 88);
   assert.equal(backup.data.progress.session.ids[0], 'personal-002');
   assert.equal(backup.data.userData.version, 1);
   assert.equal(backup.data.history.version, 1);

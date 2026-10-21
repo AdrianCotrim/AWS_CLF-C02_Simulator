@@ -10,7 +10,7 @@ function readBackupBody(body) {
 }
 
 async function exportBackup(req, res) {
-  const backup = await createBackup(req.body && req.body.progress);
+  const backup = await createBackup(req.body && req.body.progress, { usePersistedProgress: false });
   res.json(backup);
 }
 
