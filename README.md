@@ -4,159 +4,159 @@
 
 # AWS CLF-C02 Simulator
 
-Ferramenta pessoal e local para praticar questões do exame AWS Certified Cloud Practitioner. O simulador usa HTML, CSS, JavaScript puro e JSON; o backend Express local persiste o progresso e expõe a API do banco de questões.
+A personal, local tool for practicing questions for the AWS Certified Cloud Practitioner exam. The simulator uses HTML, CSS, plain JavaScript, and JSON; the local Express backend persists progress and exposes the question bank API.
 
-## Como executar
+## How to Run
 
-### Aplicativo Electron
+### Electron App
 
-Para executar a versão desktop em desenvolvimento:
+To run the desktop version in development mode:
 
 ```powershell
 npm install
 npm run electron:dev
 ```
 
-Para gerar o instalador Windows NSIS:
+To build the Windows NSIS installer:
 
 ```powershell
 npm run dist:win
 ```
 
-O instalador e a versão portátil de validação são gerados em `release/`. O pacote inclui o frontend, o backend e as dependências de produção; Node.js e Python não são necessários no computador do usuário.
+The installer and a portable validation build are generated in `release/`. The package includes the frontend, backend, and production dependencies; Node.js and Python are not required on the user's computer.
 
-Na versão instalada, o seed distribuído do catálogo é vazio (`distribution/questions.json`), para que questões pessoais não sejam incorporadas ao instalador. Questões locais, progresso, histórico, banco de erros, configurações e backups ficam no diretório de dados do usuário do Electron (`app.getPath('userData')`) e não são removidos pelo desinstalador padrão. O catálogo usado no desenvolvimento (`data/questions.json`) não é incluído no pacote.
+In the installed version, the distributed catalog seed is empty (`distribution/questions.json`), so personal questions are not bundled into the installer. Local questions, progress, history, the Error Bank, settings, and backups are stored in Electron's user data directory (`app.getPath('userData')`) and are not removed by the standard uninstaller. The development catalog (`data/questions.json`) is not included in the package.
 
-### Atualizações pelo GitHub Releases
+### Updates Through GitHub Releases
 
-A versão empacotada consulta atualizações somente após iniciar normalmente e nunca baixa uma atualização sem confirmação. O provedor está configurado para o repositório público `AdrianCotrim/AWS_CLF-C02_Simulator`. No modo de desenvolvimento, nenhuma consulta é feita.
+The packaged version checks for updates only after starting normally and never downloads an update without confirmation. The provider is configured for the public repository `AdrianCotrim/AWS_CLF-C02_Simulator`. No update checks are performed in development mode.
 
-Para publicar uma versão:
+To publish a release:
 
-1. Atualize o campo `version` em `package.json` usando uma versão semântica, por exemplo `1.0.1`.
-2. Atualize as notas da versão.
-3. Execute `npm install` e `npm run dist:win`.
-4. Crie uma tag correspondente, por exemplo `v1.0.1`.
-5. Crie uma GitHub Release para essa tag.
-6. Anexe o instalador `.exe`, o arquivo `.blockmap` e o `latest.yml` gerados em `release/`.
-7. Teste a detecção a partir da versão anterior instalada em uma VM.
+1. Update the `version` field in `package.json` using a semantic version, for example `1.0.1`.
+2. Update the release notes.
+3. Run `npm install` and `npm run dist:win`.
+4. Create a matching tag, for example `v1.0.1`.
+5. Create a GitHub Release for that tag.
+6. Attach the generated installer `.exe`, `.blockmap` file, and `latest.yml` from `release/`.
+7. Test update detection from the previously installed version in a VM.
 
-O arquivo `latest.yml` e o instalador precisam permanecer disponíveis na release. O aplicativo apresenta a versão disponível e as notas, pergunta antes de baixar, mostra o progresso no título da janela e pergunta antes de instalar e reiniciar. Se a rede ou o GitHub estiverem indisponíveis, a versão instalada continua funcionando.
+The `latest.yml` file and installer must remain available in the release. The app displays the available version and release notes, asks before downloading, shows progress in the window title, and asks before installing and restarting. If the network or GitHub is unavailable, the installed version continues to work.
 
-As atualizações substituem somente os arquivos da aplicação. Os dados em `app.getPath('userData')` não são migrados, reinicializados ou sobrescritos pelo atualizador. O instalador não possui assinatura digital configurada; alertas do SmartScreen podem ocorrer.
+Updates replace only application files. Data in `app.getPath('userData')` is not migrated, reset, or overwritten by the updater. The installer is not configured with a digital signature, so SmartScreen warnings may appear.
 
-No Windows, inicie o backend e o frontend juntos com:
+On Windows, start the backend and frontend together with:
 
 ```powershell
 .\start-app.bat
 ```
 
-O iniciador reutiliza os servidores deste projeto se já estiverem ativos e abre `http://localhost:8000` no Brave, se instalado. Caso contrário, abre o navegador padrão.
+The launcher reuses this project's servers if they are already running and opens `http://localhost:8000` in Brave, if installed. Otherwise, it opens the default browser.
 
-Navegadores bloqueiam `fetch` de arquivos locais quando o `index.html` é aberto com duplo clique (`file://`). Por isso, sirva a pasta com um servidor estático simples:
+Browsers block `fetch` requests to local files when `index.html` is opened by double-clicking it (`file://`). Therefore, serve the folder using a simple static server:
 
 ```bash
 cd aws-simulado
 python -m http.server 8000
 ```
 
-Depois acesse <http://localhost:8000>. Não é preciso internet. Qualquer servidor estático serve (`npx serve`, extensão Live Server do VS Code etc.). Para persistir o progresso e usar o formulário de cadastro, mantenha também a API local em execução (instruções abaixo).
+Then visit <http://localhost:8000>. No internet connection is required. Any static server will work (`npx serve`, the VS Code Live Server extension, etc.). To persist progress and use the question creation form, also keep the local API running (see instructions below).
 
-## Modos
+## Modes
 
-- **Todas**: questões do banco em ordem aleatória.
-- **Questões novas**: só as que você nunca respondeu.
-- **Banco de Erros**: questões erradas (ou marcadas como "Acertei por chute"). Acertar uma questão neste modo a remove do banco.
-- **Simulado**: quantidade configurável (padrão 60), com botão "Anterior", cronômetro crescente e resultado final com o tempo utilizado. Opcionalmente, ative **Limite de tempo** e informe a duração em minutos (sugestão inicial: 90); ao esgotar o prazo, o simulado é finalizado automaticamente e o resultado identifica esse encerramento. O tempo restante é recuperado corretamente se você atualizar a página. Sem limite, o comportamento continua sendo o cronômetro crescente.
+- **All**: questions from the bank in random order.
+- **New Questions**: only questions you have never answered.
+- **Error Bank**: questions answered incorrectly (or marked as “Got it right by guessing”). Answering a question correctly in this mode removes it from the bank.
+- **Practice Exam**: configurable number of questions (60 by default), a **Previous** button, an elapsed-time timer, and a final result showing the time taken. Optionally, enable **Time Limit** and enter a duration in minutes (initial suggestion: 90). When time runs out, the exam is submitted automatically and the result indicates that it ended because the time limit expired. The remaining time is recovered correctly if you refresh the page. Without a time limit, the timer continues to count upward.
 
-## Como adicionar questões
+## How to Add Questions
 
-O catálogo aprovado fica em `data/questions.json`. Cadastros pela tela **Adicionar questão** são gravados separadamente em `data/questions.local.json`, sem regravar o catálogo. O backend gera IDs `local-NNN`, e a questão criada é incluída no simulador sem recarregar a página. No cadastro, marque **Adicionar ao Banco de Erros** para incluir também a referência da nova questão.
+The approved catalog is stored in `data/questions.json`. Questions created through the **Add Question** screen are saved separately in `data/questions.local.json`, without rewriting the catalog. The backend generates `local-NNN` IDs, and the new question is added to the simulator without reloading the page. When creating a question, select **Add to Error Bank** to also add a reference to it there.
 
-Ao salvar uma nova questão, o app compara o enunciado com os registros existentes após normalizar espaços, quebras de linha, HTML e maiúsculas/minúsculas. Se encontrar correspondências, permite cancelar, visualizar cada questão encontrada ou confirmar **Cadastrar mesmo assim**. A verificação ocorre apenas no envio e não altera o texto salvo.
+When a new question is saved, the app compares its prompt with existing records after normalizing spaces, line breaks, HTML, and uppercase/lowercase. If matches are found, it lets you cancel, view each matching question, or confirm **Add Anyway**. The check runs only when the form is submitted and does not change the saved text.
 
-Na visualização de uma questão em **Banco de Questões**, use **Adicionar ao Banco de Erros** ou **Remover do Banco de Erros** para alterar essa marcação a qualquer momento. O Banco de Erros é salvo no progresso persistido e referencia as questões pelo ID; os dados da questão não são copiados. Excluir uma questão não apaga o progresso nem o histórico associados ao ID.
+When viewing a question in **Question Bank**, use **Add to Error Bank** or **Remove from Error Bank** to change its status at any time. The Error Bank is saved in persisted progress and references questions by ID; question data is not copied. Deleting a question does not delete progress or history associated with its ID.
 
-## Estatísticas
+## Statistics
 
-A seção **Estatísticas** calcula respostas, acertos, erros, questões únicas, evolução diária, tópicos e sources a partir de `history`. Novas respostas guardam data, tópico e source no próprio registro; respostas antigas sem esses campos usam os dados atuais da questão quando ela ainda existe. O histórico de simulados e a recuperação de questões no Banco de Erros são contabilizados a partir dos registros com informação suficiente, sem inferir sessões completas retroativamente. Simulados concluídos também guardam o tempo decorrido e se foram encerrados por conclusão normal ou esgotamento do tempo; registros antigos sem essa informação continuam válidos e exibem o tempo como não disponível.
+The **Statistics** section calculates answers, correct answers, incorrect answers, unique questions, daily progress, topics, and sources from `history`. New answers store the date, topic, and source in their own records; older answers without these fields use the question's current data if the question still exists. Practice exam history and recovery of questions from the Error Bank are counted from records with sufficient information, without retroactively inferring complete sessions. Completed practice exams also store elapsed time and whether they ended normally or because the time limit expired; older records without this information remain valid and display the time as unavailable.
 
 ```json
 {
   "id": "personal-001",
   "source": "Personal",
-  "tag": "Conceitos de nuvem",
-  "question": "O que é computação em nuvem?",
+  "tag": "Cloud Concepts",
+  "question": "What is cloud computing?",
   "options": [
-    "Faça backup de arquivos armazenados...",
-    "Implantação de aplicativos conectados...",
-    "Execução de código sem a necessidade...",
-    "Fornecimento sob demanda..."
+    "Back up stored files...",
+    "Deploy connected applications...",
+    "Run code without the need...",
+    "On-demand delivery..."
   ],
-  "correct_answer": "Fornecimento sob demanda...",
+  "correct_answer": "On-demand delivery...",
   "explanation": "..."
 }
 ```
 
-| Campo | Obrigatório | Observação |
+| Field | Required | Notes |
 |---|---|---|
-| `id` | sim | Único e estável. O progresso é ligado a ele; não reutilize IDs. |
-| `source` | não | Origem (Personal, AWS Official, ExamTopics...). |
-| `tag` | não | Categoria/tema da questão. |
-| `question` | sim | Texto da questão. |
-| `options` | sim | Array de strings com as alternativas, ou objeto `{ "A": "..." }` em formatos legados. |
-| `correct_answer` | sim | Texto exato da alternativa correta, ou array de letras em formatos legados. |
-| `explanation` | não | Só aparece se existir. |
+| `id` | Yes | Unique and stable. Progress is linked to it; do not reuse IDs. |
+| `source` | No | Origin (Personal, AWS Official, ExamTopics, etc.). |
+| `tag` | No | Question category/topic. |
+| `question` | Yes | Question text. |
+| `options` | Yes | Array of strings containing the answer choices, or an object such as `{ "A": "..." }` in legacy formats. |
+| `correct_answer` | Yes | Exact text of the correct choice, or an array of letters in legacy formats. |
+| `explanation` | No | Displayed only if present. |
 
-O app aceita o formato atual do `questions.json` e também o formato antigo com `type`, `options` em objeto e `correct_answer` em array. Questões inválidas (ID duplicado, sem texto, alternativas ausentes, `correct_answer` incompatível) são ignoradas e listadas em um aviso no topo da página. O restante continua funcionando.
+The app accepts the current `questions.json` format and the older format using `type`, `options` as an object, and `correct_answer` as an array. Invalid questions (duplicate ID, missing text, missing choices, or incompatible `correct_answer`) are ignored and listed in a warning at the top of the page. The remaining questions continue to work.
 
-Em `multiple_choice`, a resposta só é correta quando o conjunto selecionado é igual ao conjunto de `correct_answer`, em qualquer ordem.
+For `multiple_choice`, an answer is correct only when the selected set matches the `correct_answer` set, regardless of order.
 
-## Persistência organizada
+## Organized Persistence
 
-A aplicação mantém a persistência em arquivos JSON locais, separados por responsabilidade:
+The application stores data in local JSON files, separated by responsibility:
 
-- `data/questions.json`: banco principal usado no desenvolvimento; não é incluído na distribuição.
-- `distribution/questions.json`: seed do catálogo incluído no aplicativo empacotado; permanece vazio para novas instalações.
-- `data/questions.local.json`: cadastros, edições e exclusões locais, mantidos fora do catálogo padrão.
-- `data/user-data.json`: questões pessoais, IDs no Banco de Erros e preferências do usuário. O formato inclui a versão dos dados para facilitar migrações futuras.
-- `data/history.json`: histórico de tentativas, resultados e demais campos usados nas estatísticas.
+- `data/questions.json`: main question bank used in development; not included in the distribution.
+- `distribution/questions.json`: catalog seed included in the packaged app; remains empty for new installations.
+- `data/questions.local.json`: locally created, edited, and deleted questions, kept separate from the standard catalog.
+- `data/user-data.json`: personal questions, Error Bank IDs, and user preferences. The format includes a data version to facilitate future migrations.
+- `data/history.json`: attempt history, results, and other fields used for statistics.
 
-As 763 questões atuais foram aprovadas como baseline para separar as alterações futuras; isso não afirma que sejam o catálogo original nem recupera questões anteriores ausentes. Edições e exclusões de questões do catálogo ficam registradas localmente como substituições e exclusões lógicas. O relatório de catálogo informa questões novas, alteradas, removidas e conflitos. Uma questão editada pode ser restaurada à versão padrão atual pela tela Banco de Questões. Os arquivos locais e backups não são distribuídos junto ao projeto.
+The current 763 questions have been approved as the baseline for separating future changes; this does not mean they are the original catalog or restore any previously missing questions. Edits and deletions of catalog questions are recorded locally as overrides and soft deletions. The catalog report identifies new, changed, removed, and conflicting questions. An edited question can be restored to the current default version from the Question Bank screen. Local files and backups are not distributed with the project.
 
-Os acessos aos arquivos passam por módulos centralizados no backend (`backend/src/data`), evitando que cada tela ou componente escreva diretamente no disco. A API local continua aceitando os formatos atuais de questão e preserva o comportamento já existente do simulador.
+File access goes through centralized backend modules (`backend/src/data`), preventing each screen or component from writing directly to disk. The local API continues to accept the current question formats and preserves the simulator's existing behavior.
 
-## Persistência do progresso e migração
+## Progress Persistence and Migration
 
-O progresso ativo do simulador é persistido pelo backend em `data/progress.json`, como documento JSON versionado. Ele contém o estado compatível com o frontend: dados por `questionId`, histórico de respostas, Banco de Erros e sessão de simulado retomável. Cada gravação é serializada, escrita por substituição atômica e relida para verificação. O rodapé informa quando o progresso está sendo salvo.
+The simulator's active progress is persisted by the backend in `data/progress.json` as a versioned JSON document. It contains state compatible with the frontend: data by `questionId`, answer history, the Error Bank, and a resumable practice exam session. Each save is serialized, written using atomic replacement, and read back for verification. The footer indicates when progress is being saved.
 
-Na primeira execução após esta atualização, o app verifica a chave legada `clf-c02-progress` do LocalStorage. Se encontrar dados, mostra um resumo e pede confirmação antes de migrá-los. Se já houver progresso no backend, a substituição exige confirmação explícita; antes dela são criados backups separados dos estados atual e legado em `data/backups/`. A migração valida a estrutura e as referências da sessão, verifica a gravação e só então informa sucesso. O LocalStorage legado não é apagado nem recebe novas gravações. Se os dados forem inválidos ou a migração falhar, o erro é informado e o original permanece intacto.
+On the first run after this update, the app checks the legacy LocalStorage key `clf-c02-progress`. If data is found, it displays a summary and asks for confirmation before migrating it. If backend progress already exists, replacing it requires explicit confirmation; separate backups of the current and legacy states are created in `data/backups/` beforehand. The migration validates the structure and session references, verifies the write, and only then reports success. Legacy LocalStorage is not deleted and receives no further writes. If the data is invalid or migration fails, an error is reported and the original remains intact.
 
-O LocalStorage é consultado somente durante essa migração assistida. Assim, dados antigos ainda podem existir por navegador e endereço (`localhost:8000` e `localhost:5500` têm armazenamentos separados), mas não são mais a fonte ativa do progresso.
+LocalStorage is consulted only during this assisted migration. Therefore, old data may still exist separately for each browser and address (`localhost:8000` and `localhost:5500` have separate storage), but it is no longer the active source of progress.
 
-## Backup do progresso
+## Progress Backup
 
-- **Exportar progresso** baixa um arquivo JSON (`version`, `exportedAt`, `statistics`, `questionProgress`, `errorBank`, `history`).
-- **Importar progresso** cria primeiro um backup de segurança no backend e, após confirmação, substitui o estado persistido; a sessão ativa não é importada.
-- **Apagar progresso** remove o estado atual de `data/progress.json` após confirmação; `questions.json` não é afetado. O LocalStorage legado não é removido.
+- **Export Progress** downloads a JSON file (`version`, `exportedAt`, `statistics`, `questionProgress`, `errorBank`, `history`).
+- **Import Progress** first creates a safety backup in the backend and, after confirmation, replaces the persisted state; the active session is not imported.
+- **Delete Progress** removes the current state from `data/progress.json` after confirmation; `questions.json` is not affected. Legacy LocalStorage is not removed.
 
-Faça backups periódicos e mantenha cópias fora da pasta do projeto.
+Make regular backups and keep copies outside the project folder.
 
-## Backup completo e restauração
+## Full Backup and Restore
 
-Use **Criar backup completo** para baixar um arquivo JSON versionado com as questões efetivas, o catálogo padrão, as alterações locais, a sequência de IDs, `user-data.json`, `history.json` e o progresso persistido. O progresso inclui `questionProgress`, histórico de respostas e a sessão de simulado em andamento, quando existente.
+Use **Create Full Backup** to download a versioned JSON file containing the effective questions, default catalog, local changes, ID sequence, `user-data.json`, `history.json`, and persisted progress. Progress includes `questionProgress`, answer history, and any practice exam session currently in progress.
 
-Use **Validar e restaurar backup** para selecionar um arquivo completo. A aplicação valida formato, versão, estrutura e checksums antes de mostrar o resumo e pedir confirmação. O formato atual usa `format: "aws-clf-c02-backup"` e `version: 2`; backups legados `version: 1` continuam aceitos e são restaurados como um catálogo baseline, sem classificação retroativa de origem. Os checksums SHA-256 detectam corrupção acidental; não autenticam o arquivo nem provam que seu conteúdo é confiável.
+Use **Validate and Restore Backup** to select a full backup file. The application validates the format, version, structure, and checksums before displaying a summary and asking for confirmation. The current format uses `format: "aws-clf-c02-backup"` and `version: 2`; legacy `version: 1` backups are still accepted and restored as a baseline catalog, without retroactive source classification. SHA-256 checksums detect accidental corruption; they do not authenticate the file or prove that its contents are trustworthy.
 
-Antes de substituir os dados, o backend cria um backup de segurança com os arquivos JSON atuais, incluindo o progresso persistido, em `data/backups/`. Os arquivos são preparados em temporários e substituídos individualmente; se uma substituição falhar, o backend tenta reverter os arquivos já substituídos. Após a restauração, o frontend usa o progresso restaurado pelo backend.
+Before replacing data, the backend creates a safety backup of the current JSON files, including persisted progress, in `data/backups/`. Files are prepared as temporary files and replaced individually; if a replacement fails, the backend attempts to roll back files already replaced. After restoration, the frontend uses the progress restored by the backend.
 
-A restauração de vários arquivos não é uma transação única: uma queda abrupta do processo ou uma falha durante o rollback ainda pode exigir recuperação manual usando o backup de segurança. Guarde também o arquivo baixado em outro local. A API requer os arquivos atuais `questions.json`, `user-data.json` e `history.json` para criar o backup e a cópia de segurança; se algum estiver ausente ou corrompido, a operação é recusada em vez de substituir silenciosamente por valores vazios. O arquivo de sequência pode estar ausente, pois nesse caso o próximo ID é derivado do maior ID atual.
+Restoring multiple files is not a single transaction: an abrupt process termination or a failure during rollback may still require manual recovery using the safety backup. Also keep the downloaded backup in another location. The API requires the current `questions.json`, `user-data.json`, and `history.json` files to create the backup and safety copy; if any is missing or corrupted, the operation is rejected rather than silently replacing it with empty values. The sequence file may be missing, in which case the next ID is derived from the highest current ID.
 
-O backup completo não inclui `node_modules`, caches ou logs, nem modifica a fonte oficial de persistência. O backend continua lendo e gravando os caminhos JSON atuais. O diretório `data/backups/` é a localização adequada ao projeto local atual; em uma futura distribuição Electron, os backups e demais dados graváveis devem ser movidos para o diretório de dados do usuário do aplicativo. O servidor do backend escuta somente em `127.0.0.1`, sem expor a API às interfaces de rede externas.
+The full backup does not include `node_modules`, caches, or logs, and it does not modify the official persistence source. The backend continues to read and write the current JSON paths. The `data/backups/` directory is the appropriate location for the current local project; in a future Electron distribution, backups and other writable data should be moved to the application's user data directory. The backend server listens only on `127.0.0.1`, without exposing the API to external network interfaces.
 
-## API local de questões
+## Local Question API
 
-No desenvolvimento, o simulador carrega o banco inicial de `data/questions.json`; no aplicativo empacotado, carrega o seed vazio de `distribution/questions.json`. A tela de cadastro usa a API local. Para instalar e iniciar a API, use Node.js 18 ou superior:
+In development, the simulator loads the initial bank from `data/questions.json`; in the packaged app, it loads the empty seed from `distribution/questions.json`. The question creation screen uses the local API. To install and start the API, use Node.js 18 or later:
 
 ```bash
 cd backend
@@ -164,65 +164,64 @@ npm install
 npm run server
 ```
 
-A API fica em `http://127.0.0.1:3000`; a porta pode ser alterada pela variável de ambiente `PORT`. O armazenamento continua sendo `data/questions.json`, na raiz do projeto. O backend não cria o arquivo automaticamente: se ele estiver ausente, a API responde com erro e não substitui o banco.
+The API is available at `http://127.0.0.1:3000`; the port can be changed using the `PORT` environment variable. Storage remains in `data/questions.json` at the project root. The backend does not create the file automatically: if it is missing, the API returns an error and does not replace the bank.
 
-Endpoints disponíveis:
+Available endpoints:
 
-- `GET /api/progress`: lê o estado persistido e informa se ele existe.
-- `PUT /api/progress`: valida e salva um snapshot completo do progresso.
-- `POST /api/progress/migration/preview`: valida o progresso legado e retorna resumos do LocalStorage e do backend.
-- `POST /api/progress/migration`: migra o progresso legado. Use `replaceExisting: true` somente após confirmação explícita para substituir progresso preexistente; a rota cria os backups antes de gravar.
-- `POST /api/progress/import`: importa um estado validado após criar backup de segurança.
-- `POST /api/backup/create`: cria um backup versionado usando o progresso persistido.
-- `POST /api/backup/validate`: valida um bundle completo enviado em `{ backup: ... }`, sem gravar dados.
-- `POST /api/backup/restore`: restaura um bundle validado enviado em `{ backup: ..., currentProgress: ... }`. Cria primeiro uma cópia de segurança dos dados atuais.
-- `GET /api/questions`: retorna a lista efetiva composta pelo catálogo padrão e pelas alterações locais.
-- `GET /api/questions/catalog-status`: informa atualizações do catálogo e conflitos com alterações locais; `POST /api/questions/catalog-status/acknowledge` registra que o relatório foi revisado.
-- `GET /api/questions/:id/metadata`: informa se a questão é do catálogo ou local.
-- `POST /api/questions/:id/restore-default`: remove a edição local e restaura a versão padrão atual.
-- `GET /api/questions/:id`: retorna uma questão ou HTTP 404.
-- `POST /api/questions`: valida e adiciona uma questão, retornando HTTP 201. O servidor gera o ID `local-NNN`; não envie `id`.
-- `POST /api/questions/import`: faz pré-visualização ou confirma a importação em lote. Envie `{ questions: [...] }` e use `confirm: true` somente na confirmação final. A rota responde com resumo de itens válidos, duplicados e inválidos antes de gravar qualquer dado.
-- `PUT /api/questions/:id`: valida e atualiza os campos da questão sem alterar o ID; responde HTTP 404 se não existir.
-- `DELETE /api/questions/:id`: exclui uma questão local ou registra uma exclusão lógica da questão padrão; retorna seu ID e responde HTTP 404 se não existir.
+- `GET /api/progress`: reads persisted state and reports whether it exists.
+- `PUT /api/progress`: validates and saves a complete progress snapshot.
+- `POST /api/progress/migration/preview`: validates legacy progress and returns summaries of LocalStorage and backend data.
+- `POST /api/progress/migration`: migrates legacy progress. Use `replaceExisting: true` only after explicit confirmation to replace existing progress; the route creates backups before writing.
+- `POST /api/progress/import`: imports a validated state after creating a safety backup.
+- `POST /api/backup/create`: creates a versioned backup using persisted progress.
+- `POST /api/backup/validate`: validates a submitted full bundle in `{ backup: ... }` without writing data.
+- `POST /api/backup/restore`: restores a validated bundle submitted in `{ backup: ..., currentProgress: ... }`. First creates a safety copy of current data.
+- `GET /api/questions`: returns the effective list composed of the default catalog and local changes.
+- `GET /api/questions/catalog-status`: reports catalog updates and conflicts with local changes; `POST /api/questions/catalog-status/acknowledge` records that the report has been reviewed.
+- `GET /api/questions/:id/metadata`: indicates whether a question belongs to the catalog or is local.
+- `POST /api/questions/:id/restore-default`: removes the local edit and restores the current default version.
+- `GET /api/questions/:id`: returns a question or HTTP 404.
+- `POST /api/questions`: validates and adds a question, returning HTTP 201. The server generates the `local-NNN` ID; do not send `id`.
+- `POST /api/questions/import`: previews or confirms a bulk import. Send `{ questions: [...] }` and use `confirm: true` only for final confirmation. The route returns a summary of valid, duplicate, and invalid items before writing any data.
+- `PUT /api/questions/:id`: validates and updates question fields without changing the ID; returns HTTP 404 if the question does not exist.
+- `DELETE /api/questions/:id`: deletes a local question or records a soft deletion of a default question; returns its ID and responds with HTTP 404 if it does not exist.
 
-Exemplo de questão para criação (o campo `correct_answer` pode ser a letra da alternativa ou seu texto):
-
+Example question for creation (the `correct_answer` field can be the answer choice's letter or its text):
 
 ```json
 {
   "source": "Personal",
-  "tag": "Conceitos de nuvem",
-  "question": "Qual é outro nome para implantação on-premises?",
-  "options": ["Nuvem privada", "Aplicativo baseado na nuvem", "Implantação híbrida", "Nuvem AWS"],
+  "tag": "Cloud Concepts",
+  "question": "What is another name for an on-premises deployment?",
+  "options": ["Private cloud", "Cloud-based application", "Hybrid deployment", "AWS Cloud"],
   "correct_answer": "A",
-  "explanation": "Uma implantação on-premises também é chamada de implantação de nuvem privada."
+  "explanation": "An on-premises deployment is also called a private cloud deployment."
 }
 ```
 
-Teste os endpoints no PowerShell enquanto o servidor estiver em execução:
+Test the endpoints in PowerShell while the server is running:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:3000/api/questions
 Invoke-RestMethod http://127.0.0.1:3000/api/questions/personal-001
-$body = @{ source = 'Personal'; tag = 'Conceitos de nuvem'; question = 'Enunciado atualizado?'; options = @('Alternativa A', 'Alternativa B'); correct_answer = 'A'; explanation = '' } | ConvertTo-Json
+$body = @{ source = 'Personal'; tag = 'Cloud Concepts'; question = 'Updated question prompt?'; options = @('Choice A', 'Choice B'); correct_answer = 'A'; explanation = '' } | ConvertTo-Json
 Invoke-RestMethod -Method Put -Uri http://127.0.0.1:3000/api/questions/personal-001 -ContentType 'application/json' -Body $body
 Invoke-RestMethod -Method Delete -Uri http://127.0.0.1:3000/api/questions/personal-001
-$body = @{ source = 'Personal'; tag = 'Conceitos de nuvem'; question = 'Exemplo de pergunta?'; options = @('Alternativa A', 'Alternativa B'); correct_answer = 'A'; explanation = 'A alternativa A está correta.' } | ConvertTo-Json
+$body = @{ source = 'Personal'; tag = 'Cloud Concepts'; question = 'Example question?'; options = @('Choice A', 'Choice B'); correct_answer = 'A'; explanation = 'Choice A is correct.' } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3000/api/questions -ContentType 'application/json' -Body $body
 ```
 
-Para executar os testes automatizados da API, rode `npm test` dentro de `backend/`.
+To run the automated API tests, execute `npm test` inside `backend/`.
 
-No simulador, **Banco de Questões** carrega a lista atual pela API e permite pesquisar por texto, Source e Tag, filtrar questões dentro ou fora do **Banco de Erros**, além de abrir os detalhes de cada questão. Ao entrar na área, os dados são atualizados do backend.
+In the simulator, **Question Bank** loads the current list through the API and lets you search by text, Source, and Tag; filter questions that are in or out of the **Error Bank**; and open each question's details. When entering this section, the data is refreshed from the backend.
 
-O POST altera o arquivo JSON persistente. Dados inválidos retornam HTTP 400 em JSON; erros de leitura, escrita ou arquivo corrompido retornam HTTP 500. CORS permite origens locais em `localhost` e `127.0.0.1` durante o desenvolvimento.
+POST requests modify the persistent JSON file. Invalid data returns HTTP 400 in JSON; read/write errors or corrupted files return HTTP 500. CORS allows local origins on `localhost` and `127.0.0.1` during development.
 
-O DELETE pede confirmação na interface. Para questões padrão, a exclusão é lógica e pode ser revertida se a questão voltar a existir no catálogo; questões locais são removidas das alterações locais. Uma sequência auxiliar preserva o maior número já emitido, para que o backend não reutilize IDs antigos.
+DELETE requests require confirmation in the interface. For default questions, deletion is logical and can be reversed if the question appears in the catalog again; local questions are removed from local changes. An auxiliary sequence preserves the highest number already issued so the backend does not reuse old IDs.
 
-## Decisões de implementação
+## Implementation Decisions
 
-- Estatísticas contam cada questão uma vez, pelo resultado da última resposta (assim acertos + erros = respondidas).
-- Fora do Simulado, a sessão percorre o conjunto filtrado e embaralhado uma vez e mostra o resultado ao final. Só o Simulado é persistido.
-- Alternativas não são embaralhadas nesta versão.
-- Categorias de motivo do erro (seção 17) não foram implementadas, apenas "Acertei por chute".
+- Statistics count each question once, based on the result of its most recent answer (so correct + incorrect = answered).
+- Outside Practice Exam mode, a session goes through the filtered and shuffled set once and shows the result at the end. Only Practice Exam sessions are persisted.
+- Answer choices are not shuffled in this version.
+- Error-reason categories (section 17) have not been implemented; only “Got it right by guessing” is available.
