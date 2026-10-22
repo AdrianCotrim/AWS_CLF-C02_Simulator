@@ -12,6 +12,13 @@ const { errorHandler } = require('./middleware/errorHandler');
 const app = express();
 const localOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i;
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    service: 'aws-clf-c02-questions-api',
+    ready: true
+  });
+});
+
 app.use(cors({
   origin(origin, callback) {
     callback(null, !origin || localOrigin.test(origin));

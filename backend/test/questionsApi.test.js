@@ -72,6 +72,15 @@ async function readEffectiveQuestions() {
   return response.json();
 }
 
+test('GET /health confirma que a API está pronta', async () => {
+  const response = await fetch(`${baseUrl}/health`);
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    service: 'aws-clf-c02-questions-api',
+    ready: true
+  });
+});
+
 before(async () => {
   directory = await fs.mkdtemp(path.join(os.tmpdir(), 'questions-api-'));
   questionsFile = path.join(directory, 'questions.json');

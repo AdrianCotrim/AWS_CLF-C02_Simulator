@@ -4,21 +4,21 @@ const { app, BrowserWindow, dialog, session } = require('electron');
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawn } = require('node:child_process');
 const { autoUpdater } = require('electron-updater');
 const { createUpdateManager } = require('./updateManager');
+const { createBackendLifecycle } = require('./backendLifecycle');
 
 const HOST = '127.0.0.1';
 const frontendDirectory = app.getAppPath();
 const appIconPath = path.join(frontendDirectory, 'build', 'icon.ico');
-const backendHealthPath = '/api/questions';
-const maxHealthAttempts = 30;
-const healthRetryDelayMs = 200;
+const backendStartupTimeoutMs = Number(process.env.BACKEND_STARTUP_TIMEOUT_MS) || 15000;
 
 let backendProcess;
 let frontendServer;
 let mainWindow;
 let isShuttingDown = false;
+let logger = console;
+let backendLifecycle;
 
 function getBackendDirectory() {
   return app.isPackaged
@@ -99,7 +99,23 @@ function configureDataPaths() {
   process.env.QUESTIONS_SEQUENCE_FILE = path.join(userDataDirectory, 'questions.json.sequence.json');
 }
 
-function startBackend(port) {
+function createLogger() {
+  if (!app.isPackaged) return console;
+  const logDirectory = app.getPath('logs');
+  fs.mkdirSync(logDirectory, { recursive: true });
+  const logFile = path.join(logDirectory, 'startup.log');
+  const write = (level, args) => {
+    const line = `[${new Date().toISOString()}] [${level}] ${args.map(String).join(' ')}\n`;
+    fs.appendFileSync(logFile, line, 'utf8');
+  };
+  return {
+    info: (...args) => write('INFO', args),
+    warn: (...args) => write('WARN', args),
+    error: (...args) => write('ERROR', args)
+  };
+}
+
+function getBackendStartOptions(port) {
   const nodeExecutable = app.isPackaged
     ? process.execPath
     : (process.env.npm_node_execpath || process.env.NODE_EXEC_PATH || process.execPath);
@@ -111,47 +127,23 @@ function startBackend(port) {
       ? { ELECTRON_RUN_AS_NODE: '1' }
       : {})
   };
-  return new Promise((resolve, reject) => {
-    backendProcess = spawn(nodeExecutable, ['server.js'], {
-      cwd: backendDirectory,
-      env: environment,
-      stdio: ['ignore', 'pipe', 'pipe'],
-      windowsHide: true
-    });
-    let startupError = '';
-    backendProcess.stderr.setEncoding('utf8');
-    backendProcess.stderr.on('data', chunk => { startupError += chunk; });
-    backendProcess.once('error', reject);
-    backendProcess.once('exit', code => {
-      if (!isShuttingDown && code !== 0) {
-        reject(new Error(startupError.trim() || `O backend encerrou com código ${code}.`));
-      }
-    });
-    resolve();
-  });
-}
-
-async function waitForBackend(port) {
-  const url = `http://${HOST}:${port}${backendHealthPath}`;
-  for (let attempt = 0; attempt < maxHealthAttempts; attempt += 1) {
-    try {
-      const response = await fetch(url);
-      if (response.ok) return;
-    } catch {
-      // The child process may still be binding its port.
-    }
-    await new Promise(resolve => setTimeout(resolve, healthRetryDelayMs));
-  }
-  throw new Error('O backend não ficou disponível dentro do tempo esperado.');
+  logger.info(`Backend configurado: port=${port}, health=http://${HOST}:${port}/health`);
+  return { executable: nodeExecutable, cwd: backendDirectory, env: environment, port };
 }
 
 async function startServices() {
   configureDataPaths();
+  logger = createLogger();
+  const startedAt = Date.now();
   const backendProbe = http.createServer();
   const backendPort = await listen(backendProbe);
   await closeServer(backendProbe);
-  await startBackend(backendPort);
-  await waitForBackend(backendPort);
+  backendLifecycle = createBackendLifecycle({
+    logger,
+    startupTimeoutMs: backendStartupTimeoutMs
+  });
+  backendProcess = await backendLifecycle.start(getBackendStartOptions(backendPort));
+  logger.info(`Inicialização do backend concluída em ${Date.now() - startedAt}ms`);
   frontendServer = createFrontendServer(backendPort);
   const frontendPort = await listen(frontendServer);
   return `http://${HOST}:${frontendPort}`;
@@ -161,14 +153,8 @@ async function stopServices() {
   if (isShuttingDown) return;
   isShuttingDown = true;
   await closeServer(frontendServer);
-  if (backendProcess && !backendProcess.killed) {
-    if (backendProcess.exitCode === null && backendProcess.signalCode === null) {
-      await new Promise(resolve => {
-        backendProcess.once('exit', resolve);
-        backendProcess.kill();
-      });
-    }
-  }
+  if (backendLifecycle) await backendLifecycle.stop();
+  backendProcess = null;
 }
 
 function createWindow(frontendUrl) {
@@ -218,6 +204,7 @@ app.whenReady().then(async () => {
     });
     void updateManager.check();
   } catch (error) {
+    logger.error(`Falha na inicialização: ${error.code || 'unknown'} - ${error.stack || error.message}`);
     await stopServices();
     dialog.showErrorBox('Falha ao iniciar o aplicativo', error.message);
     app.quit();
